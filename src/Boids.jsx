@@ -130,9 +130,11 @@ export default function Boids() {
                 <Edges color="white" />
             </mesh>
 
+
             <points material={renderMat}>
-                <bufferGeometry>
-                    <bufferAttribute attach="attributes-position" count={uvs.length / 3} array={uvs} itemSize={3} />
+                {/* set the draw range to let gpu know how many particles to draw */}
+                <bufferGeometry drawRange={{ start: 0, count: uvs.length }}>
+                    <bufferAttribute attach="attributes-uvs" count={uvs.length / 3} array={uvs} itemSize={3} />
                 </bufferGeometry>
             </points>
         </>
