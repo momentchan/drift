@@ -6,7 +6,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import VelSimulateShaderMaterial from "./shaders/velSimulateShader";
 import GPGPU from "./r3f-gist/gpgpu/GPGPU";
 import { Edges } from "@react-three/drei";
-import { useControls } from 'leva'
+import { folder, useControls } from 'leva'
 
 function initPosData(count, bounds) {
     const data = new Float32Array(count * 4)
@@ -42,10 +42,8 @@ const size = 64
 
 export default function Boids() {
 
-    const { separationDistance, alignmentDistance, cohesionDistance,
-        separationWeight, alignmentWeight, cohesionWeight, avoidWallWeight,
-        maxSpeed, maxForce } =
-        useControls('boids', {
+    const props = useControls({
+        'boids': folder({
             separationDistance: { value: 1, min: 0, max: 5 },
             alignmentDistance: { value: 2, min: 0, max: 5 },
             cohesionDistance: { value: 2, min: 0, max: 5 },
@@ -53,12 +51,19 @@ export default function Boids() {
             separationWeight: { value: 2, min: 0, max: 10 },
             alignmentWeight: { value: 1, min: 0, max: 10 },
             cohesionWeight: { value: 1, min: 0, max: 10 },
-            avoidWallWeight: { value: 10, min: 0, max: 10 },
+            avoidWallWeight: { value: 100, min: 0, max: 100 },
 
-            maxSpeed: { value: 10, min: 0, max: 200 },
+            maxSpeed: { value: 50, min: 0, max: 200 },
             maxForce: { value: 3, min: 0, max: 20 },
-        })
+        }),
 
+        'Dof': folder({
+            focus: { value: 5.1, min: 3, max: 100, step: 0.01 },
+            aperture: { value: 1.8, min: 1, max: 5.6, step: 0.1 },
+            fov: { value: 20, min: 0, max: 200 },
+            blur: { value: 30, min: 0, max: 100 },
+        })
+    })
 
     const count = size * size
 
@@ -94,24 +99,27 @@ export default function Boids() {
         gpgpu.setUniform('positionTex', 'delta', delta)
         gpgpu.setUniform('positionTex', 'time', state.clock.elapsedTime)
 
-
         gpgpu.setUniform('velocityTex', 'bounds', bounds)
         gpgpu.setUniform('velocityTex', 'delta', delta)
         gpgpu.setUniform('velocityTex', 'time', state.clock.elapsedTime)
 
-        gpgpu.setUniform('velocityTex', 'alignmentDistance', alignmentDistance);
-        gpgpu.setUniform('velocityTex', 'separationDistance', separationDistance);
-        gpgpu.setUniform('velocityTex', 'cohesionDistance', cohesionDistance);
-        gpgpu.setUniform('velocityTex', 'separationWeight', separationWeight);
-        gpgpu.setUniform('velocityTex', 'alignmentWeight', alignmentWeight);
-        gpgpu.setUniform('velocityTex', 'cohesionWeight', cohesionWeight);
-        gpgpu.setUniform('velocityTex', 'avoidWallWeight', avoidWallWeight);
-        gpgpu.setUniform('velocityTex', 'maxSpeed', maxSpeed);
-        gpgpu.setUniform('velocityTex', 'maxForce', maxForce);
+        gpgpu.setUniform('velocityTex', 'alignmentDistance', props.alignmentDistance);
+        gpgpu.setUniform('velocityTex', 'separationDistance', props.separationDistance);
+        gpgpu.setUniform('velocityTex', 'cohesionDistance', props.cohesionDistance);
+        gpgpu.setUniform('velocityTex', 'separationWeight', props.separationWeight);
+        gpgpu.setUniform('velocityTex', 'alignmentWeight', props.alignmentWeight);
+        gpgpu.setUniform('velocityTex', 'cohesionWeight', props.cohesionWeight);
+        gpgpu.setUniform('velocityTex', 'avoidWallWeight', props.avoidWallWeight);
+        gpgpu.setUniform('velocityTex', 'maxSpeed', props.maxSpeed);
+        gpgpu.setUniform('velocityTex', 'maxForce', props.maxForce);
 
         gpgpu.compute()
 
         renderMat.uniforms.positionTex.value = gpgpu.getCurrentRenderTarget('positionTex')
+        // renderMat.uniforms.uTime.value = state.clock.elapsedTime
+        // renderMat.uniforms.uFocus.value = THREE.MathUtils.lerp(renderMat.uniforms.uFocus.value, props.focus, 0.1)
+        // renderMat.uniforms.uFov.value = THREE.MathUtils.lerp(renderMat.uniforms.uFov.value, props.fov, 0.1)
+        // renderMat.uniforms.uBlur.value = THREE.MathUtils.lerp(renderMat.uniforms.uBlur.value, (5.6 - props.aperture) * 9, 0.1)
     })
 
     return (
@@ -121,6 +129,7 @@ export default function Boids() {
                 <meshBasicMaterial color="#ff0000" opacity={0} transparent />
                 <Edges color="white" />
             </mesh>
+
             <points material={renderMat}>
                 <bufferGeometry>
                     <bufferAttribute attach="attributes-position" count={uvs.length / 3} array={uvs} itemSize={3} />
