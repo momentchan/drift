@@ -1,10 +1,12 @@
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber'
 import Utilities from "./r3f-gist/utility/Utilities";
-import Boids from "./boids";
+import Boids from "./Boids";
+import { Leva } from 'leva'
 
 export default function App() {
     return <>
+        <Leva collapsed />
         <Canvas
             shadows
             camera={{
@@ -15,7 +17,7 @@ export default function App() {
             }}
             gl={{ preserveDrawingBuffer: true }}
         >
-            <color attach="background" args={["#000000"]}/>
+            <color attach="background" args={["#000000"]} />
 
             <OrbitControls makeDefault />
 
@@ -24,7 +26,7 @@ export default function App() {
                 <meshStandardMaterial />
             </mesh> */}
 
-            <Boids/>
+            <Boids />
 
             <Utilities />
 

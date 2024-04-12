@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import {  useMemo, useRef } from "react";
 import "./shaders/boidsPointRenderShader";
 import BoidsPointRenderShader from "./shaders/boidsPointRenderShader";
 import PosSimulateShaderMaterial from "./shaders/posSimulateShader";
@@ -8,7 +8,6 @@ import GPGPU from "./r3f-gist/gpgpu/GPGPU";
 import { Edges } from "@react-three/drei";
 import { folder, useControls } from 'leva'
 import BoidsMeshRenderShader from "./shaders/boidsMeshRenderShader";
-import { InstancedBufferAttribute } from "three";
 
 function initPosData(count, bounds) {
     const data = new Float32Array(count * 4)
@@ -48,15 +47,15 @@ export default function Boids() {
         'boids': folder({
             separationDistance: { value: 1, min: 0, max: 5 },
             alignmentDistance: { value: 2, min: 0, max: 5 },
-            cohesionDistance: { value: 2, min: 0, max: 5 },
+            cohesionDistance: { value: 3, min: 0, max: 5 },
 
             separationWeight: { value: 2, min: 0, max: 10 },
-            alignmentWeight: { value: 1, min: 0, max: 10 },
-            cohesionWeight: { value: 1, min: 0, max: 10 },
-            avoidWallWeight: { value: 100, min: 0, max: 100 },
+            alignmentWeight: { value: 0.5, min: 0, max: 10 },
+            cohesionWeight: { value: 0.5, min: 0, max: 10 },
+            avoidWallWeight: { value: 3, min: 0, max: 10 },
 
-            maxSpeed: { value: 50, min: 0, max: 200 },
-            maxForce: { value: 3, min: 0, max: 20 },
+            maxSpeed: { value: 2, min: 0, max: 20 },
+            maxForce: { value: 1, min: 0, max: 20 },
         }),
 
         'Dof': folder({
@@ -120,8 +119,10 @@ export default function Boids() {
 
         gpgpu.compute()
 
-        renderMat.uniforms.positionTex.value = gpgpu.getCurrentRenderTarget('positionTex')
         meshRenderMat.uniforms.positionTex.value = gpgpu.getCurrentRenderTarget('positionTex')
+        meshRenderMat.uniforms.velocityTex.value = gpgpu.getCurrentRenderTarget('velocityTex')
+
+        // renderMat.uniforms.positionTex.value = gpgpu.getCurrentRenderTarget('positionTex')
         // renderMat.uniforms.uTime.value = state.clock.elapsedTime
         // renderMat.uniforms.uFocus.value = THREE.MathUtils.lerp(renderMat.uniforms.uFocus.value, props.focus, 0.1)
         // renderMat.uniforms.uFov.value = THREE.MathUtils.lerp(renderMat.uniforms.uFov.value, props.fov, 0.1)
@@ -140,17 +141,17 @@ export default function Boids() {
                 ref={mesh}
                 args={[null, null, count]}
                 material={meshRenderMat}>
-                <boxGeometry args={[0.2, 0.2, 0.2]}>
+                <boxGeometry args={[0.2, 0.2, 0.6]}>
                     <instancedBufferAttribute attach="attributes-uvs" args={[uvs, 3]} />
                 </boxGeometry>
                 {/* <meshBasicMaterial /> */}
             </instancedMesh>
 
-            <points material={renderMat}>
+            {/* <points material={renderMat}>
                 <bufferGeometry>
                     <bufferAttribute attach="attributes-position" count={uvs.length / 3} array={uvs} itemSize={3} />
                 </bufferGeometry>
-            </points>
+            </points> */}
         </>
     )
 }
