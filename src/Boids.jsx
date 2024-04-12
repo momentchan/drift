@@ -10,6 +10,7 @@ import ThreeCustomShaderMaterial from 'three-custom-shader-material'
 import * as THREE from 'three'
 import { patchShaders } from 'gl-noise'
 import BoidsMeshRenderCustomShader from "./shaders/boidsMeshRenderCustomShader";
+import CustomShaderMaterial from 'three-custom-shader-material/vanilla'
 
 
 function initPosData(count, bounds) {
@@ -41,10 +42,7 @@ function initVelData(count) {
     return data
 }
 
-const bounds = 32
-const size = 64
-
-export default function Boids() {
+export default function Boids({bounds, size}) {
 
     const props = useControls({
         'boids': folder({
@@ -66,6 +64,17 @@ export default function Boids() {
 
     const { gl } = useThree()
     const renderMat = new BoidsMeshRenderCustomShader()
+
+    const depthMat = new CustomShaderMaterial({
+        // CSM
+        baseMaterial: THREE.MeshDepthMaterial,
+        vertexShader: renderMat.vertexShader,
+        uniforms: renderMat.uniforms,
+        silent: true,
+    
+        // MeshDepthMaterial
+        depthPacking: THREE.RGBADepthPacking
+    })
 
     const mesh = useRef()
     const mat = useRef()
@@ -116,6 +125,9 @@ export default function Boids() {
 
         mat.current.uniforms.positionTex.value = gpgpu.getCurrentRenderTarget('positionTex')
         mat.current.uniforms.velocityTex.value = gpgpu.getCurrentRenderTarget('velocityTex')
+
+        // depthMat.uniforms.positionTex.value = gpgpu.getCurrentRenderTarget('positionTex')
+        // depthMat.uniforms.velocityTex.value = gpgpu.getCurrentRenderTarget('velocityTex')
     })
 
     return (
@@ -129,6 +141,10 @@ export default function Boids() {
             <instancedMesh
                 ref={mesh}
                 args={[null, null, count]}
+                castShadow
+                receiveShadow
+                frustumCulled={false}
+                customDepthMaterial={depthMat}
             >
                 <boxGeometry args={[0.2, 0.2, 0.6]}>
                     <instancedBufferAttribute attach="attributes-uvs" args={[uvs, 3]} />

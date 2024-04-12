@@ -1,10 +1,17 @@
-import { Environment, OrbitControls } from "@react-three/drei";
+import { OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber'
 import Utilities from "./r3f-gist/utility/Utilities";
 import Boids from "./Boids";
 import { Leva } from 'leva'
+import Stage from "./Stage";
+
 
 export default function App() {
+    const props = {
+        bounds: 32,
+        size: 64
+    }
+
     return <>
         <Leva collapsed />
         <Canvas
@@ -21,9 +28,9 @@ export default function App() {
 
             <OrbitControls makeDefault />
 
-            <Environment preset="city"/>
+            <Boids {...props} />
 
-            <Boids />
+            <Stage {...props} />
 
             <Utilities />
 
