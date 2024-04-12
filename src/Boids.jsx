@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef } from "react";
-import "./shaders/boidsRenderShader";
-import BoidsRenderShader from "./shaders/boidsRenderShader";
+import "./shaders/boidsPointRenderShader";
+import BoidsPointRenderShader from "./shaders/boidsPointRenderShader";
 import PosSimulateShaderMaterial from "./shaders/posSimulateShader";
 import { useFrame, useThree } from "@react-three/fiber";
 import VelSimulateShaderMaterial from "./shaders/velSimulateShader";
 import GPGPU from "./r3f-gist/gpgpu/GPGPU";
 import { Edges } from "@react-three/drei";
 import { folder, useControls } from 'leva'
+import BoidsMeshRenderShader from "./shaders/boidsMeshRenderShader";
+import { InstancedBufferAttribute } from "three";
 
 function initPosData(count, bounds) {
     const data = new Float32Array(count * 4)
@@ -68,7 +70,10 @@ export default function Boids() {
     const count = size * size
 
     const { gl } = useThree()
-    const renderMat = new BoidsRenderShader()
+    const renderMat = new BoidsPointRenderShader()
+    const meshRenderMat = new BoidsMeshRenderShader()
+
+    const mesh = useRef()
 
     const uvs = useMemo(() => {
         const uvs = new Float32Array(count * 3)
@@ -116,6 +121,7 @@ export default function Boids() {
         gpgpu.compute()
 
         renderMat.uniforms.positionTex.value = gpgpu.getCurrentRenderTarget('positionTex')
+        meshRenderMat.uniforms.positionTex.value = gpgpu.getCurrentRenderTarget('positionTex')
         // renderMat.uniforms.uTime.value = state.clock.elapsedTime
         // renderMat.uniforms.uFocus.value = THREE.MathUtils.lerp(renderMat.uniforms.uFocus.value, props.focus, 0.1)
         // renderMat.uniforms.uFov.value = THREE.MathUtils.lerp(renderMat.uniforms.uFov.value, props.fov, 0.1)
@@ -129,6 +135,16 @@ export default function Boids() {
                 <meshBasicMaterial color="#ff0000" opacity={0} transparent />
                 <Edges color="white" />
             </mesh>
+
+            <instancedMesh
+                ref={mesh}
+                args={[null, null, count]}
+                material={meshRenderMat}>
+                <boxGeometry args={[0.2, 0.2, 0.2]}>
+                    <instancedBufferAttribute attach="attributes-uvs" args={[uvs, 3]} />
+                </boxGeometry>
+                {/* <meshBasicMaterial /> */}
+            </instancedMesh>
 
             <points material={renderMat}>
                 <bufferGeometry>

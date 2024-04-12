@@ -1,6 +1,6 @@
 import * as THREE from 'three'
 
-export default class BoidsRenderShader extends THREE.ShaderMaterial {
+export default class BoidsPointRenderShader extends THREE.ShaderMaterial {
     constructor() {
         super({
             vertexShader: /* glsl */`
