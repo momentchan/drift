@@ -8,7 +8,8 @@ export default class BoidsMeshRenderCustomShader extends THREE.ShaderMaterial {
 
             uniform sampler2D positionTex;
             uniform sampler2D velocityTex;
-            varying float vDistance;
+            varying float vX;
+
 
             attribute vec3 uvs;
 
@@ -17,6 +18,8 @@ export default class BoidsMeshRenderCustomShader extends THREE.ShaderMaterial {
             void main() {
                 vec3 pos = texture2D(positionTex, uvs.xy).xyz;
                 vec3 vel = texture2D(velocityTex, uvs.xy).xyz;
+
+                vX = texture2D(velocityTex, uvs.xy).w;
 
                 float rotY = atan(vel.x / vel.z);
                 float rotX = -atan(vel.y / (length(vel)+1e-8));
@@ -31,10 +34,10 @@ export default class BoidsMeshRenderCustomShader extends THREE.ShaderMaterial {
 
 
             fragmentShader: /* glsl */ `
-            varying float vDistance;
+            varying float vX;
 
             void main() {
-                gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+                csm_DiffuseColor = vec4(1.0, 1.0, 1.0, 1.0) * vX;
             }`,
 
             uniforms: {

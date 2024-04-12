@@ -59,7 +59,7 @@ export default function Stage({ radius }) {
         <>
             <Environment preset="city" />
 
-            <ambientLight intensity={0.2} />
+            <ambientLight intensity={0.05} />
 
             {/* <Environment resolution={256}>
                 <group rotation={[-Math.PI / 2, 0, 0]}>

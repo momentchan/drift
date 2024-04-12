@@ -8,7 +8,10 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
 
             ${snoise}
 
+            uniform mat4 modelViewProjectionMatrix;
+            uniform mat4 inverseModelViewProjectionMatrix;
             uniform float time;
+            uniform float aspect;
             
             uniform float separationDistance;
             uniform float alignmentDistance;
@@ -18,8 +21,13 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
             uniform float alignmentWeight;
             uniform float cohesionWeight;
             uniform float noiseWeight;
+            uniform float touchWeight;
+
             uniform float noiseFrequency;
             uniform float noiseSpeed;
+
+            uniform float touchRange;
+            uniform vec2 touchPos;
 
             uniform float avoidWallWeight;
 
@@ -149,17 +157,32 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 force += avoidWall(pp) * avoidWallWeight;
                 force += curlNoise(pp * noiseFrequency + noiseSpeed * time) * noiseWeight;
 
+                // interaction
+                vec4 pp_clip = modelViewProjectionMatrix * vec4(pp.xyz, 1.0);
+                vec2 pp_ndc = pp_clip.xy / pp_clip.w;
+                float dist = length((pp_ndc - touchPos) * vec2(aspect, 1.0));
+                float decay = smoothstep(touchRange, 0.0, dist);
+
+                vec4 touch = inverseModelViewProjectionMatrix * vec4(pp_ndc * vec2(aspect, 1.0), 0.0, 0.0);
+
+                force += step(dist, touchRange) * touch.xyz * touchWeight;
+
                 vec3 vel = pv + force * delta;
-                vel = limit(vel, maxSpeed);
+                vel = limit(vel, maxSpeed * mix(1.0, 30.0, decay));
 
                 vel = mix(pv, vel, 0.5); // smooth
 
-                gl_FragColor = vec4(vel, 1.0);
+                gl_FragColor = vec4(vel, 1.0 - decay);
             }`,
 
             uniforms: {
+                modelViewProjectionMatrix: { value: 0 },
+                inverseModelViewProjectionMatrix: { value: 0 },
+
                 time: { value: 0 },
                 delta: { value: 0 },
+
+                aspect: { value: 0 },
 
                 separationDistance: { value: 1 },
                 alignmentDistance: { value: 2 },
@@ -169,9 +192,13 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 alignmentWeight: { value: 1 },
                 cohesionWeight: { value: 1 },
                 avoidWallWeight: { value: 10 },
+                touchWeight: { value: 10 },
+
                 noiseWeight: { value: 0.2 },
                 noiseFrequency: { value: 0.1 },
                 noiseSpeed: { value: 0.1 },
+                touchRange: { value: 0.1 },
+                touchPos: { value: 0 },
 
                 maxSpeed: { value: 5.0 },
                 maxForce: { value: 0.5 },

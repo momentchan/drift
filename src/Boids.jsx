@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./shaders/boidsPointRenderShader";
 import PosSimulateShaderMaterial from "./shaders/posSimulateShader";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -11,7 +11,7 @@ import { patchShaders } from 'gl-noise'
 import BoidsMeshRenderCustomShader from "./shaders/boidsMeshRenderCustomShader";
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla'
 import { getRandomVectorInsideSphere } from "./r3f-gist/utility/Utilities";
-
+import { MathUtils } from 'three/src/math/MathUtils.js';
 
 function initData(count, radius) {
     const data = new Float32Array(count * 4)
@@ -25,7 +25,7 @@ function initData(count, radius) {
     return data
 }
 
-export default function Boids({ radius, size }) {
+export default function Boids({ radius, length }) {
 
     const props = useControls({
         'Boids': folder({
@@ -38,17 +38,45 @@ export default function Boids({ radius, size }) {
             cohesionWeight: { value: 0.5, min: 0, max: 10 },
             avoidWallWeight: { value: 10, min: 0, max: 10 },
             noiseWeight: { value: 1.2, min: 0, max: 5 },
+            touchWeight: { value: 30, min: 0, max: 50 },
+
             noiseFrequency: { value: 0.05, min: 0, max: 0.1 },
             noiseSpeed: { value: 0.1, min: 0, max: 0.5 },
+            touchRange: { value: 0.3, min: 0, max: 0.5 },
 
             maxSpeed: { value: 2, min: 0, max: 20 },
             maxForce: { value: 10, min: 0, max: 20 },
         }),
     })
 
-    const count = size * size
+    const count = length * length
 
-    const { gl } = useThree()
+    const { gl, camera, size } = useThree()
+
+    const [touchDir, setTouchDir] = useState(0);
+
+    const handleCanvasClick = event => {
+        if (event.button === 0) {
+            setTouchDir(1);
+        } else if (event.button === 2) {
+            setTouchDir(-1);
+        }
+    };
+
+    const handleCanvasMouseUp = () => {
+        setTouchDir(0);
+    };
+
+    useEffect(() => {
+        gl.domElement.addEventListener('mousedown', handleCanvasClick);
+        gl.domElement.addEventListener('mouseup', handleCanvasMouseUp);
+        return () => {
+            gl.domElement.removeEventListener('mousedown', handleCanvasClick);
+            gl.domElement.removeEventListener('mouseup', handleCanvasMouseUp);
+        }
+    }, [gl])
+
+
     const renderMat = new BoidsMeshRenderCustomShader()
 
     const depthMat = new CustomShaderMaterial({
@@ -69,32 +97,38 @@ export default function Boids({ radius, size }) {
         const uvs = new Float32Array(count * 3)
         for (let i = 0; i < count; i++) {
             const i3 = i * 3
-            uvs[i3 + 0] = (i % size) / size
-            uvs[i3 + 1] = i / size / size
+            uvs[i3 + 0] = (i % length) / length
+            uvs[i3 + 1] = i / length / length
         }
         return uvs
     }, [count])
 
-
     const gpgpu = useMemo(() => {
-        const gpgpu = new GPGPU(gl, size, size)
+        const gpgpu = new GPGPU(gl, length, length)
 
-        gpgpu.addVariable('positionTex', initData(size * size, radius), new PosSimulateShaderMaterial())
-        gpgpu.addVariable('velocityTex', initData(size * size, 10), new VelSimulateShaderMaterial())
+        gpgpu.addVariable('positionTex', initData(length * length, radius), new PosSimulateShaderMaterial())
+        gpgpu.addVariable('velocityTex', initData(length * length, 10), new VelSimulateShaderMaterial())
 
         gpgpu.setVariableDependencies('positionTex', ['positionTex', 'velocityTex'])
         gpgpu.setVariableDependencies('velocityTex', ['positionTex', 'velocityTex'])
         gpgpu.init()
+
         return gpgpu
-    }, [size])
+    }, [length])
 
     useFrame((state, delta) => {
+        const modelMatrix = mesh.current.matrixWorld;
+        const viewMatrix = camera.matrixWorldInverse;
+        const projectionMatrix = camera.projectionMatrix;
+        const modelViewProjectionMatrix = new THREE.Matrix4().multiplyMatrices(projectionMatrix,
+            new THREE.Matrix4().multiplyMatrices(viewMatrix, modelMatrix))
+        const inverseModelViewProjectionMatrix = modelViewProjectionMatrix.clone().invert();
 
         gpgpu.setUniform('positionTex', 'delta', delta)
         gpgpu.setUniform('positionTex', 'time', state.clock.elapsedTime)
 
         gpgpu.setUniform('velocityTex', 'radius', radius)
-        gpgpu.setUniform('velocityTex', 'delta', delta)
+        gpgpu.setUniform('velocityTex', 'delta', Math.min(delta, 1 / 30))
         gpgpu.setUniform('velocityTex', 'time', state.clock.elapsedTime)
         gpgpu.setUniform('velocityTex', 'alignmentDistance', props.alignmentDistance);
         gpgpu.setUniform('velocityTex', 'separationDistance', props.separationDistance);
@@ -104,18 +138,23 @@ export default function Boids({ radius, size }) {
         gpgpu.setUniform('velocityTex', 'cohesionWeight', props.cohesionWeight);
         gpgpu.setUniform('velocityTex', 'avoidWallWeight', props.avoidWallWeight);
         gpgpu.setUniform('velocityTex', 'noiseWeight', props.noiseWeight);
+        gpgpu.setUniform('velocityTex', 'touchWeight', props.touchWeight * touchDir);
+        gpgpu.setUniform('velocityTex', 'touchPos', state.pointer);
+
         gpgpu.setUniform('velocityTex', 'noiseFrequency', props.noiseFrequency);
         gpgpu.setUniform('velocityTex', 'noiseSpeed', props.noiseSpeed);
+        gpgpu.setUniform('velocityTex', 'touchRange', props.touchRange);
+
         gpgpu.setUniform('velocityTex', 'maxSpeed', props.maxSpeed);
         gpgpu.setUniform('velocityTex', 'maxForce', props.maxForce);
+        gpgpu.setUniform('velocityTex', 'aspect', size.width / size.height);
+        gpgpu.setUniform('velocityTex', 'modelViewProjectionMatrix', modelViewProjectionMatrix)
+        gpgpu.setUniform('velocityTex', 'inverseModelViewProjectionMatrix', inverseModelViewProjectionMatrix)
 
         gpgpu.compute()
 
         mat.current.uniforms.positionTex.value = gpgpu.getCurrentRenderTarget('positionTex')
         mat.current.uniforms.velocityTex.value = gpgpu.getCurrentRenderTarget('velocityTex')
-
-        // depthMat.uniforms.positionTex.value = gpgpu.getCurrentRenderTarget('positionTex')
-        // depthMat.uniforms.velocityTex.value = gpgpu.getCurrentRenderTarget('velocityTex')
     })
 
     return (
@@ -127,6 +166,7 @@ export default function Boids({ radius, size }) {
                 receiveShadow
                 frustumCulled={false}
                 customDepthMaterial={depthMat}
+                onClick={() => console.log(123)}
             >
                 <boxGeometry args={[0.2, 0.2, 0.6]}>
                     <instancedBufferAttribute attach="attributes-uvs" args={[uvs, 3]} />
@@ -140,7 +180,7 @@ export default function Boids({ radius, size }) {
                     fragmentShader={patchShaders(renderMat.fragmentShader)}
                     vertexShader={patchShaders(renderMat.vertexShader)}
                     uniforms={renderMat.uniforms}
-                    envMapIntensity={0.2}
+                    envMapIntensity={0.1}
                 />
             </instancedMesh>
 

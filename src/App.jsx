@@ -15,7 +15,7 @@ export default function App() {
 
     const props = {
         radius: 12,
-        size: 64
+        length: 64
     }
 
     return <>
@@ -26,7 +26,7 @@ export default function App() {
                 fov: 45,
                 near: 0.1,
                 far: 200,
-                position: [50, 2, 50]
+                position: [50, 2, 20]
             }}
             gl={{ preserveDrawingBuffer: true }}
 
