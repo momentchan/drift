@@ -1,5 +1,5 @@
 import { useThree } from "@react-three/fiber";
-import { EffectComposer, SMAA } from "@react-three/postprocessing";
+import { EffectComposer, SMAA, ToneMapping } from "@react-three/postprocessing";
 import { N8AOPostPass } from "n8ao";
 import { useEffect, useRef } from "react";
 
@@ -25,6 +25,7 @@ export default function Effect() {
 
     return <>
         <EffectComposer ref={composer} disableNormalPass multisampling={0}>
+            <ToneMapping/>
             <SMAA />
         </EffectComposer>
     </>
