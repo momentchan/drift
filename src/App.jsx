@@ -9,7 +9,7 @@ import Effect from "./Effect";
 
 export default function App() {
     const props = {
-        bounds: 24,
+        radius: 12,
         size: 64
     }
 

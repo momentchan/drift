@@ -1,11 +1,15 @@
 import * as THREE from 'three'
-
+import snoise from '../r3f-gist/shader/cginc/noise/simplexNoise'
 
 export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
     constructor() {
         super({
             fragmentShader: /* glsl */ `
 
+            ${snoise}
+
+            uniform float time;
+            
             uniform float separationDistance;
             uniform float alignmentDistance;
             uniform float cohesionDistance;
@@ -13,12 +17,15 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
             uniform float separationWeight;
             uniform float alignmentWeight;
             uniform float cohesionWeight;
+            uniform float noiseWeight;
+            uniform float noiseFrequency;
+            uniform float noiseSpeed;
 
             uniform float avoidWallWeight;
 
             uniform float freedomFactor;
             uniform float delta;
-            uniform float bounds;
+            uniform float radius;
 
 			uniform float maxSpeed;
             uniform float maxForce;
@@ -27,22 +34,26 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
             const float height = resolution.y;
 
             vec3 avoidWall(vec3 pos) {
-                vec3 acc = vec3(0.0);
-
-                // x 
-                acc.x = (pos.x < -bounds * 0.5) ? acc.x + 1.0 : acc.x;
-                acc.x = (pos.x >  bounds * 0.5) ? acc.x - 1.0 : acc.x;
-
-                // y 
-                acc.y = (pos.y < -bounds * 0.5) ? acc.y + 1.0 : acc.y;
-                acc.y = (pos.y >  bounds * 0.5) ? acc.y - 1.0 : acc.y;
-
-                // z 
-                acc.z = (pos.z < -bounds * 0.5) ? acc.z + 1.0 : acc.z;
-                acc.z = (pos.z >  bounds * 0.5) ? acc.z - 1.0 : acc.z;
-
-                return acc;
+                return length(pos) > radius ? -normalize(pos) : vec3(0.0);
             }
+
+            // vec3 avoidWall(vec3 pos) {
+            //     vec3 acc = vec3(0.0);
+
+            //     // x 
+            //     acc.x = (pos.x < -radius) ? acc.x + 1.0 : acc.x;
+            //     acc.x = (pos.x >  radius) ? acc.x - 1.0 : acc.x;
+
+            //     // y 
+            //     acc.y = (pos.y < -radius) ? acc.y + 1.0 : acc.y;
+            //     acc.y = (pos.y >  radius) ? acc.y - 1.0 : acc.y;
+
+            //     // z 
+            //     acc.z = (pos.z < -radius) ? acc.z + 1.0 : acc.z;
+            //     acc.z = (pos.z >  radius) ? acc.z - 1.0 : acc.z;
+
+            //     return acc;
+            // }
 
             vec3 limit(vec3 vec, float value){
                 float l = length(vec);
@@ -136,9 +147,12 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 force += aliSteer * alignmentWeight;
                 force += cohSteer * cohesionWeight;
                 force += avoidWall(pp) * avoidWallWeight;
+                force += curlNoise(pp * noiseFrequency + noiseSpeed * time) * noiseWeight;
 
                 vec3 vel = pv + force * delta;
                 vel = limit(vel, maxSpeed);
+
+                vel = mix(pv, vel, 0.5); // smooth
 
                 gl_FragColor = vec4(vel, 1.0);
             }`,
@@ -155,11 +169,14 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 alignmentWeight: { value: 1 },
                 cohesionWeight: { value: 1 },
                 avoidWallWeight: { value: 10 },
+                noiseWeight: { value: 0.2 },
+                noiseFrequency: { value: 0.1 },
+                noiseSpeed: { value: 0.1 },
 
                 maxSpeed: { value: 5.0 },
                 maxForce: { value: 0.5 },
 
-                bounds: { value: 0 },
+                radius: { value: 0 },
             }
         })
     }

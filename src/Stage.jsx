@@ -3,30 +3,43 @@ import { useRef } from "react";
 import * as THREE from 'three'
 
 import { folder, useControls } from 'leva'
-export default function Stage({ bounds }) {
+
+const light = [2.5, 10, -2.5]
+const sphereScaler = 1.1
+
+export default function Stage({ radius }) {
     const diretionalLight = useRef()
     useHelper(diretionalLight, THREE.DirectionalLightHelper, 1)
-    const { nodes } = useGLTF('/rounded-box.glb')
-
-    const light = [2.5, 10, -2.5]
 
     const config = useControls({
         'transmission': folder({
-            backside: false,
+
             samples: { value: 16, min: 1, max: 32, step: 1 },
+
             resolution: { value: 1024, min: 64, max: 2048, step: 64 },
+
             transmission: { value: 1, min: 0, max: 1 },
+            thickness: { value: 0.02, min: 0, max: 1, step: 0.01 },
             roughness: { value: 0, min: 0, max: 1, step: 0.01 },
+
+            chromaticAberration: { value: 0.01, min: 0, max: 1 },
+            anisotropy: { value: 0.1, min: 0, max: 10, step: 0.01 },
+            anisotropicBlur: { value: 0.1, min: 0, max: 10, step: 0.01 },
+
             clearcoat: { value: 1, min: 0, max: 1, step: 0.01 },
             clearcoatRoughness: { value: 1, min: 0, max: 1, step: 0.01 },
-            thickness: { value: 0.02, min: 0, max: 1, step: 0.01 },
+
+            backside: false,
             backsideThickness: { value: 200, min: 0, max: 200, step: 0.01 },
+            backsideEnvMapIntensity: { value: 1, min: 0, max: 1, step: 0.01 },
+            backsideResolution: { value: 1024, min: 64, max: 2048, step: 64 },
+
             ior: { value: 1.5, min: 1, max: 5, step: 0.01 },
-            chromaticAberration: { value: 0.01, min: 0, max: 1 },
-            anisotropicBlur: { value: 0.1, min: 0, max: 10, step: 0.01 },
+
             distortion: { value: 0.0, min: 0, max: 1, step: 0.01 },
             distortionScale: { value: 0.2, min: 0.01, max: 1, step: 0.01 },
             temporalDistortion: { value: 0, min: 0, max: 1, step: 0.01 },
+
             attenuationDistance: { value: 0.5, min: 0, max: 10, step: 0.01 },
             attenuationColor: '#ffffff',
             color: '#ffffff',
@@ -46,6 +59,9 @@ export default function Stage({ bounds }) {
     return (
         <>
             <Environment preset="city" />
+
+            <ambientLight intensity={0.2} />
+
             {/* <Environment resolution={256}>
                 <group rotation={[-Math.PI / 2, 0, 0]}>
                     <Lightformer intensity={4} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={[10, 10, 1]} />
@@ -63,32 +79,30 @@ export default function Stage({ bounds }) {
                 intensity={10} position={light}
                 castShadow
                 shadow-mapSize={[512, 512]}
-                shadow-camera-top={bounds}
-                shadow-camera-right={bounds}
-                shadow-camera-bottom={- bounds}
-                shadow-camera-left={- bounds}
+                shadow-camera-top={radius * 2}
+                shadow-camera-right={radius * 2}
+                shadow-camera-bottom={- radius * 2}
+                shadow-camera-left={- radius * 2}
             />
 
             <mesh
-                position={[0, -bounds * 0.5, 0]}
+                position={[0, -radius * sphereScaler, 0]}
                 rotation={[-Math.PI * 0.5, 0, 0]}
                 receiveShadow
             >
-                <planeGeometry args={[bounds * 1.5, bounds * 1.5, 1, 1]} />
+                <planeGeometry args={[radius * 5, radius * 5, 1, 1]} />
                 <shadowMaterial transparent opacity={0.3} side={THREE.DoubleSide} />
             </mesh>
 
             <mesh
-                position={[0, -bounds * 0.5 + 5, 0]}
-                castShadow
-            >
+                position={[0, 0, 0]}
+                castShadow>
                 <boxGeometry args={[2, 2, 2]} />
                 <meshBasicMaterial />
             </mesh>
-            <ambientLight intensity={0.2} />
 
             <group
-            // visible={false}
+                visible={false}
             >
                 <Caustics
                     frames='Infinity'
@@ -97,19 +111,14 @@ export default function Stage({ bounds }) {
                     // debug
                     lightSource={light}
                     {...caustics}>
-                    <mesh
-                        scale={[bounds * 0.55, bounds * 0.55, bounds * 0.55]}
-                        // geometry={nodes.Cube.geometry}
-                        castShadow>
-                        <sphereGeometry args={[1, 32, 32]} />
-                        {/* <boxGeometry args={[bounds, bounds, bounds]} /> */}
-                        {/* <meshBasicMaterial color="#ff0000" opacity={0.5} transparent /> */}
+                    <mesh castShadow>
+                        <sphereGeometry args={[radius * sphereScaler, 32, 32]} />
+
                         <MeshTransmissionMaterial
                             toneMapped={false}
-                            // envMapIntensity={0.2}
+                            envMapIntensity={0.2}
                             {...config}
                         />
-                        {/* <Edges color="white" /> */}
                     </mesh>
                 </Caustics>
             </group>
