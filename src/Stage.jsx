@@ -1,4 +1,4 @@
-import { Caustics, Edges, Environment, Lightformer, MeshTransmissionMaterial, SoftShadows, useFaceControls, useGLTF, useHelper } from "@react-three/drei";
+import { AccumulativeShadows, Caustics, Edges, Environment, Lightformer, MeshTransmissionMaterial, RandomizedLight, SoftShadows, useFaceControls, useGLTF, useHelper } from "@react-three/drei";
 import { useRef } from "react";
 import * as THREE from 'three'
 
@@ -45,8 +45,8 @@ export default function Stage({ bounds }) {
 
     return (
         <>
-            {/* <Environment preset="city" /> */}
-            <Environment resolution={256}>
+            <Environment preset="city" />
+            {/* <Environment resolution={256}>
                 <group rotation={[-Math.PI / 2, 0, 0]}>
                     <Lightformer intensity={4} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={[10, 10, 1]} />
                     {[2, 0, 2, 0, 2, 0, 2, 0].map((x, i) => (
@@ -56,7 +56,7 @@ export default function Stage({ bounds }) {
                     <Lightformer intensity={2} rotation-y={Math.PI / 2} position={[-5, -1, -1]} scale={[50, 2, 1]} />
                     <Lightformer intensity={2} rotation-y={-Math.PI / 2} position={[10, 1, 0]} scale={[50, 2, 1]} />
                 </group>
-            </Environment>
+            </Environment> */}
 
             <directionalLight
                 ref={diretionalLight}
@@ -87,28 +87,32 @@ export default function Stage({ bounds }) {
             </mesh>
             <ambientLight intensity={0.2} />
 
-            <Caustics
-                // position={[0, -bounds * 0.5, 0]}
-                frames='Infinity'
-                backside
-                height={-5}
-                // debug
-                lightSource={light}
-                {...caustics}>
-                <mesh
-                    scale={[bounds * 0.55, bounds * 0.55, bounds * 0.55]}
-                    geometry={nodes.Cube.geometry}
-                    castShadow>
-                    {/* <boxGeometry args={[bounds, bounds, bounds]} /> */}
-                    {/* <meshBasicMaterial color="#ff0000" opacity={0.5} transparent /> */}
-                    <MeshTransmissionMaterial
-                        toneMapped={false}
-                        // envMapIntensity={0.2}
-                        {...config}
-                    />
-                    <Edges color="white" />
-                </mesh>
-            </Caustics>
+            <group
+            // visible={false}
+            >
+                <Caustics
+                    frames='Infinity'
+                    backside
+                    height={-5}
+                    // debug
+                    lightSource={light}
+                    {...caustics}>
+                    <mesh
+                        scale={[bounds * 0.55, bounds * 0.55, bounds * 0.55]}
+                        // geometry={nodes.Cube.geometry}
+                        castShadow>
+                        <sphereGeometry args={[1, 32, 32]} />
+                        {/* <boxGeometry args={[bounds, bounds, bounds]} /> */}
+                        {/* <meshBasicMaterial color="#ff0000" opacity={0.5} transparent /> */}
+                        <MeshTransmissionMaterial
+                            toneMapped={false}
+                            // envMapIntensity={0.2}
+                            {...config}
+                        />
+                        {/* <Edges color="white" /> */}
+                    </mesh>
+                </Caustics>
+            </group>
         </>
     )
 }

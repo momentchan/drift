@@ -49,7 +49,7 @@ export default function Boids({bounds, size}) {
             alignmentDistance: { value: 2, min: 0, max: 5 },
             cohesionDistance: { value: 3, min: 0, max: 5 },
 
-            separationWeight: { value: 2, min: 0, max: 10 },
+            separationWeight: { value: 1, min: 0, max: 10 },
             alignmentWeight: { value: 0.5, min: 0, max: 10 },
             cohesionWeight: { value: 0.5, min: 0, max: 10 },
             avoidWallWeight: { value: 3, min: 0, max: 10 },
