@@ -2,12 +2,17 @@ import { OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber'
 import Utilities from "./r3f-gist/utility/Utilities";
 import Boids from "./Boids";
-import { Leva } from 'leva'
+import { Leva, folder, useControls } from 'leva'
 import Stage from "./Stage";
 import Effect from "./Effect";
 
-
 export default function App() {
+    const { bgColor } = useControls({
+        'Global': folder({
+            bgColor: '#353535'
+        })
+    })
+
     const props = {
         radius: 12,
         size: 64
@@ -26,8 +31,8 @@ export default function App() {
             gl={{ preserveDrawingBuffer: true }}
 
         >
-            <fogExp2 attach="fog" args={['#353535', 0.025]} />
-            <color attach="background" args={['#353535']} />
+            <fogExp2 attach="fog" args={[bgColor, 0.03]} />
+            <color attach="background" args={[bgColor]} />
 
 
             <OrbitControls makeDefault />

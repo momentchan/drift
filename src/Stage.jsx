@@ -12,8 +12,7 @@ export default function Stage({ radius }) {
     useHelper(diretionalLight, THREE.DirectionalLightHelper, 1)
 
     const config = useControls({
-        'transmission': folder({
-
+        'Transmission': folder({
             samples: { value: 16, min: 1, max: 32, step: 1 },
 
             resolution: { value: 1024, min: 64, max: 2048, step: 64 },
@@ -48,7 +47,7 @@ export default function Stage({ radius }) {
 
 
     const caustics = useControls({
-        'caustics': folder({
+        'Caustics': folder({
             color: 'white',
             worldRadius: { value: 0.3125, min: 0.0001, max: 10, step: 0.0001 },
             ior: { value: 1.1, min: 0, max: 2, step: 0.01 },
@@ -76,7 +75,7 @@ export default function Stage({ radius }) {
 
             <directionalLight
                 ref={diretionalLight}
-                intensity={10} position={light}
+                intensity={2} position={light}
                 castShadow
                 shadow-mapSize={[512, 512]}
                 shadow-camera-top={radius * 2}

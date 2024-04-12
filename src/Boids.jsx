@@ -28,7 +28,7 @@ function initData(count, radius) {
 export default function Boids({ radius, size }) {
 
     const props = useControls({
-        'boids': folder({
+        'Boids': folder({
             separationDistance: { value: 1, min: 0, max: 5 },
             alignmentDistance: { value: 2, min: 0, max: 5 },
             cohesionDistance: { value: 2, min: 0, max: 5 },
