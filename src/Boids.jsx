@@ -1,13 +1,16 @@
-import {  useMemo, useRef } from "react";
+import { useMemo, useRef } from "react";
 import "./shaders/boidsPointRenderShader";
-import BoidsPointRenderShader from "./shaders/boidsPointRenderShader";
 import PosSimulateShaderMaterial from "./shaders/posSimulateShader";
 import { useFrame, useThree } from "@react-three/fiber";
 import VelSimulateShaderMaterial from "./shaders/velSimulateShader";
 import GPGPU from "./r3f-gist/gpgpu/GPGPU";
 import { Edges } from "@react-three/drei";
 import { folder, useControls } from 'leva'
-import BoidsMeshRenderShader from "./shaders/boidsMeshRenderShader";
+import ThreeCustomShaderMaterial from 'three-custom-shader-material'
+import * as THREE from 'three'
+import { patchShaders } from 'gl-noise'
+import BoidsMeshRenderCustomShader from "./shaders/boidsMeshRenderCustomShader";
+
 
 function initPosData(count, bounds) {
     const data = new Float32Array(count * 4)
@@ -57,22 +60,15 @@ export default function Boids() {
             maxSpeed: { value: 2, min: 0, max: 20 },
             maxForce: { value: 1, min: 0, max: 20 },
         }),
-
-        'Dof': folder({
-            focus: { value: 5.1, min: 3, max: 100, step: 0.01 },
-            aperture: { value: 1.8, min: 1, max: 5.6, step: 0.1 },
-            fov: { value: 20, min: 0, max: 200 },
-            blur: { value: 30, min: 0, max: 100 },
-        })
     })
 
     const count = size * size
 
     const { gl } = useThree()
-    const renderMat = new BoidsPointRenderShader()
-    const meshRenderMat = new BoidsMeshRenderShader()
+    const renderMat = new BoidsMeshRenderCustomShader()
 
     const mesh = useRef()
+    const mat = useRef()
 
     const uvs = useMemo(() => {
         const uvs = new Float32Array(count * 3)
@@ -97,7 +93,6 @@ export default function Boids() {
         return gpgpu
     }, [size])
 
-
     useFrame((state, delta) => {
 
         gpgpu.setUniform('positionTex', 'delta', delta)
@@ -119,14 +114,8 @@ export default function Boids() {
 
         gpgpu.compute()
 
-        meshRenderMat.uniforms.positionTex.value = gpgpu.getCurrentRenderTarget('positionTex')
-        meshRenderMat.uniforms.velocityTex.value = gpgpu.getCurrentRenderTarget('velocityTex')
-
-        // renderMat.uniforms.positionTex.value = gpgpu.getCurrentRenderTarget('positionTex')
-        // renderMat.uniforms.uTime.value = state.clock.elapsedTime
-        // renderMat.uniforms.uFocus.value = THREE.MathUtils.lerp(renderMat.uniforms.uFocus.value, props.focus, 0.1)
-        // renderMat.uniforms.uFov.value = THREE.MathUtils.lerp(renderMat.uniforms.uFov.value, props.fov, 0.1)
-        // renderMat.uniforms.uBlur.value = THREE.MathUtils.lerp(renderMat.uniforms.uBlur.value, (5.6 - props.aperture) * 9, 0.1)
+        mat.current.uniforms.positionTex.value = gpgpu.getCurrentRenderTarget('positionTex')
+        mat.current.uniforms.velocityTex.value = gpgpu.getCurrentRenderTarget('velocityTex')
     })
 
     return (
@@ -140,11 +129,20 @@ export default function Boids() {
             <instancedMesh
                 ref={mesh}
                 args={[null, null, count]}
-                material={meshRenderMat}>
+            >
                 <boxGeometry args={[0.2, 0.2, 0.6]}>
                     <instancedBufferAttribute attach="attributes-uvs" args={[uvs, 3]} />
                 </boxGeometry>
-                {/* <meshBasicMaterial /> */}
+
+                <ThreeCustomShaderMaterial
+                    ref={mat}
+                    baseMaterial={THREE.MeshStandardMaterial}
+                    silent
+                    color='white'
+                    fragmentShader={patchShaders(renderMat.fragmentShader)}
+                    vertexShader={patchShaders(renderMat.vertexShader)}
+                    uniforms={renderMat.uniforms}
+                />
             </instancedMesh>
 
             {/* <points material={renderMat}>

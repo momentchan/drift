@@ -1,4 +1,4 @@
-import { OrbitControls } from "@react-three/drei";
+import { Environment, OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber'
 import Utilities from "./r3f-gist/utility/Utilities";
 import Boids from "./Boids";
@@ -21,10 +21,7 @@ export default function App() {
 
             <OrbitControls makeDefault />
 
-            {/* <mesh>
-                <torusGeometry />
-                <meshStandardMaterial />
-            </mesh> */}
+            <Environment preset="city"/>
 
             <Boids />
 
