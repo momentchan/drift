@@ -4,12 +4,13 @@ import Utilities from "./r3f-gist/utility/Utilities";
 import Boids from "./Boids";
 import { Leva } from 'leva'
 import Stage from "./Stage";
+import Effect from "./Effect";
 
 
 export default function App() {
     const props = {
-        bounds: 32,
-        size: 64
+        bounds: 24,
+        size: 32
     }
 
     return <>
@@ -20,11 +21,11 @@ export default function App() {
                 fov: 45,
                 near: 0.1,
                 far: 200,
-                position: [4, 2, 6]
+                position: [50, 2, 100]
             }}
             gl={{ preserveDrawingBuffer: true }}
         >
-            <color attach="background" args={["#000000"]} />
+            <color attach="background" args={['#cccccc']} />
 
             <OrbitControls makeDefault />
 
@@ -33,6 +34,8 @@ export default function App() {
             <Stage {...props} />
 
             <Utilities />
+
+            <Effect/>
 
         </Canvas>
     </>

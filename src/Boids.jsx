@@ -4,7 +4,6 @@ import PosSimulateShaderMaterial from "./shaders/posSimulateShader";
 import { useFrame, useThree } from "@react-three/fiber";
 import VelSimulateShaderMaterial from "./shaders/velSimulateShader";
 import GPGPU from "./r3f-gist/gpgpu/GPGPU";
-import { Edges } from "@react-three/drei";
 import { folder, useControls } from 'leva'
 import ThreeCustomShaderMaterial from 'three-custom-shader-material'
 import * as THREE from 'three'
@@ -132,12 +131,6 @@ export default function Boids({bounds, size}) {
 
     return (
         <>
-            <mesh>
-                <boxGeometry args={[bounds, bounds, bounds]} />
-                <meshBasicMaterial color="#ff0000" opacity={0} transparent />
-                <Edges color="white" />
-            </mesh>
-
             <instancedMesh
                 ref={mesh}
                 args={[null, null, count]}
@@ -158,6 +151,7 @@ export default function Boids({bounds, size}) {
                     fragmentShader={patchShaders(renderMat.fragmentShader)}
                     vertexShader={patchShaders(renderMat.vertexShader)}
                     uniforms={renderMat.uniforms}
+                    envMapIntensity={0.2}
                 />
             </instancedMesh>
 

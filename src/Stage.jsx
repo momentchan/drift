@@ -1,23 +1,56 @@
-import { Environment, useFaceControls, useHelper } from "@react-three/drei";
+import { Edges, Environment, Lightformer, MeshTransmissionMaterial, useFaceControls, useGLTF, useHelper } from "@react-three/drei";
 import { useRef } from "react";
 import * as THREE from 'three'
 
 import { folder, useControls } from 'leva'
-
 export default function Stage({ bounds }) {
     const diretionalLight = useRef()
     useHelper(diretionalLight, THREE.DirectionalLightHelper, 1)
+    const { nodes } = useGLTF('/rounded-box.glb')
 
-    console.log(diretionalLight.current);
+    const config = useControls({
+        'transmission': folder({
+            backside: false,
+            samples: { value: 16, min: 1, max: 32, step: 1 },
+            resolution: { value: 1024, min: 64, max: 2048, step: 64 },
+            transmission: { value: 0.95, min: 0, max: 1 },
+            roughness: { value: 0, min: 0, max: 1, step: 0.01 },
+            clearcoat: { value: 0.1, min: 0, max: 1, step: 0.01 },
+            clearcoatRoughness: { value: 0.1, min: 0, max: 1, step: 0.01 },
+            thickness: { value: 1, min: 0, max: 5, step: 0.01 },
+            backsideThickness: { value: 200, min: 0, max: 200, step: 0.01 },
+            ior: { value: 1.5, min: 1, max: 5, step: 0.01 },
+            chromaticAberration: { value: 0.01, min: 0, max: 1 },
+            anisotropy: { value: 0.1, min: 0, max: 10, step: 0.01 },
+            anisotropicBlur: { value: 0.1, min: 0, max: 10, step: 0.01 },
+            distortion: { value: 0.0, min: 0, max: 1, step: 0.01 },
+            distortionScale: { value: 0.2, min: 0.01, max: 1, step: 0.01 },
+            temporalDistortion: { value: 0, min: 0, max: 1, step: 0.01 },
+            attenuationDistance: { value: 0.5, min: 0, max: 10, step: 0.01 },
+            attenuationColor: '#ffffff',
+            color: '#ffffff',
+        })
+    })
 
     return (
         <>
             <Environment preset="city" />
+            {/* <Environment resolution={256}>
+                <group rotation={[-Math.PI / 2, 0, 0]}>
+                    <Lightformer intensity={4} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={[10, 10, 1]} />
+                    {[2, 0, 2, 0, 2, 0, 2, 0].map((x, i) => (
+                        <Lightformer key={i} form="circle" intensity={4} rotation={[Math.PI / 2, 0, 0]} position={[x, 4, i * 4]} scale={[4, 1, 1]} />
+                    ))}
+                    <Lightformer intensity={2} rotation-y={Math.PI / 2} position={[-5, 1, -1]} scale={[50, 2, 1]} />
+                    <Lightformer intensity={2} rotation-y={Math.PI / 2} position={[-5, -1, -1]} scale={[50, 2, 1]} />
+                    <Lightformer intensity={2} rotation-y={-Math.PI / 2} position={[10, 1, 0]} scale={[50, 2, 1]} />
+                </group>
+            </Environment> */}
 
             <directionalLight
                 ref={diretionalLight}
                 intensity={10} position={[0, 1, 0]}
-                castShadow 
+                castShadow
                 shadow-mapSize={[512, 512]}
                 shadow-camera-top={bounds * 0.5}
                 shadow-camera-right={bounds * 0.5}
@@ -31,15 +64,31 @@ export default function Stage({ bounds }) {
                 receiveShadow
             >
                 <planeGeometry args={[bounds, bounds, 1, 1]} />
-                <meshStandardMaterial />
+                <shadowMaterial transparent opacity={1} side={THREE.DoubleSide} />
             </mesh>
 
             <mesh
-                position={[0,  -bounds * 0.5 + 5, 0]}
+                position={[0, -bounds * 0.5 + 5, 0]}
                 castShadow
             >
                 <boxGeometry args={[2, 2, 2]} />
-                <meshStandardMaterial />
+                <meshBasicMaterial />
+            </mesh>
+            <ambientLight intensity={0.2} />
+
+
+            <mesh
+                scale={[bounds * 0.55, bounds * 0.55, bounds * 0.55]}
+                geometry={nodes.Cube.geometry}
+                receiveShadow
+                castShadow
+            >
+                {/* <boxGeometry args={[bounds, bounds, bounds]} /> */}
+                {/* <meshBasicMaterial color="#ff0000" opacity={0.5} transparent /> */}
+                <MeshTransmissionMaterial
+                    {...config} toneMapped={false}
+                />
+                <Edges color="white" />
             </mesh>
         </>
     )
