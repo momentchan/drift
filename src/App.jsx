@@ -21,11 +21,14 @@ export default function App() {
                 fov: 45,
                 near: 0.1,
                 far: 200,
-                position: [50, 2, 100]
+                position: [50, 2, 50]
             }}
             gl={{ preserveDrawingBuffer: true }}
+
         >
-            <color attach="background" args={['#cccccc']} />
+            <fogExp2 attach="fog" args={['#353535', 0.025]} />
+            <color attach="background" args={['#353535']} />
+
 
             <OrbitControls makeDefault />
 
@@ -35,7 +38,7 @@ export default function App() {
 
             <Utilities />
 
-            <Effect/>
+            <Effect />
 
         </Canvas>
     </>
