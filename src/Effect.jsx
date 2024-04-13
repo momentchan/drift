@@ -1,66 +1,43 @@
-import { useFrame, useThree } from "@react-three/fiber";
-import { BloomEffect, EffectComposer, EffectPass, FXAAEffect, RenderPass, ToneMappingEffect } from "postprocessing";
-import { useEffect, useState } from "react";
-import { HBAOEffect, MotionBlurEffect, SSGIEffect, SSREffect, TRAAEffect, VelocityDepthNormalPass } from "realism-effects";
+import { useThree } from "@react-three/fiber";
+import { Bloom, DepthOfField, EffectComposer, N8AO, Noise, SMAA, TiltShift2, ToneMapping } from "@react-three/postprocessing";
+import { BlendFunction } from 'postprocessing'
+import { folder, useControls } from 'leva'
+import * as THREE from 'three'
+import { useRef } from "react";
 
 export default function Effect() {
     const gl = useThree((state) => state.gl)
     const scene = useThree((state) => state.scene)
     const camera = useThree((state) => state.camera)
     const size = useThree((state) => state.size)
-    const [composer] = useState(() => new EffectComposer(gl, { multisampling: 0 }))
+    const composer = useRef()
 
-    useEffect(() => composer.setSize(size.width, size.height), [composer, size])
-    useEffect(() => {
-        const config = {
-            importanceSampling: true,
-            steps: 20,
-            refineSteps: 4,
-            spp: 1,
-            resolutionScale: 1,
-            missedRays: false,
-            distance: 5.980000000000011,
-            thickness: 2.829999999999997,
-            denoiseIterations: 1,
-            denoiseKernel: 3,
-            denoiseDiffuse: 25,
-            denoiseSpecular: 25.54,
-            radius: 11,
-            phi: 0.5760000000000001,
-            lumaPhi: 20.651999999999997,
-            depthPhi: 23.37,
-            normalPhi: 26.087,
-            roughnessPhi: 18.477999999999998,
-            specularPhi: 7.099999999999999,
-            envBlur: 0.8
-        }
+    return <>
+        <EffectComposer ref={composer} disableNormalPass multisampling={0}>
+            <N8AO
+                halfRes
+                color='black'
+                aoRadius={12}
+                intensity={8}
+                aoSamples={3}
+                denoiseSamples={4} />
+            {/* <Noise
+                premultiply
+                blendFunction={BlendFunction.SOFT_LIGHT} /> */}
+            <Bloom
+                luminanceThreshold={1}
+                mipmapBlur
+                intensity={0.2} />
+            <ToneMapping />
 
-        const velocityDepthNormalPass = new VelocityDepthNormalPass(scene, camera)
+            {/* <DepthOfField
+                focusDistance={10}
+                focalLength={20}
+                bokehScale={6}  // blur radius
+            /> */}
 
-        const renderPass = new RenderPass(scene, camera)
-        const ssgi = new SSGIEffect(scene, camera, velocityDepthNormalPass, config)
-        const fxaa = new FXAAEffect()
-        const traa = new TRAAEffect(scene, camera, velocityDepthNormalPass)
-        const motionBlur = new MotionBlurEffect(velocityDepthNormalPass)
-        const toneMapping = new ToneMappingEffect()
-        const bloom = new BloomEffect({ mipmapBlur: true, luminanceThreshold: 0.1, intensity: 0.9, levels: 7 })
-        const ssr = new SSREffect(scene, camera, velocityDepthNormalPass)
-
-        composer.addPass(velocityDepthNormalPass)
-        composer.addPass(new EffectPass(camera, ssgi))
-        composer.addPass(renderPass)
-        // composer.addPass(new EffectPass(camera, motionBlur))
-        // composer.addPass(new EffectPass(camera, bloom))
-        composer.addPass(new EffectPass(camera, toneMapping))
-        composer.addPass(new EffectPass(camera, fxaa))
-
-        return () => {
-            composer.removeAllPasses()
-        }
-    }, [composer, scene, camera])
-
-    useFrame((state, delta) => {
-        gl.autoClear = true
-        composer.render(delta)
-    }, 1)
+            <SMAA />
+            {/* <TiltShift2 blur={0.1}/> */}
+        </EffectComposer>
+    </>
 }
