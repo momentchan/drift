@@ -138,7 +138,7 @@ export default function Boids({ radius, length }) {
         gpgpu.setUniform('velocityTex', 'cohesionWeight', props.cohesionWeight);
         gpgpu.setUniform('velocityTex', 'avoidWallWeight', props.avoidWallWeight);
         gpgpu.setUniform('velocityTex', 'noiseWeight', props.noiseWeight);
-        gpgpu.setUniform('velocityTex', 'touchWeight', props.touchWeight * touchDir);
+        gpgpu.setUniform('velocityTex', 'touchWeight', props.touchWeight);
         gpgpu.setUniform('velocityTex', 'touchPos', state.pointer);
 
         gpgpu.setUniform('velocityTex', 'noiseFrequency', props.noiseFrequency);
@@ -180,7 +180,7 @@ export default function Boids({ radius, length }) {
                     fragmentShader={patchShaders(renderMat.fragmentShader)}
                     vertexShader={patchShaders(renderMat.vertexShader)}
                     uniforms={renderMat.uniforms}
-                    envMapIntensity={0.1}
+                    envMapIntensity={0.2}
                 />
             </instancedMesh>
 

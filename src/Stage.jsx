@@ -90,13 +90,15 @@ export default function Stage({ radius }) {
                 receiveShadow
             >
                 <planeGeometry args={[radius * 5, radius * 5, 1, 1]} />
-                <shadowMaterial transparent opacity={0.3} side={THREE.DoubleSide} />
+                <shadowMaterial transparent opacity={0.5} />
+                {/* <meshStandardMaterial metalness={1} roughness={0}/> */}
             </mesh>
 
             <mesh
                 position={[0, 0, 0]}
                 castShadow>
                 <boxGeometry args={[2, 2, 2]} />
+                {/* <meshStandardMaterial metalness={1} roughness={0}/> */}
                 <meshBasicMaterial />
             </mesh>
 
@@ -115,7 +117,7 @@ export default function Stage({ radius }) {
 
                         <MeshTransmissionMaterial
                             toneMapped={false}
-                            envMapIntensity={0.2}
+                            envMapIntensity={1}
                             {...config}
                         />
                     </mesh>

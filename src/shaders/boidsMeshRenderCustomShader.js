@@ -10,7 +10,6 @@ export default class BoidsMeshRenderCustomShader extends THREE.ShaderMaterial {
             uniform sampler2D velocityTex;
             varying float vX;
 
-
             attribute vec3 uvs;
 
             ${utility}

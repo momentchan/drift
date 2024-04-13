@@ -1,32 +1,66 @@
-import { useThree } from "@react-three/fiber";
-import { EffectComposer, SMAA, ToneMapping } from "@react-three/postprocessing";
-import { N8AOPostPass } from "n8ao";
-import { useEffect, useRef } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import { BloomEffect, EffectComposer, EffectPass, FXAAEffect, RenderPass, ToneMappingEffect } from "postprocessing";
+import { useEffect, useState } from "react";
+import { HBAOEffect, MotionBlurEffect, SSGIEffect, SSREffect, TRAAEffect, VelocityDepthNormalPass } from "realism-effects";
 
 export default function Effect() {
+    const gl = useThree((state) => state.gl)
     const scene = useThree((state) => state.scene)
     const camera = useThree((state) => state.camera)
     const size = useThree((state) => state.size)
-    const composer = useRef()
+    const [composer] = useState(() => new EffectComposer(gl, { multisampling: 0 }))
 
-    // useEffect(() => {
-    //     const n8aopass = new N8AOPostPass(
-    //         scene,
-    //         camera,
-    //         size.width,
-    //         size.height,
-    //     );
-    //     n8aopass.configuration.aoRadius = 2
-    //     n8aopass.configuration.intensity = 1
-    //     n8aopass.configuration.aoSamples = 6
-    //     n8aopass.configuration.denoiseSamples = 4
-    //     composer.current.addPass(n8aopass, 1)
-    // })
+    useEffect(() => composer.setSize(size.width, size.height), [composer, size])
+    useEffect(() => {
+        const config = {
+            importanceSampling: true,
+            steps: 20,
+            refineSteps: 4,
+            spp: 1,
+            resolutionScale: 1,
+            missedRays: false,
+            distance: 5.980000000000011,
+            thickness: 2.829999999999997,
+            denoiseIterations: 1,
+            denoiseKernel: 3,
+            denoiseDiffuse: 25,
+            denoiseSpecular: 25.54,
+            radius: 11,
+            phi: 0.5760000000000001,
+            lumaPhi: 20.651999999999997,
+            depthPhi: 23.37,
+            normalPhi: 26.087,
+            roughnessPhi: 18.477999999999998,
+            specularPhi: 7.099999999999999,
+            envBlur: 0.8
+        }
 
-    return <>
-        <EffectComposer ref={composer} disableNormalPass multisampling={0}>
-            <ToneMapping/>
-            <SMAA />
-        </EffectComposer>
-    </>
+        const velocityDepthNormalPass = new VelocityDepthNormalPass(scene, camera)
+
+        const renderPass = new RenderPass(scene, camera)
+        const ssgi = new SSGIEffect(scene, camera, velocityDepthNormalPass, config)
+        const fxaa = new FXAAEffect()
+        const traa = new TRAAEffect(scene, camera, velocityDepthNormalPass)
+        const motionBlur = new MotionBlurEffect(velocityDepthNormalPass)
+        const toneMapping = new ToneMappingEffect()
+        const bloom = new BloomEffect({ mipmapBlur: true, luminanceThreshold: 0.1, intensity: 0.9, levels: 7 })
+        const ssr = new SSREffect(scene, camera, velocityDepthNormalPass)
+
+        composer.addPass(velocityDepthNormalPass)
+        composer.addPass(new EffectPass(camera, ssgi))
+        composer.addPass(renderPass)
+        // composer.addPass(new EffectPass(camera, motionBlur))
+        // composer.addPass(new EffectPass(camera, bloom))
+        composer.addPass(new EffectPass(camera, toneMapping))
+        composer.addPass(new EffectPass(camera, fxaa))
+
+        return () => {
+            composer.removeAllPasses()
+        }
+    }, [composer, scene, camera])
+
+    useFrame((state, delta) => {
+        gl.autoClear = true
+        composer.render(delta)
+    }, 1)
 }
