@@ -5,11 +5,13 @@ import Boids from "./Boids";
 import { Leva, folder, useControls } from 'leva'
 import Stage from "./Stage";
 import Effect from "./Effect";
+import Light from "./Light";
+import { useRef } from "react";
 
 export default function App() {
     const { bgColor } = useControls({
         'Global': folder({
-            bgColor: '#353535'
+            bgColor: '#000000'
         })
     })
 
@@ -17,6 +19,8 @@ export default function App() {
         radius: 12,
         length: 64
     }
+
+    const light = useRef()
 
     return <>
         <Leva collapsed />
@@ -41,9 +45,11 @@ export default function App() {
 
             <Stage {...props} />
 
+            <Light {...props} ref={light} />
+
             <Utilities />
 
-            <Effect />
+            <Effect light={light} />
 
         </Canvas>
     </>

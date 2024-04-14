@@ -181,6 +181,8 @@ export default function Boids({ radius, length }) {
                     vertexShader={patchShaders(renderMat.vertexShader)}
                     uniforms={renderMat.uniforms}
                     envMapIntensity={0.2}
+                    // emissive="white" 
+                    // emissiveIntensity={ 1 }
                 />
             </instancedMesh>
 
