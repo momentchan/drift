@@ -15,7 +15,7 @@ export default function Effect({ light }) {
     const godray = useRef()
 
     const config = {
-        density: 0.01,
+        density: 0.02,
         maxDensity: 10,
         edgeStrength: 0,
         edgeRadius: 10,
@@ -43,16 +43,15 @@ export default function Effect({ light }) {
                 intensity={8}
                 aoSamples={3}
                 denoiseSamples={4} /> */}
-            {/* <Noise
-                opacity={0.5}
+            <Noise
+                opacity={1.0}
                 premultiply
-                blendFunction={BlendFunction.SOFT_LIGHT} /> */}
+                blendFunction={BlendFunction.SOFT_LIGHT} />
             <Bloom
                 luminanceThreshold={0.1}
                 mipmapBlur
                 intensity={2} />
             <ToneMapping />
-            {/* <Vignette eskil={false} offset={0.1} darkness={1.1} /> */}
 
             {/* <DepthOfField
                 focusDistance={10}
@@ -60,7 +59,7 @@ export default function Effect({ light }) {
                 bokehScale={6}  // blur radius
             /> */}
             <SMAA />
-            {/* <TiltShift2 blur={0.1}/> */}
+            <TiltShift2 blur={0.05}/>
         </EffectComposer>
     </>
 }
