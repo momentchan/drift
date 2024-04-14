@@ -11,7 +11,6 @@ import { patchShaders } from 'gl-noise'
 import BoidsMeshRenderCustomShader from "./shaders/boidsMeshRenderCustomShader";
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla'
 import { getRandomVectorInsideSphere } from "./r3f-gist/utility/Utilities";
-import { MathUtils } from 'three/src/math/MathUtils.js';
 
 function initData(count, radius) {
     const data = new Float32Array(count * 4)
@@ -42,7 +41,7 @@ export default function Boids({ radius, length }) {
 
             noiseFrequency: { value: 0.05, min: 0, max: 0.1 },
             noiseSpeed: { value: 0.1, min: 0, max: 0.5 },
-            touchRange: { value: 0.3, min: 0, max: 0.5 },
+            touchRange: { value: 0.6, min: 0, max: 0.5 },
 
             maxSpeed: { value: 2, min: 0, max: 20 },
             maxForce: { value: 10, min: 0, max: 20 },
@@ -168,7 +167,7 @@ export default function Boids({ radius, length }) {
                 customDepthMaterial={depthMat}
                 onClick={() => console.log(123)}
             >
-                <boxGeometry args={[0.2, 0.2, 0.6]}>
+                <boxGeometry args={[0.1, 0.2, 0.6]}>
                     <instancedBufferAttribute attach="attributes-uvs" args={[uvs, 3]} />
                 </boxGeometry>
 

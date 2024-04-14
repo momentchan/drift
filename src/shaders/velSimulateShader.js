@@ -151,21 +151,28 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                     cohSteer = limit(cohSteer, maxForce);
                 }
 
-                force += sepSteer * separationWeight;
-                force += aliSteer * alignmentWeight;
-                force += cohSteer * cohesionWeight;
-                force += avoidWall(pp) * avoidWallWeight;
-                force += curlNoise(pp * noiseFrequency + noiseSpeed * time) * noiseWeight;
 
                 // interaction
                 vec4 pp_clip = modelViewProjectionMatrix * vec4(pp.xyz, 1.0);
                 vec2 pp_ndc = pp_clip.xy / pp_clip.w;
                 float dist = length((pp_ndc - touchPos) * vec2(aspect, 1.0));
                 float decay = smoothstep(touchRange, 0.0, dist);
+                vec3 touchSteer = (inverseModelViewProjectionMatrix * vec4(pp_ndc * vec2(aspect, 1.0), 0.0, 0.0)).xyz;
+                touchSteer *= smoothstep(touchRange, 0.0, dist);
 
-                vec4 touch = inverseModelViewProjectionMatrix * vec4(pp_ndc * vec2(aspect, 1.0), 0.0, 0.0);
+                // center avoid
+                vec3 orth = normalize(cross(pp, vec3(0.0,1.0,0.0)));
+                orth *= dot(pv, orth) * 0.2;
+                vec3 forward = normalize(pp);
+                vec3 centerSter = smoothstep(3.0, 0.0, length(pp)) * (forward + orth);
 
-                force += step(dist, touchRange) * touch.xyz * touchWeight;
+                force += sepSteer * separationWeight;
+                force += aliSteer * alignmentWeight;
+                force += cohSteer * cohesionWeight;
+                force += avoidWall(pp) * avoidWallWeight;
+                force += curlNoise(pp * noiseFrequency + noiseSpeed * time) * noiseWeight;
+                force += (touchSteer + centerSter) * touchWeight;
+
 
                 vec3 vel = pv + force * delta;
                 vel = limit(vel, maxSpeed * mix(1.0, 30.0, decay));

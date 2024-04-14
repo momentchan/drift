@@ -67,7 +67,7 @@ export default function Stage({ radius }) {
             <mesh
                 position={[0, 0, 0]}
                 castShadow>
-                <boxGeometry args={[2, 2, 2]} />
+                <sphereGeometry args={[1, 36, 36]} />
                 {/* <meshStandardMaterial metalness={1} roughness={0}/> */}
                 <meshBasicMaterial />
             </mesh>
