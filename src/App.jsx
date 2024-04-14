@@ -38,7 +38,6 @@ export default function App() {
             <fogExp2 attach="fog" args={[bgColor, 0.03]} />
             <color attach="background" args={[bgColor]} />
 
-
             <OrbitControls makeDefault />
 
             <Boids {...props} />

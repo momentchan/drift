@@ -54,15 +54,14 @@ export default function Stage({ radius }) {
 
     return (
         <>
-            <mesh
+            {/* <mesh
                 position={[0, -radius * sphereScaler, 0]}
                 rotation={[-Math.PI * 0.5, 0, 0]}
                 receiveShadow
             >
                 <planeGeometry args={[radius * 5, radius * 5, 1, 1]} />
                 <shadowMaterial transparent opacity={0.5} />
-                {/* <meshStandardMaterial metalness={1} roughness={0}/> */}
-            </mesh>
+            </mesh> */}
 
             <mesh
                 position={[0, 0, 0]}

@@ -12,25 +12,27 @@ export default function Effect({ light }) {
     const camera = useThree((state) => state.camera)
     const size = useThree((state) => state.size)
     const composer = useRef()
+    const godray = useRef()
 
-    const params = useControls({
-        'Godray': folder({
-            density: { value: 0.01, min: 0, max: 10 },
-            maxDensity: { value: 10, min: 0, max: 100 },
-            edgeStrength: { value: 0, min: 0, max: 10 },
-            edgeRadius: { value: 10, min: 0, max: 20 },
-            distanceAttenuation: { value: 5, min: 0, max: 10 },
-            color: new THREE.Color(0xffffff),
-            raymarchSteps: { value: 60, min: 0, max: 100 },
-            blur: false,
-            gammaCorrection: false,
-        }),
-    })
+    const config = {
+        density: 0.01,
+        maxDensity: 10,
+        edgeStrength: 0,
+        edgeRadius: 10,
+        distanceAttenuation: 5,
+        color: new THREE.Color(0xffffff),
+        raymarchSteps: 60,
+        blur: false,
+        gammaCorrection: false,
+    }
 
     useEffect(() => {
-        const godray =  new GodraysPass(light.current.getDirectionalLight(), camera, params)
-        composer.current.addPass(godray)
-    }, [light])
+        godray.current = new GodraysPass(light.current.getDirectionalLight(), camera, config)
+        composer.current.addPass(godray.current)
+        return () => {
+            composer.current.removePass(godray.current)
+        }
+    }, [])
 
     return <>
         <EffectComposer ref={composer} disableNormalPass multisampling={0}>
