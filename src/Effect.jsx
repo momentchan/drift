@@ -45,10 +45,10 @@ export default function Effect({ light }) {
                 opacity={0.5}
                 premultiply
                 blendFunction={BlendFunction.SOFT_LIGHT} /> */}
-            {/* <Bloom
-                luminanceThreshold={1}
+            <Bloom
+                luminanceThreshold={0.1}
                 mipmapBlur
-                intensity={0.2} /> */}
+                intensity={2} />
             <ToneMapping />
             {/* <Vignette eskil={false} offset={0.1} darkness={1.1} /> */}
 
@@ -56,9 +56,6 @@ export default function Effect({ light }) {
                 focusDistance={10}
                 focalLength={20}
                 bokehScale={6}  // blur radius
-            /> */}
-            {/* <GodRays
-
             /> */}
             <SMAA />
             {/* <TiltShift2 blur={0.1}/> */}

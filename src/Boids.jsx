@@ -11,6 +11,7 @@ import { patchShaders } from 'gl-noise'
 import BoidsMeshRenderCustomShader from "./shaders/boidsMeshRenderCustomShader";
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla'
 import { getRandomVectorInsideSphere } from "./r3f-gist/utility/Utilities";
+import { Trail } from '@react-three/drei';
 
 function initData(count, radius) {
     const data = new Float32Array(count * 4)
@@ -154,6 +155,7 @@ export default function Boids({ radius, length }) {
 
         mat.current.uniforms.positionTex.value = gpgpu.getCurrentRenderTarget('positionTex')
         mat.current.uniforms.velocityTex.value = gpgpu.getCurrentRenderTarget('velocityTex')
+        mat.current.uniforms.time.value = state.clock.elapsedTime
     })
 
     return (
@@ -167,7 +169,7 @@ export default function Boids({ radius, length }) {
                 customDepthMaterial={depthMat}
                 onClick={() => console.log(123)}
             >
-                <boxGeometry args={[0.1, 0.2, 0.6]}>
+                <boxGeometry args={[0.05, 0.2, 0.6]}>
                     <instancedBufferAttribute attach="attributes-uvs" args={[uvs, 3]} />
                 </boxGeometry>
 
@@ -175,13 +177,12 @@ export default function Boids({ radius, length }) {
                     ref={mat}
                     baseMaterial={THREE.MeshStandardMaterial}
                     silent
-                    color='white'
                     fragmentShader={patchShaders(renderMat.fragmentShader)}
                     vertexShader={patchShaders(renderMat.vertexShader)}
                     uniforms={renderMat.uniforms}
-                    envMapIntensity={0.2}
-                    // emissive="white" 
-                    // emissiveIntensity={ 1 }
+                    envMapIntensity={0.5}
+                // emissive="white" 
+                // emissiveIntensity={ 1 }
                 />
             </instancedMesh>
 

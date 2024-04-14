@@ -173,13 +173,13 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 force += curlNoise(pp * noiseFrequency + noiseSpeed * time) * noiseWeight;
                 force += (touchSteer + centerSter) * touchWeight;
 
-
                 vec3 vel = pv + force * delta;
                 vel = limit(vel, maxSpeed * mix(1.0, 30.0, decay));
+                vel = mix(pv, vel, 0.2); // smooth
 
-                vel = mix(pv, vel, 0.5); // smooth
+                float debug = 1.0 - decay;
 
-                gl_FragColor = vec4(vel, 1.0 - decay);
+                gl_FragColor = vec4(vel, debug);
             }`,
 
             uniforms: {
