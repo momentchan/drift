@@ -68,7 +68,10 @@ export default function Stage({ radius }) {
                 castShadow>
                 <sphereGeometry args={[1, 36, 36]} />
                 {/* <meshStandardMaterial metalness={1} roughness={0}/> */}
-                <meshBasicMaterial />
+                <meshStandardMaterial
+                    emissive='white'
+                    emissiveIntensity={5.0}
+                />
             </mesh>
 
             <group

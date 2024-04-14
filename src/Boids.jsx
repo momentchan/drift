@@ -25,7 +25,7 @@ function initData(count, radius) {
     return data
 }
 
-export default function Boids({ radius, length }) {
+export default function Boids({ radius, length, lightPos }) {
 
     const props = useControls({
         'Boids': folder({
@@ -75,7 +75,6 @@ export default function Boids({ radius, length }) {
             gl.domElement.removeEventListener('mouseup', handleCanvasMouseUp);
         }
     }, [gl])
-
 
     const renderMat = new BoidsMeshRenderCustomShader()
 
@@ -150,12 +149,14 @@ export default function Boids({ radius, length }) {
         gpgpu.setUniform('velocityTex', 'aspect', size.width / size.height);
         gpgpu.setUniform('velocityTex', 'modelViewProjectionMatrix', modelViewProjectionMatrix)
         gpgpu.setUniform('velocityTex', 'inverseModelViewProjectionMatrix', inverseModelViewProjectionMatrix)
+        gpgpu.setUniform('velocityTex', 'lightPos', lightPos)
 
         gpgpu.compute()
 
         mat.current.uniforms.positionTex.value = gpgpu.getCurrentRenderTarget('positionTex')
         mat.current.uniforms.velocityTex.value = gpgpu.getCurrentRenderTarget('velocityTex')
         mat.current.uniforms.time.value = state.clock.elapsedTime
+
     })
 
     return (

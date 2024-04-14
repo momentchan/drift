@@ -59,8 +59,9 @@ export default class BoidsMeshRenderCustomShader extends THREE.ShaderMaterial {
 
                 vec3 color = vColor;
 
-                csm_DiffuseColor = vec4(color, 1.0);
-                // csm_Emissive = vec3(1.0, 0.0, 0.0);
+                // csm_DiffuseColor = vec4(color, 1.0);
+                csm_DiffuseColor = vec4(debug);
+                // csm_Emissive = vec3(debug);
             }`,
 
             uniforms: {

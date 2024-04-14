@@ -17,7 +17,8 @@ export default function App() {
 
     const props = {
         radius: 12,
-        length: 64
+        length: 64,
+        lightPos: [100, 100, 0]
     }
 
     const light = useRef()
@@ -30,7 +31,7 @@ export default function App() {
                 fov: 45,
                 near: 0.1,
                 far: 200,
-                position: [50, 2, 20]
+                position: [0, 0, 50]
             }}
             gl={{ preserveDrawingBuffer: true }}
 

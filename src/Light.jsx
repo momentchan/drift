@@ -1,9 +1,6 @@
 import { Environment, useHelper } from "@react-three/drei"
-import { useFrame } from "@react-three/fiber"
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react"
 import * as THREE from 'three'
-
-const lightPos = [100, 100, 0]
 
 export default forwardRef(function Light(props, ref) {
 
@@ -20,7 +17,6 @@ export default forwardRef(function Light(props, ref) {
         // console.log(diretionalLight.current);
     }, [])
 
-
     return (
         <>
             <ambientLight intensity={0.05} />
@@ -28,7 +24,7 @@ export default forwardRef(function Light(props, ref) {
             <directionalLight
                 ref={diretionalLight}
                 intensity={1}
-                position={lightPos}
+                position={props.lightPos}
                 castShadow
                 shadow-mapSize={[4096, 4096]}
                 shadow-camera-top={props.radius * 1.5}

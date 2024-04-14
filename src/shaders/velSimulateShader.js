@@ -41,6 +41,8 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
             const float width = resolution.x;
             const float height = resolution.y;
 
+            uniform vec3 lightPos;
+
             vec3 avoidWall(vec3 pos) {
                 return length(pos) > radius ? -normalize(pos) : vec3(0.0);
             }
@@ -66,6 +68,15 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
             vec3 limit(vec3 vec, float value){
                 float l = length(vec);
                 return (l > value && l > 0.0) ? vec.xyz * (value / l) : vec;
+            }
+
+            vec3 pointToLineDistance(vec3 point, vec3 linePoint, vec3 lineDirection) {
+                vec3 w = point - linePoint;
+                vec3 v = normalize(lineDirection);
+                float projectedLength = dot(w, v);
+                vec3 projectedVector = v * projectedLength;
+                vec3 distanceVector = w - projectedVector;
+                return distanceVector;
             }
 
             
@@ -166,18 +177,29 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 vec3 forward = normalize(pp);
                 vec3 centerSter = smoothstep(3.0, 0.0, length(pp)) * (forward + orth);
 
+                // curl 
+                vec3 vec2Line = pointToLineDistance(pp, vec3(0.0), lightPos);
+                vec3 curl = normalize(cross(vec2Line, lightPos));
+                float dist2Plane = dot(normalize(lightPos), pp) / radius;
+                curl *= step(length(vec2Line), dist) * max(dist2Plane, 0.0);
+
                 force += sepSteer * separationWeight;
                 force += aliSteer * alignmentWeight;
                 force += cohSteer * cohesionWeight;
                 force += avoidWall(pp) * avoidWallWeight;
                 force += curlNoise(pp * noiseFrequency + noiseSpeed * time) * noiseWeight;
                 force += (touchSteer + centerSter) * touchWeight;
+                force += curl * 200.0;
 
                 vec3 vel = pv + force * delta;
                 vel = limit(vel, maxSpeed * mix(1.0, 30.0, decay));
-                vel = mix(pv, vel, 0.2); // smooth
+                vel = mix(pv, vel, 1.0); // smooth
 
                 float debug = 1.0 - decay;
+                debug = step(dist, length(vec2Line));
+                debug = 1.0;
+                debug = mix(5.0, 0.5, smoothstep(0.0, 0.5, length(vec2Line) / radius)) * smoothstep(-2.0, 1.0, dist2Plane);
+
 
                 gl_FragColor = vec4(vel, debug);
             }`,
@@ -211,6 +233,8 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 maxForce: { value: 0.5 },
 
                 radius: { value: 0 },
+
+                lightPos: { value: 0 }
             }
         })
     }
