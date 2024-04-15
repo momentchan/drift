@@ -50,10 +50,10 @@ export default function Effect({ light }) {
                     intensity={8}
                     aoSamples={3}
                     denoiseSamples={4} /> */}
-            {/* <Noise
-                    opacity={1.0}
+            <Noise
+                    opacity={0.2}
                     premultiply
-                    blendFunction={BlendFunction.SOFT_LIGHT} /> */}
+                    blendFunction={BlendFunction.SOFT_LIGHT} />
         </EffectComposer>
     </>
 }
