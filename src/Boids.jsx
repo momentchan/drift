@@ -11,7 +11,6 @@ import { patchShaders } from 'gl-noise'
 import BoidsMeshRenderCustomShader from "./shaders/boidsMeshRenderCustomShader";
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla'
 import { getRandomVectorInsideSphere } from "./r3f-gist/utility/Utilities";
-import { Trail } from '@react-three/drei';
 
 function initData(count, radius) {
     const data = new Float32Array(count * 4)
@@ -104,6 +103,7 @@ export default function Boids({ radius, length, lightPos }) {
 
     const gpgpu = useMemo(() => {
         const gpgpu = new GPGPU(gl, length, length)
+        
 
         gpgpu.addVariable('positionTex', initData(length * length, radius), new PosSimulateShaderMaterial())
         gpgpu.addVariable('velocityTex', initData(length * length, 10), new VelSimulateShaderMaterial())

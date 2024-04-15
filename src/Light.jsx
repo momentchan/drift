@@ -23,7 +23,7 @@ export default forwardRef(function Light(props, ref) {
 
             <directionalLight
                 ref={diretionalLight}
-                intensity={1}
+                intensity={2}
                 position={props.lightPos}
                 castShadow
                 shadow-mapSize={[4096, 4096]}

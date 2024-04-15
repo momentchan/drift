@@ -193,7 +193,7 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
 
                 vec3 vel = pv + force * delta;
                 vel = limit(vel, maxSpeed * mix(1.0, 30.0, decay));
-                vel = mix(pv, vel, 1.0); // smooth
+                vel = mix(pv, vel, 0.5); // smooth
 
                 float debug = 1.0 - decay;
                 debug = step(dist, length(vec2Line));

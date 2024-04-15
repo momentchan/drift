@@ -1,11 +1,18 @@
-import { Caustics, Edges, MeshTransmissionMaterial } from "@react-three/drei";
+import { Caustics, Edges, MeshTransmissionMaterial, useFBX } from "@react-three/drei";
 import * as THREE from 'three'
 
 import { folder, useControls } from 'leva'
+import { useEffect, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 
 const sphereScaler = 1.1
 
 export default function Stage({ radius }) {
+
+    const fbx = useFBX('Female Dynamic Pose.fbx')
+    const body = useRef()
+    const mixer = new THREE.AnimationMixer(fbx)
+    console.log(mixer);
 
 
     const config = useControls({
@@ -52,27 +59,39 @@ export default function Stage({ radius }) {
         })
     })
 
+
+    useEffect(() => {
+        fbx.traverse(child => {
+            if(child.isMesh){
+                const mat = new THREE.MeshStandardMaterial()
+                child.material = mat
+            }
+        })
+        fbx.animations.forEach(clip=>{
+            const action = mixer.clipAction(clip)
+            action.play()
+        })
+    }, [])
+
+    useFrame((_,delta)=>{
+        mixer.update(delta)
+        body.current.rotation.y += delta * 1.0
+
+        console.log();
+    })
+
     return (
         <>
             {/* <mesh
-                position={[0, -radius * sphereScaler, 0]}
-                rotation={[-Math.PI * 0.5, 0, 0]}
-                receiveShadow
-            >
-                <planeGeometry args={[radius * 5, radius * 5, 1, 1]} />
-                <shadowMaterial transparent opacity={0.5} />
-            </mesh> */}
-
-            <mesh
                 position={[0, 0, 0]}
                 castShadow>
                 <sphereGeometry args={[1, 36, 36]} />
-                {/* <meshStandardMaterial metalness={1} roughness={0}/> */}
                 <meshStandardMaterial
                     emissive='white'
                     emissiveIntensity={5.0}
                 />
-            </mesh>
+            </mesh> */}
+            <primitive scale={2} object={fbx} ref={body} />
 
             <group
                 visible={false}

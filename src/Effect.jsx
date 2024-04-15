@@ -36,30 +36,24 @@ export default function Effect({ light }) {
 
     return <>
         <EffectComposer ref={composer} disableNormalPass multisampling={0}>
-            {/* <N8AO
-                halfRes
-                color='black'
-                aoRadius={12}
-                intensity={8}
-                aoSamples={3}
-                denoiseSamples={4} /> */}
-            <Noise
-                opacity={1.0}
-                premultiply
-                blendFunction={BlendFunction.SOFT_LIGHT} />
             <Bloom
                 luminanceThreshold={0.1}
                 mipmapBlur
                 intensity={2} />
             <ToneMapping />
-
-            {/* <DepthOfField
-                focusDistance={10}
-                focalLength={20}
-                bokehScale={6}  // blur radius
-            /> */}
             <SMAA />
-            <TiltShift2 blur={0.05}/>
+            <TiltShift2 blur={0.05} />
+            {/* <N8AO
+                    halfRes
+                    color='black'
+                    aoRadius={12}
+                    intensity={8}
+                    aoSamples={3}
+                    denoiseSamples={4} /> */}
+            {/* <Noise
+                    opacity={1.0}
+                    premultiply
+                    blendFunction={BlendFunction.SOFT_LIGHT} /> */}
         </EffectComposer>
     </>
 }
