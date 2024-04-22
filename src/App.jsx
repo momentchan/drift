@@ -7,6 +7,7 @@ import Stage from "./Stage";
 import Effect from "./Effect";
 import Light from "./Light";
 import { useRef } from "react";
+import RayEmitter from "./RayEmitter";
 
 export default function App() {
     const { bgColor } = useControls({
@@ -18,11 +19,15 @@ export default function App() {
     const props = {
         radius: 12,
         length: 64,
-        lightPos: [100, 100, 0]
+        lightPos: [100, 100, 0],
+        rayCount: 10
     }
 
     const light = useRef()
-
+    const vertices = [
+        0, 0, 0, // Start position
+        1, 1, 1, // End position
+    ];
     return <>
         <Leva collapsed />
         <Canvas
@@ -39,11 +44,12 @@ export default function App() {
             <fogExp2 attach="fog" args={[bgColor, 0.03]} />
             <color attach="background" args={[bgColor]} />
 
+            <RayEmitter {...props} />
             <OrbitControls makeDefault />
 
-            <Boids {...props} />
+            {/* <Boids {...props} /> */}
 
-            <Stage {...props} />
+            {/* <Stage {...props} /> */}
 
             <Light {...props} ref={light} />
 

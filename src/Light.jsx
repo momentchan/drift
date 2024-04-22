@@ -5,7 +5,7 @@ import * as THREE from 'three'
 export default forwardRef(function Light(props, ref) {
 
     const diretionalLight = useRef()
-    useHelper(diretionalLight, THREE.DirectionalLightHelper, 1)
+    // useHelper(diretionalLight, THREE.DirectionalLightHelper, 1)
 
     useImperativeHandle(ref, () => ({
         getDirectionalLight() {

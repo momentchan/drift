@@ -18,10 +18,10 @@ export default function Effect({ light }) {
         density: 0.02,
         maxDensity: 10,
         edgeStrength: 0,
-        edgeRadius: 10,
+        edgeRadius: 2,
         distanceAttenuation: 5,
         color: new THREE.Color(0xffffff),
-        raymarchSteps: 60,
+        raymarchSteps: 30,
         blur: false,
         gammaCorrection: false,
     }

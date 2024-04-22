@@ -168,7 +168,6 @@ export default function Boids({ radius, length, lightPos }) {
                 receiveShadow
                 frustumCulled={false}
                 customDepthMaterial={depthMat}
-                onClick={() => console.log(123)}
             >
                 <boxGeometry args={[0.05, 0.2, 0.6]}>
                     <instancedBufferAttribute attach="attributes-uvs" args={[uvs, 3]} />
@@ -186,12 +185,6 @@ export default function Boids({ radius, length, lightPos }) {
                 // emissiveIntensity={ 1 }
                 />
             </instancedMesh>
-
-            {/* <points material={renderMat}>
-                <bufferGeometry>
-                    <bufferAttribute attach="attributes-position" count={uvs.length / 3} array={uvs} itemSize={3} />
-                </bufferGeometry>
-            </points> */}
         </>
     )
 }
