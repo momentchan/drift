@@ -8,6 +8,8 @@ import Effect from "./Effect";
 import Light from "./Light";
 import { useRef } from "react";
 import RayEmitter from "./RayEmitter";
+import * as THREE from 'three';
+
 
 export default function App() {
     const { bgColor } = useControls({
@@ -28,6 +30,24 @@ export default function App() {
         0, 0, 0, // Start position
         1, 1, 1, // End position
     ];
+
+    const textureData = new Float32Array(props.rayCount * 4);
+
+    const texture = new THREE.DataTexture(
+        textureData,
+        props.rayCount,
+        1,
+        THREE.RGBAFormat,
+        THREE.FloatType
+    );
+
+    const handleUpdatePoints = (index, point) => {
+        textureData[(index * 4) + 0] = point.x;
+        textureData[(index * 4) + 1] = point.y;
+        textureData[(index * 4) + 2] = point.z;
+        texture.needsUpdate = true;
+    };
+
     return <>
         <Leva collapsed />
         <Canvas
@@ -44,10 +64,13 @@ export default function App() {
             <fogExp2 attach="fog" args={[bgColor, 0.03]} />
             <color attach="background" args={[bgColor]} />
 
-            <RayEmitter {...props} />
+            <RayEmitter {...props}
+                texture={texture} // Pass the texture to RayEmitter as a prop
+                onUpdateTexture={handleUpdatePoints}
+            />
             <OrbitControls makeDefault />
 
-            {/* <Boids {...props} /> */}
+            <Boids {...props} texture={texture} />
 
             {/* <Stage {...props} /> */}
 

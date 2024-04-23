@@ -43,6 +43,9 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
 
             uniform vec3 lightPos;
 
+            uniform float rayCount;
+            uniform sampler2D rayTex;
+
             vec3 avoidWall(vec3 pos) {
                 return length(pos) > radius ? -normalize(pos) : vec3(0.0);
             }
@@ -183,6 +186,14 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 float dist2Plane = dot(normalize(lightPos), pp) / radius;
                 curl *= step(length(vec2Line), dist) * max(dist2Plane, 0.0);
 
+                // ray avoid
+                vec3 raySteer;
+                for(float c = 0.0; c < rayCount; c++) {
+                    vec3 ray = texture2D(rayTex, vec2((c+0.5)/rayCount, 0.5)).rgb;
+                    float d = length(ray - pp);
+                    raySteer += - smoothstep(3.0, 0.0, d) * normalize(ray - pp);
+                }
+
                 force += sepSteer * separationWeight;
                 force += aliSteer * alignmentWeight;
                 force += cohSteer * cohesionWeight;
@@ -190,6 +201,7 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 force += curlNoise(pp * noiseFrequency + noiseSpeed * time) * noiseWeight;
                 force += (touchSteer + centerSter) * touchWeight;
                 force += curl * 200.0;
+                force +=raySteer * 1000.0;
 
                 vec3 vel = pv + force * delta;
                 vel = limit(vel, maxSpeed * mix(1.0, 30.0, decay));
@@ -200,6 +212,12 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 debug += 5.0 * smoothstep(0.2, 0.0, abs(length(pp)/radius - pow(mod(time * 0.4, 2.5), 0.5)));
                 debug = 1.0;
 
+                for(float c = 0.0; c < 10.0; c++) {
+                    vec3 ray = texture2D(rayTex, vec2((c+0.5)/10., 0.5)).rgb;
+                    float d = length(ray - pp);
+                    debug += 5.0 * smoothstep(3.0, 0.0, d);
+                }
+
 
                 gl_FragColor = vec4(vel, debug);
             }`,
@@ -207,6 +225,9 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
             uniforms: {
                 modelViewProjectionMatrix: { value: 0 },
                 inverseModelViewProjectionMatrix: { value: 0 },
+
+                rayTex: { value: 0 },
+                rayCount: { value: 0 },
 
                 time: { value: 0 },
                 delta: { value: 0 },

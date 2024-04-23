@@ -24,8 +24,7 @@ function initData(count, radius) {
     return data
 }
 
-export default function Boids({ radius, length, lightPos }) {
-
+export default function Boids({ radius, length, lightPos, texture, rayCount }) {
     const props = useControls({
         'Boids': folder({
             separationDistance: { value: 1, min: 0, max: 5 },
@@ -103,7 +102,7 @@ export default function Boids({ radius, length, lightPos }) {
 
     const gpgpu = useMemo(() => {
         const gpgpu = new GPGPU(gl, length, length)
-        
+
 
         gpgpu.addVariable('positionTex', initData(length * length, radius), new PosSimulateShaderMaterial())
         gpgpu.addVariable('velocityTex', initData(length * length, 10), new VelSimulateShaderMaterial())
@@ -150,6 +149,8 @@ export default function Boids({ radius, length, lightPos }) {
         gpgpu.setUniform('velocityTex', 'modelViewProjectionMatrix', modelViewProjectionMatrix)
         gpgpu.setUniform('velocityTex', 'inverseModelViewProjectionMatrix', inverseModelViewProjectionMatrix)
         gpgpu.setUniform('velocityTex', 'lightPos', lightPos)
+        gpgpu.setUniform('velocityTex', 'rayCount', rayCount)
+        gpgpu.setUniform('velocityTex', 'rayTex', texture)
 
         gpgpu.compute()
 
