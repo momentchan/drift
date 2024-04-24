@@ -89,6 +89,7 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
 
                 vec3 pp = texture2D(positionTex, uv).xyz;
                 vec3 pv = texture2D(velocityTex, uv).xyz;
+                float debug = texture2D(velocityTex, uv).w;
 
 
                 // force
@@ -180,18 +181,12 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 vec3 forward = normalize(pp);
                 vec3 centerSter = smoothstep(3.0, 0.0, length(pp)) * (forward + orth);
 
-                // curl 
-                vec3 vec2Line = pointToLineDistance(pp, vec3(0.0), lightPos);
-                vec3 curl = normalize(cross(vec2Line, lightPos));
-                float dist2Plane = dot(normalize(lightPos), pp) / radius;
-                curl *= step(length(vec2Line), dist) * max(dist2Plane, 0.0);
-
                 // ray avoid
                 vec3 raySteer;
                 for(float c = 0.0; c < rayCount; c++) {
                     vec3 ray = texture2D(rayTex, vec2((c+0.5)/rayCount, 0.5)).rgb;
                     float d = length(ray - pp);
-                    raySteer += - smoothstep(3.0, 0.0, d) * normalize(ray - pp);
+                    raySteer += - smoothstep(5.0, 0.0, d) * normalize(ray - pp);
                 }
 
                 force += sepSteer * separationWeight;
@@ -200,23 +195,30 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 force += avoidWall(pp) * avoidWallWeight;
                 force += curlNoise(pp * noiseFrequency + noiseSpeed * time) * noiseWeight;
                 force += (touchSteer + centerSter) * touchWeight;
-                force += curl * 200.0;
                 force +=raySteer * 1000.0;
 
                 vec3 vel = pv + force * delta;
                 vel = limit(vel, maxSpeed * mix(1.0, 30.0, decay));
                 vel = mix(pv, vel, 0.5); // smooth
 
-                float debug = 1.0 - decay;
-                debug = mix(5.0, 0.5, smoothstep(0.0, 0.5, length(vec2Line) / radius)) * smoothstep(-2.0, 1.0, dist2Plane);
-                debug += 5.0 * smoothstep(0.2, 0.0, abs(length(pp)/radius - pow(mod(time * 0.4, 2.5), 0.5)));
-                debug = 1.0;
+                // debug = 1.0 - decay;
+                // debug += 5.0 * smoothstep(0.2, 0.0, abs(length(pp)/radius - pow(mod(time * 0.4, 2.5), 0.5)));
+                // debug = 1.0;
 
-                for(float c = 0.0; c < 10.0; c++) {
-                    vec3 ray = texture2D(rayTex, vec2((c+0.5)/10., 0.5)).rgb;
-                    float d = length(ray - pp);
-                    debug += 5.0 * smoothstep(3.0, 0.0, d);
+                for(float c = 0.0; c < rayCount; c++) {
+                    vec4 ray = texture2D(rayTex, vec2((c+0.5)/rayCount, 0.5));
+
+                    vec3 vec2Line = pointToLineDistance(pp, ray.rgb, lightPos);
+                    vec3 vecOnLine = pp - ray.rgb - vec2Line;
+                    float v  =length(vecOnLine) * sign(dot(vecOnLine , lightPos));
+
+                    float d = length(vec2Line);
+                    float r = step(0.0, v) * step(v, ray.w);
+                    debug += 1.0 * pow(smoothstep(5.0, 0.0, d), 2.0)  * r;
                 }
+                debug -= delta * 2.0;
+                // debug = mix(5.0, 0.5, smoothstep(0.0, 0.5, length(vec2Line) / radius)) * smoothstep(-2.0, 1.0, dist2Plane);
+                debug = min(max(debug, 0.5), 3.0);
 
 
                 gl_FragColor = vec4(vel, debug);

@@ -7,15 +7,14 @@ const rfs = THREE.MathUtils.randFloatSpread
 const speedRange = [-0.2, -0.5]
 const lengthRange = [5, 20]
 
-function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range = 20, onUpdatePoints }) {
-    var length = THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1])
+function Ray({ index, pos, dir, normal, binormal, length, lengthRange, speedRange, range = 20, onUpdatePoints }) {
     var speed = THREE.MathUtils.randFloat(speedRange[0], speedRange[1])
     var offset = dir.clone().multiplyScalar(speed)
 
     const [points, setPoints] = useState([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0)])
 
     function getRandomPos() {
-        length = THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1])
+        // length = THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1])
         speed = THREE.MathUtils.randFloat(speedRange[0], speedRange[1])
 
         const offset1 = normal.clone().multiplyScalar(rfs(range))
@@ -33,7 +32,7 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
 
     useFrame(() => {
         setPoints([points[0].add(offset), points[1].add(offset)])
-        onUpdatePoints(index, points[0])
+        onUpdatePoints(index, points[0], length)
 
         if (points[1].y < -20)
             getRandomPos()
@@ -44,13 +43,13 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
             <Line
                 points={points}
                 color="white"
-                lineWidth={1}
+                lineWidth={2}
             />
         </>
     );
 }
 
-export default function RayEmitter({ rayCount, lightPos, texture, onUpdateTexture }) {
+export default function RayEmitter({ rayCount, lightPos, onUpdateTexture }) {
     const dir = new THREE.Vector3()
     const normal = new THREE.Vector3()
     const binormal = new THREE.Vector3()
@@ -62,12 +61,11 @@ export default function RayEmitter({ rayCount, lightPos, texture, onUpdateTextur
         binormal.crossVectors(dir, normal)
     }, [pos])
 
-    const points = [];
+    // const points = [];
 
-    points.push(new THREE.Vector3(- 10, 0, 0));
-    points.push(new THREE.Vector3(0, 10, 0));
-    points.push(new THREE.Vector3(10, 0, 0));
-
+    // points.push(new THREE.Vector3(- 10, 0, 0));
+    // points.push(new THREE.Vector3(0, 10, 0));
+    // points.push(new THREE.Vector3(10, 0, 0));
 
     return (
         <>
@@ -84,6 +82,7 @@ export default function RayEmitter({ rayCount, lightPos, texture, onUpdateTextur
                     dir={dir}
                     binormal={binormal}
                     normal={normal}
+                    length={THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1])}
                     lengthRange={lengthRange}
                     speedRange={speedRange}
                     onUpdatePoints={onUpdateTexture}

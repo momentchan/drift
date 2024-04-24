@@ -41,7 +41,6 @@ export default function Effect({ light }) {
                 mipmapBlur
                 intensity={2} />
             <ToneMapping />
-            <SMAA />
             <TiltShift2 blur={0.05} />
             {/* <N8AO
                     halfRes
@@ -49,11 +48,12 @@ export default function Effect({ light }) {
                     aoRadius={12}
                     intensity={8}
                     aoSamples={3}
-                    denoiseSamples={4} /> */}
+                denoiseSamples={4} /> */}
             <Noise
-                    opacity={0.2}
-                    premultiply
-                    blendFunction={BlendFunction.SOFT_LIGHT} />
+                opacity={0.5}
+                premultiply
+                blendFunction={BlendFunction.SOFT_LIGHT} />
+            <SMAA />
         </EffectComposer>
     </>
 }

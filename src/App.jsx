@@ -22,7 +22,7 @@ export default function App() {
         radius: 12,
         length: 64,
         lightPos: [100, 100, 0],
-        rayCount: 10
+        rayCount: 20
     }
 
     const light = useRef()
@@ -41,10 +41,11 @@ export default function App() {
         THREE.FloatType
     );
 
-    const handleUpdatePoints = (index, point) => {
+    const handleUpdatePoints = (index, point, length) => {
         textureData[(index * 4) + 0] = point.x;
         textureData[(index * 4) + 1] = point.y;
         textureData[(index * 4) + 2] = point.z;
+        textureData[(index * 4) + 3] = length;
         texture.needsUpdate = true;
     };
 
