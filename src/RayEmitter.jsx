@@ -10,6 +10,7 @@ const lengthRange = [5, 20]
 function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range = 20, onUpdatePoints }) {
     const [speed, setSpeed] = useState(THREE.MathUtils.randFloat(speedRange[0], speedRange[1]))
     const [length, setLength] = useState(THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1]))
+    const [delay, setDelay] = useState(THREE.MathUtils.randFloat(0, 3))
 
     var offset = dir.clone().multiplyScalar(speed)
 
@@ -18,6 +19,7 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
     function getRandomPos() {
         setLength(THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1]))
         setSpeed(THREE.MathUtils.randFloat(speedRange[0], speedRange[1]))
+        setDelay(THREE.MathUtils.randFloat(0, 3))
 
         const offset1 = normal.clone().multiplyScalar(rfs(range))
         const offset2 = binormal.clone().multiplyScalar(rfs(range))
@@ -32,11 +34,8 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
         getRandomPos()
     }, [])
 
-    useFrame(() => {
-
-        if (index == 0)
-            console.log(length);
-
+    useFrame((state, delta) => {
+        setDelay(delay - delta)
 
         setPoints([points[0].add(offset), points[1].add(offset)])
         onUpdatePoints(index, points[0], length)
@@ -47,11 +46,12 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
 
     return (
         <>
-            <Line
+            {delay < 0 ? <Line
                 points={points}
                 color="white"
                 lineWidth={2}
-            />
+            /> : ""}
+
         </>
     );
 }
