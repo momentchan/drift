@@ -7,15 +7,17 @@ const rfs = THREE.MathUtils.randFloatSpread
 const speedRange = [-0.2, -0.5]
 const lengthRange = [5, 20]
 
-function Ray({ index, pos, dir, normal, binormal, length, lengthRange, speedRange, range = 20, onUpdatePoints }) {
-    var speed = THREE.MathUtils.randFloat(speedRange[0], speedRange[1])
+function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range = 20, onUpdatePoints }) {
+    const [speed, setSpeed] = useState(THREE.MathUtils.randFloat(speedRange[0], speedRange[1]))
+    const [length, setLength] = useState(THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1]))
+
     var offset = dir.clone().multiplyScalar(speed)
 
     const [points, setPoints] = useState([new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0)])
 
     function getRandomPos() {
-        // length = THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1])
-        speed = THREE.MathUtils.randFloat(speedRange[0], speedRange[1])
+        setLength(THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1]))
+        setSpeed(THREE.MathUtils.randFloat(speedRange[0], speedRange[1]))
 
         const offset1 = normal.clone().multiplyScalar(rfs(range))
         const offset2 = binormal.clone().multiplyScalar(rfs(range))
@@ -31,6 +33,11 @@ function Ray({ index, pos, dir, normal, binormal, length, lengthRange, speedRang
     }, [])
 
     useFrame(() => {
+
+        if (index == 0)
+            console.log(length);
+
+
         setPoints([points[0].add(offset), points[1].add(offset)])
         onUpdatePoints(index, points[0], length)
 
@@ -82,7 +89,6 @@ export default function RayEmitter({ rayCount, lightPos, onUpdateTexture }) {
                     dir={dir}
                     binormal={binormal}
                     normal={normal}
-                    length={THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1])}
                     lengthRange={lengthRange}
                     speedRange={speedRange}
                     onUpdatePoints={onUpdateTexture}
