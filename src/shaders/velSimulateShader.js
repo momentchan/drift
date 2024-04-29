@@ -218,7 +218,7 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 }
                 debug -= delta * 2.0;
                 // debug = mix(5.0, 0.5, smoothstep(0.0, 0.5, length(vec2Line) / radius)) * smoothstep(-2.0, 1.0, dist2Plane);
-                debug = min(max(debug, 0.5), 3.0);
+                debug = min(max(debug, 0.3), 3.0);
 
 
                 gl_FragColor = vec4(vel, debug);

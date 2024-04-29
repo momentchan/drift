@@ -16,13 +16,13 @@ export default function Effect({ light }) {
 
     const config = {
         density: 0.02,
-        maxDensity: 10,
+        maxDensity: 5,
         edgeStrength: 0,
         edgeRadius: 2,
         distanceAttenuation: 5,
         color: new THREE.Color(0xffffff),
         raymarchSteps: 30,
-        blur: false,
+        blur: true,
         gammaCorrection: false,
     }
 
@@ -42,15 +42,8 @@ export default function Effect({ light }) {
                 intensity={2} />
             <ToneMapping />
             <TiltShift2 blur={0.05} />
-            {/* <N8AO
-                    halfRes
-                    color='black'
-                    aoRadius={12}
-                    intensity={8}
-                    aoSamples={3}
-                denoiseSamples={4} /> */}
             <Noise
-                opacity={0.5}
+                opacity={0.2}
                 premultiply
                 blendFunction={BlendFunction.SOFT_LIGHT} />
             <SMAA />

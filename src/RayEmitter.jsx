@@ -7,10 +7,11 @@ const rfs = THREE.MathUtils.randFloatSpread
 const speedRange = [-0.2, -0.5]
 const lengthRange = [5, 20]
 
-function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range = 20, onUpdatePoints }) {
+function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range = 30, onUpdatePoints }) {
     const [speed, setSpeed] = useState(THREE.MathUtils.randFloat(speedRange[0], speedRange[1]))
     const [length, setLength] = useState(THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1]))
-    const [delay, setDelay] = useState(THREE.MathUtils.randFloat(0, 3))
+    const [delay, setDelay] = useState(THREE.MathUtils.randFloat(0, -3))
+    const [fade, setFade] = useState(0)
 
     var offset = dir.clone().multiplyScalar(speed)
 
@@ -35,22 +36,27 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
     }, [])
 
     useFrame((state, delta) => {
-        setDelay(delay - delta)
+        setDelay(delay + delta)
+
+        setFade(THREE.MathUtils.clamp(delay/10, 0, 1) * THREE.MathUtils.smootherstep(points[1].y, -50, -30))
 
         setPoints([points[0].add(offset), points[1].add(offset)])
         onUpdatePoints(index, points[0], length)
 
-        if (points[1].y < -20)
+        if (points[1].y < -50)
             getRandomPos()
     });
 
     return (
         <>
-            {delay < 0 ? <Line
+            {delay < 0 ? "" : <Line
                 points={points}
                 color="white"
                 lineWidth={2}
-            /> : ""}
+                transparent
+                opacity={fade}
+                
+            />}
 
         </>
     );
