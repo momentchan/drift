@@ -37,15 +37,15 @@ export default function Effect({ light }) {
     return <>
         <EffectComposer ref={composer} disableNormalPass multisampling={0}>
             <Bloom
-                luminanceThreshold={0.1}
+                luminanceThreshold={0.3}
                 mipmapBlur
                 intensity={2} />
             <ToneMapping />
-            <TiltShift2 blur={0.05} />
+            <TiltShift2 blur={0.02} />
             <Noise
-                opacity={0.2}
+                opacity={0.1}
                 premultiply
-                blendFunction={BlendFunction.SOFT_LIGHT} />
+                blendFunction={BlendFunction.ALPHA} />
             <SMAA />
         </EffectComposer>
     </>

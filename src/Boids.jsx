@@ -40,7 +40,7 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
 
             noiseFrequency: { value: 0.05, min: 0, max: 0.1 },
             noiseSpeed: { value: 0.1, min: 0, max: 0.5 },
-            touchRange: { value: 0.6, min: 0, max: 0.5 },
+            touchRange: { value: 0.6, min: 0, max: 5 },
 
             maxSpeed: { value: 2, min: 0, max: 20 },
             maxForce: { value: 10, min: 0, max: 20 },

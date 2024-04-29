@@ -55,7 +55,6 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
                 lineWidth={2}
                 transparent
                 opacity={fade}
-                
             />}
 
         </>

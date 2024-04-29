@@ -166,6 +166,7 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                     cohSteer = limit(cohSteer, maxForce);
                 }
 
+                
 
                 // interaction
                 vec4 pp_clip = modelViewProjectionMatrix * vec4(pp.xyz, 1.0);
@@ -184,9 +185,21 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 // ray avoid
                 vec3 raySteer;
                 for(float c = 0.0; c < rayCount; c++) {
-                    vec3 ray = texture2D(rayTex, vec2((c+0.5)/rayCount, 0.5)).rgb;
-                    float d = length(ray - pp);
-                    raySteer += - smoothstep(5.0, 0.0, d) * normalize(ray - pp);
+                    vec4 ray = texture2D(rayTex, vec2((c+0.5)/rayCount, 0.5));
+                    float d = length(ray.rgb - pp);
+
+
+
+                    vec3 vec2Line = pointToLineDistance(pp, ray.rgb, lightPos);
+                    vec3 vecOnLine = pp - ray.rgb - vec2Line;
+                    float v  =length(vecOnLine) * sign(dot(vecOnLine , lightPos));
+
+                    float d2 = length(vec2Line);
+                    float r = step(0.0, v) * step(v, ray.w);
+
+
+                    raySteer += - smoothstep(5.0, 0.0, d) * normalize(ray.rgb - pp);
+                    debug += 1.0 * pow(smoothstep(5.0, 0.0, d2), 2.0)  * r;
                 }
 
                 force += sepSteer * separationWeight;
@@ -205,17 +218,6 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 // debug += 5.0 * smoothstep(0.2, 0.0, abs(length(pp)/radius - pow(mod(time * 0.4, 2.5), 0.5)));
                 // debug = 1.0;
 
-                for(float c = 0.0; c < rayCount; c++) {
-                    vec4 ray = texture2D(rayTex, vec2((c+0.5)/rayCount, 0.5));
-
-                    vec3 vec2Line = pointToLineDistance(pp, ray.rgb, lightPos);
-                    vec3 vecOnLine = pp - ray.rgb - vec2Line;
-                    float v  =length(vecOnLine) * sign(dot(vecOnLine , lightPos));
-
-                    float d = length(vec2Line);
-                    float r = step(0.0, v) * step(v, ray.w);
-                    debug += 1.0 * pow(smoothstep(5.0, 0.0, d), 2.0)  * r;
-                }
                 debug -= delta * 2.0;
                 // debug = mix(5.0, 0.5, smoothstep(0.0, 0.5, length(vec2Line) / radius)) * smoothstep(-2.0, 1.0, dist2Plane);
                 debug = min(max(debug, 0.3), 3.0);
