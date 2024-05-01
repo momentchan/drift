@@ -6,13 +6,14 @@ import { Line } from '@react-three/drei';
 const rfs = THREE.MathUtils.randFloatSpread
 const speedRange = [-0.2, -0.5]
 const lengthRange = [5, 20]
+const delayRange = [-5, -10]
 
 function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range = 30, onUpdatePoints }) {
-    const [delay, setDelay] = useState(THREE.MathUtils.randFloat(0, -3))
+    const [delay, setDelay] = useState(THREE.MathUtils.randFloat(delayRange[0], delayRange[1]))
     const [speed, setSpeed] = useState(THREE.MathUtils.randFloat(speedRange[0], speedRange[1]))
     const [length, setLength] = useState(THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1]))
     const [fade, setFade] = useState(0)
-    const [fadeRange, setFadeRange] = useState(0)
+    const [stopPos, setStopPos] = useState(0)
 
     const velocity = useMemo(() => dir.clone().multiplyScalar(speed), [dir, speed]);
 
@@ -21,8 +22,8 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
     function getRandomPos() {
         setLength(THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1]))
         setSpeed(THREE.MathUtils.randFloat(speedRange[0], speedRange[1]))
-        setDelay(THREE.MathUtils.randFloat(0, 3))
-        setFadeRange(THREE.MathUtils.randFloat(-20, 20))
+        setDelay(THREE.MathUtils.randFloat(delayRange[0], delayRange[1]))
+        setStopPos(THREE.MathUtils.randFloat(-20, 20))
 
         const offset1 = normal.clone().multiplyScalar(rfs(range))
         const offset2 = binormal.clone().multiplyScalar(rfs(range))
@@ -36,23 +37,25 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
     }, [])
 
     useFrame((state, delta) => {
-        const dot = points[0].dot(dir.clone().normalize())
-
         setDelay(delay + delta)
-        setFade(THREE.MathUtils.clamp(delay / 10, 0, 1) * THREE.MathUtils.smootherstep(points[1].y, -50, -30) * THREE.MathUtils.smootherstep(dot - fadeRange, -lengthRange[0], lengthRange[0]))
 
-        if (dot < fadeRange) {
-            setLength(Math.max(length - velocity.length(), 0))
-        }
+        if (delay > 0) {
+            const dot = points[0].dot(dir.clone().normalize())
+            setFade(THREE.MathUtils.clamp(delay / 10, 0, 1) * THREE.MathUtils.smootherstep(points[1].y, -50, -30) * THREE.MathUtils.smootherstep(dot - stopPos, -lengthRange[0], lengthRange[0] * 0.5))
 
-        const p1 = points[0].add(velocity)
-        const p2 = p1.clone().add(velocity.clone().normalize().multiplyScalar(length))
-        setPoints([p1, p2])
+            if (dot < stopPos) {
+                setLength(Math.max(length - velocity.length(), 0))
+            }
 
-        onUpdatePoints(index, points[0], length)
+            const p1 = points[0].add(velocity)
+            const p2 = p1.clone().add(velocity.clone().normalize().multiplyScalar(length))
+            setPoints([p1, p2])
 
-        if (points[1].y < -50) {
-            getRandomPos()
+            onUpdatePoints(index, points[0], length)
+
+            if (points[1].y < -50) {
+                getRandomPos()
+            }
         }
     });
 

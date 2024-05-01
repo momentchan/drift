@@ -213,7 +213,7 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 force += avoidWall(pp) * avoidWallWeight;
                 force += curlNoise(pp * noiseFrequency + noiseSpeed * time) * noiseWeight;
                 force += (touchSteer + centerSter) * touchWeight;
-                force +=raySteer * 1000.0;
+                force += raySteer * 1000.0;
 
                 vec3 vel = pv + force * delta;
                 vel = limit(vel, maxSpeed * mix(1.0, 30.0, decay));
@@ -223,7 +223,7 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 // debug += 5.0 * smoothstep(0.2, 0.0, abs(length(pp)/radius - pow(mod(time * 0.4, 2.5), 0.5)));
                 // debug = 1.0;
 
-                debug -= delta * 2.0;
+                debug -= delta * 1.0;
                 // debug = mix(5.0, 0.5, smoothstep(0.0, 0.5, length(vec2Line) / radius)) * smoothstep(-2.0, 1.0, dist2Plane);
                 debug = min(max(debug, 0.3), 3.0);
 
