@@ -186,20 +186,25 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                 vec3 raySteer;
                 for(float c = 0.0; c < rayCount; c++) {
                     vec4 ray = texture2D(rayTex, vec2((c+0.5)/rayCount, 0.5));
+
+                    // distance to ray point
                     float d = length(ray.rgb - pp);
-
-
 
                     vec3 vec2Line = pointToLineDistance(pp, ray.rgb, lightPos);
                     vec3 vecOnLine = pp - ray.rgb - vec2Line;
-                    float v  =length(vecOnLine) * sign(dot(vecOnLine , lightPos));
+                    float v = length(vecOnLine) * sign(dot(vecOnLine , lightPos));
 
+                    // distance to ray light
                     float d2 = length(vec2Line);
-                    float r = step(0.0, v) * step(v, ray.w);
+                    float mask = step(0.0, v) * step(v, ray.w);
 
+                    // curl
+                    vec3 curl = normalize(cross(vec2Line, lightPos));
+                    curl *= step(length(vec2Line), dist);
 
                     raySteer += - smoothstep(5.0, 0.0, d) * normalize(ray.rgb - pp);
-                    debug += 1.0 * pow(smoothstep(5.0, 0.0, d2), 2.0)  * r;
+                    raySteer += curl * 2.0* pow(smoothstep(5.0, 0.0, d2), 3.0)  * mask;
+                    debug += 1.0 * pow(smoothstep(5.0, 0.0, d2), 2.0)  * mask;
                 }
 
                 force += sepSteer * separationWeight;
