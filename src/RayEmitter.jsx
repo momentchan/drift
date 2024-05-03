@@ -2,11 +2,86 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Line } from '@react-three/drei';
+import { randFloatSpread } from 'three/src/math/MathUtils.js';
 
 const rfs = THREE.MathUtils.randFloatSpread
 const speedRange = [-0.2, -0.5]
 const lengthRange = [5, 20]
 const delayRange = [-5, -10]
+
+
+function Triangle({ pos, ratio }) {
+    const [points, setPoints] = useState([]);
+    const size = useMemo(() => THREE.MathUtils.randFloat(5, 15), [])
+    const [fade, setFade] = useState(1)
+    const dir = useMemo(() => new THREE.Vector3(randFloatSpread(1), randFloatSpread(1), randFloatSpread(1)).normalize(), [])
+
+    const calculatePoints = () => {
+        const angle = Math.PI * 2 / 3
+        setFade(THREE.MathUtils.smoothstep(1 - ratio, 0, 0.3))
+
+        const p1 = new THREE.Vector3();
+        p1.crossVectors(dir, new THREE.Vector3(1, 0, 0)).multiplyScalar(size * Math.pow(ratio, 0.5));
+
+        const p2 = p1.clone().applyAxisAngle(dir, angle);
+        const p3 = p1.clone().applyAxisAngle(dir, -angle);
+
+        const points = [p1.clone().add(pos), p3.clone().add(pos), p2.clone().add(pos), p1.clone().add(pos)];
+        setPoints(points);
+    };
+
+    useFrame((state) => {
+        calculatePoints()
+    })
+
+    return <>
+        {points.length != 0 && ratio != 0 ?
+            <Line
+                points={points}
+                color="white"
+                transparent
+                opacity={fade}
+                lineWidth={1} /> :
+            ""}
+    </>
+}
+
+function Rectangle({ pos, ratio }) {
+    const [points, setPoints] = useState([]);
+    const size = useMemo(() => THREE.MathUtils.randFloat(5, 15), [])
+    const [fade, setFade] = useState(1)
+    const dir = useMemo(() => new THREE.Vector3(randFloatSpread(1), randFloatSpread(1), randFloatSpread(1)).normalize(), [])
+
+    const calculatePoints = () => {
+        const angle = Math.PI / 2
+        setFade(THREE.MathUtils.smoothstep(1 - ratio, 0, 0.3))
+
+        const p1 = new THREE.Vector3();
+        p1.crossVectors(dir, new THREE.Vector3(1, 0, 0)).multiplyScalar(size * Math.pow(ratio, 0.5));
+
+        const p2 = p1.clone().applyAxisAngle(dir, angle)
+        const p3 = p1.clone().applyAxisAngle(dir, angle * 2)
+        const p4 = p1.clone().applyAxisAngle(dir, angle * 3)
+
+        const points = [p1.clone().add(pos), p2.clone().add(pos), p3.clone().add(pos), p4.clone().add(pos), p1.clone().add(pos)];
+        setPoints(points);
+    };
+
+    useFrame((state) => {
+        calculatePoints()
+    })
+
+    return <>
+        {points.length != 0 && ratio != 0 ?
+            <Line
+                points={points}
+                color="white"
+                transparent
+                opacity={fade}
+                lineWidth={1} /> :
+            ""}
+    </>
+}
 
 function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range = 30, onUpdatePoints }) {
     const [delay, setDelay] = useState(THREE.MathUtils.randFloat(delayRange[0], delayRange[1]))
@@ -14,16 +89,27 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
     const [length, setLength] = useState(THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1]))
     const [fade, setFade] = useState(0)
     const [stopPos, setStopPos] = useState(0)
+    const [stop, setStop] = useState(false)
+    const [triPos, setTriPos] = useState([new THREE.Vector3(-100, -100, -100), new THREE.Vector3(-100, -100, -100)])
+    const shape = useMemo(() => THREE.MathUtils.randFloat(0, 1) > 0.5, [])
 
     const velocity = useMemo(() => dir.clone().multiplyScalar(speed), [dir, speed]);
 
     const [points, setPoints] = useState([new THREE.Vector3(-100, -100, -100), new THREE.Vector3(-100, -100, -100)])
 
+    const [time, setTime] = useState(0)
+    const [duration, setDuration] = useState(THREE.MathUtils.randFloat(2, 5))
+
     function getRandomPos() {
+        setDuration(THREE.MathUtils.randFloat(2, 5))
+        setTime(0)
+        setStop(false)
+        setTriPos([new THREE.Vector3(-100, -100, -100), new THREE.Vector3(-100, -100, -100)])
+
         setLength(THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1]))
         setSpeed(THREE.MathUtils.randFloat(speedRange[0], speedRange[1]))
         setDelay(THREE.MathUtils.randFloat(delayRange[0], delayRange[1]))
-        setStopPos(THREE.MathUtils.randFloat(-20, 20))
+        setStopPos(THREE.MathUtils.randFloat(-5, 10))
 
         const offset1 = normal.clone().multiplyScalar(rfs(range))
         const offset2 = binormal.clone().multiplyScalar(rfs(range))
@@ -41,10 +127,19 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
 
         if (delay > 0) {
             const dot = points[0].dot(dir.clone().normalize())
-            setFade(THREE.MathUtils.clamp(delay / 10, 0, 1) * THREE.MathUtils.smootherstep(points[1].y, -50, -30) * THREE.MathUtils.smootherstep(dot - stopPos, -lengthRange[0], lengthRange[0] * 0.5))
+            setFade(THREE.MathUtils.clamp(delay / 10, 0, 1) * THREE.MathUtils.smootherstep(points[1].y, -50, -30))
 
             if (dot < stopPos) {
                 setLength(Math.max(length - velocity.length(), 0))
+
+                if (!stop) {
+                    setTriPos(points[1])
+                    setStop(true)
+                }
+            }
+
+            if (length == 0) {
+                setTime(time + delta)
             }
 
             const p1 = points[0].add(velocity)
@@ -53,7 +148,7 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
 
             onUpdatePoints(index, points[0], length)
 
-            if (points[1].y < -50) {
+            if (points[1].y < -100) {
                 getRandomPos()
             }
         }
@@ -69,6 +164,7 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
                 opacity={fade}
             />}
 
+            {shape ? <Rectangle pos={triPos} ratio={Math.min(time / duration, 1)} /> : <Triangle pos={triPos} ratio={Math.min(time / duration, 1)} />}
         </>
     );
 }
@@ -85,19 +181,8 @@ export default function RayEmitter({ rayCount, lightPos, onUpdateTexture }) {
         binormal.crossVectors(dir, normal)
     }, [pos])
 
-    // const points = [];
-
-    // points.push(new THREE.Vector3(- 10, 0, 0));
-    // points.push(new THREE.Vector3(0, 10, 0));
-    // points.push(new THREE.Vector3(10, 0, 0));
-
     return (
         <>
-            {/* <Line
-                points={points}
-                color="white"
-                lineWidth={1}
-            /> */}
             {Array.from({ length: rayCount }, (_, i) => (
                 <Ray
                     key={i}

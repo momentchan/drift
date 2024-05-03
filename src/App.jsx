@@ -26,10 +26,6 @@ export default function App() {
     }
 
     const light = useRef()
-    const vertices = [
-        0, 0, 0, // Start position
-        1, 1, 1, // End position
-    ];
 
     const textureData = new Float32Array(props.rayCount * 4);
 
