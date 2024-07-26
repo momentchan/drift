@@ -69,7 +69,7 @@ export default function App() {
 
             <Boids {...props} texture={texture} />
 
-            {/* <Stage {...props} /> */}
+            <Stage {...props} />
 
             <Light {...props} ref={light} />
 

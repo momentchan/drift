@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Line } from '@react-three/drei';
@@ -34,14 +34,23 @@ function Triangle({ pos, ratio }) {
         calculatePoints()
     })
 
+    const lineRef = useRef()
+    useEffect(() => {
+        if (lineRef.current) {
+            lineRef.current.layers.toggle(2)
+            // console.log(lineRef.current.layers);
+        }
+    }, [lineRef.current])
+
     return <>
         {points.length != 0 && ratio != 0 ?
             <Line
+                ref={lineRef}
                 points={points}
                 color="white"
                 transparent
                 opacity={fade}
-                lineWidth={1} /> :
+                lineWidth={5} /> :
             ""}
     </>
 }
@@ -78,7 +87,7 @@ function Rectangle({ pos, ratio }) {
                 color="white"
                 transparent
                 opacity={fade}
-                lineWidth={1} /> :
+                lineWidth={5} /> :
             ""}
     </>
 }
@@ -159,7 +168,7 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
             {delay < 0 ? "" : <Line
                 points={points}
                 color="white"
-                lineWidth={2}
+                lineWidth={3}
                 transparent
                 opacity={fade}
             />}

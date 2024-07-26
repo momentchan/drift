@@ -38,8 +38,9 @@ export default function Effect({ light }) {
         <EffectComposer ref={composer} disableNormalPass multisampling={0}>
             <Bloom
                 luminanceThreshold={0.3}
+                luminanceSmoothing={0.5}
                 mipmapBlur
-                intensity={2} />
+                intensity={10} />
             <ToneMapping />
             <TiltShift2 blur={0.02} />
             <Noise
