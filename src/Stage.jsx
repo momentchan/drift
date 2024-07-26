@@ -58,19 +58,7 @@ export default function Stage({ radius }) {
         })
     })
 
-
-    const caustics = useControls({
-        'Caustics': folder({
-            color: 'white',
-            worldRadius: { value: 0.3125, min: 0.0001, max: 10, step: 0.0001 },
-            ior: { value: 1.1, min: 0, max: 2, step: 0.01 },
-            intensity: { value: 0.0, min: 0, max: 10, step: 0.01 },
-        })
-    })
-
-
     useEffect(() => {
-        console.log(fbx);
         const bodyMat = new THREE.MeshStandardMaterial({ map: bodyTex.map, aoMap: bodyTex.aoMap, normalMap: bodyTex.normalMap, metalnessMap: bodyTex.metalnessMap });
         const detailMat = new THREE.MeshStandardMaterial({ map: detailTex.map, aoMap: detailTex.aoMap, normalMap: detailTex.normalMap, metalnessMap: detailTex.metalnessMap });
 
@@ -82,7 +70,6 @@ export default function Stage({ radius }) {
 
         fbx.traverse(child => {
             if (child.isMesh) {
-                console.log(child.name);
                 if (bodyMeshes.includes(child.name)) {
                     child.material = bodyMat
                 } else if (!child.name.includes('Person')) {
@@ -90,54 +77,15 @@ export default function Stage({ radius }) {
                 }
             }
         })
-        // fbx.animations.forEach(clip=>{
-        //     const action = mixer.clipAction(clip)
-        //     action.play()
-        // })
     }, [])
 
     useFrame((state, delta) => {
-        fbx.rotation.set(state.clock.elapsedTime, 0, 0)
-        // mixer.update(delta)
-        // body.current.rotation.y += delta * 1.0
-
-        // console.log();
+        fbx.rotation.set(state.clock.elapsedTime * 0.1, 0, 0)
     })
 
     return (
         <>
-            {/* <mesh
-                position={[0, 0, 0]}
-                castShadow>
-                <sphereGeometry args={[1, 36, 36]} />
-                <meshStandardMaterial
-                    emissive='white'
-                    emissiveIntensity={5.0}
-                />
-            </mesh> */}
             <primitive scale={0.02} object={fbx} ref={body} />
-
-            <group
-                visible={false}
-            >
-                <Caustics
-                    frames='Infinity'
-                    backside
-                    height={-5}
-                    // debug
-                    // lightSource={light}
-                    {...caustics}>
-                    <mesh castShadow>
-                        <sphereGeometry args={[radius * sphereScaler, 32, 32]} />
-
-                        <MeshTransmissionMaterial
-                            toneMapped={false}
-                            envMapIntensity={1}
-                            {...config}
-                        />
-                    </mesh>
-                </Caustics>
-            </group>
         </>
     )
 }
