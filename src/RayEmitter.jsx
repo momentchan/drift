@@ -5,7 +5,7 @@ import { Line } from '@react-three/drei';
 import { randFloatSpread } from 'three/src/math/MathUtils.js';
 
 const rfs = THREE.MathUtils.randFloatSpread
-const speedRange = [-0.2, -0.5]
+const speedRange = [-0.5, -1]
 const lengthRange = [5, 20]
 const delayRange = [-5, -10]
 
@@ -50,7 +50,7 @@ function Triangle({ pos, ratio }) {
                 color="white"
                 transparent
                 opacity={fade}
-                lineWidth={5} /> :
+                lineWidth={1} /> :
             ""}
     </>
 }
@@ -87,7 +87,7 @@ function Rectangle({ pos, ratio }) {
                 color="white"
                 transparent
                 opacity={fade}
-                lineWidth={5} /> :
+                lineWidth={1} /> :
             ""}
     </>
 }
@@ -118,12 +118,13 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
         setLength(THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1]))
         setSpeed(THREE.MathUtils.randFloat(speedRange[0], speedRange[1]))
         setDelay(THREE.MathUtils.randFloat(delayRange[0], delayRange[1]))
-        setStopPos(THREE.MathUtils.randFloat(-5, 10))
+        setStopPos(THREE.MathUtils.randFloat(-5, 5))
 
-        const offset1 = normal.clone().multiplyScalar(rfs(range))
-        const offset2 = binormal.clone().multiplyScalar(rfs(range))
+        const offset = new THREE.Vector3().addScaledVector(normal, rfs(2)).addScaledVector(binormal, rfs(2))
+        offset.normalize()
+        offset.multiplyScalar(THREE.MathUtils.randFloat(2, 8))
 
-        const p = pos.clone().add(offset1).add(offset2)
+        const p = pos.clone().add(offset)
         setPoints([p.clone(), p.clone().add(dir.clone().multiplyScalar(length))])
     }
 
@@ -133,9 +134,9 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
 
     useFrame((state, delta) => {
         setDelay(delay + delta)
-
         if (delay > 0) {
             const dot = points[0].dot(dir.clone().normalize())
+
             setFade(THREE.MathUtils.clamp(delay / 10, 0, 1) * THREE.MathUtils.smootherstep(points[1].y, -50, -30))
 
             if (dot < stopPos) {
@@ -168,7 +169,7 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
             {delay < 0 ? "" : <Line
                 points={points}
                 color="white"
-                lineWidth={3}
+                lineWidth={1}
                 transparent
                 opacity={fade}
             />}
@@ -179,32 +180,43 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
 }
 
 export default function RayEmitter({ rayCount, lightPos, onUpdateTexture }) {
-    const dir = new THREE.Vector3()
-    const normal = new THREE.Vector3()
-    const binormal = new THREE.Vector3()
+    const [dir, setDir] = useState(new THREE.Vector3());
+    const [normal, setNormal] = useState(new THREE.Vector3());
+    const [binormal, setBinormal] = useState(new THREE.Vector3());
     const [pos, setPos] = useState(new THREE.Vector3(lightPos[0], lightPos[1], lightPos[2]))
 
     useEffect(() => {
-        dir.copy(pos).normalize()
-        normal.crossVectors(dir, new THREE.Vector3(1, 0, 0));
-        binormal.crossVectors(dir, normal)
-    }, [pos])
+        const newDir = new THREE.Vector3().copy(pos).normalize();
+        setDir(newDir);
+
+        const newNormal = new THREE.Vector3();
+        newNormal.crossVectors(dir, new THREE.Vector3(1, 0, 0));
+
+        const newBinormal = new THREE.Vector3();
+        newBinormal.crossVectors(dir, newNormal);
+
+        setNormal(newNormal);
+        setBinormal(newBinormal);
+    }, [pos]);
+
 
     return (
         <>
-            {Array.from({ length: rayCount }, (_, i) => (
-                <Ray
-                    key={i}
-                    index={i}
-                    pos={pos}
-                    dir={dir}
-                    binormal={binormal}
-                    normal={normal}
-                    lengthRange={lengthRange}
-                    speedRange={speedRange}
-                    onUpdatePoints={onUpdateTexture}
-                />
-            ))}
+            {normal.length() != 0 &&
+                Array.from({ length: rayCount }, (_, i) => (
+                    <Ray
+                        key={i}
+                        index={i}
+                        pos={pos}
+                        dir={dir}
+                        binormal={binormal}
+                        normal={normal}
+                        lengthRange={lengthRange}
+                        speedRange={speedRange}
+                        onUpdatePoints={onUpdateTexture}
+                    />
+                ))
+            }
         </>
     );
 };
