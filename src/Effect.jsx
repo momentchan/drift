@@ -1,6 +1,6 @@
 import { useFrame, useThree } from "@react-three/fiber";
-import { Bloom, DepthOfField, EffectComposer, GodRays, N8AO, Noise, SMAA, TiltShift2, ToneMapping, Vignette } from "@react-three/postprocessing";
-import { BlendFunction } from 'postprocessing'
+import { Bloom, BrightnessContrast, DepthOfField, EffectComposer, GodRays, N8AO, Noise, SMAA, TiltShift2, ToneMapping, Vignette } from "@react-three/postprocessing";
+import { BlendFunction, ToneMappingMode } from 'postprocessing'
 import { folder, useControls } from 'leva'
 import * as THREE from 'three'
 import { useEffect, useRef } from "react";
@@ -12,7 +12,6 @@ export default function Effect({ light }) {
     const camera = useThree((state) => state.camera)
     const size = useThree((state) => state.size)
     const composer = useRef()
-    const godray = useRef()
 
     const config = {
         density: 0.02,
@@ -26,25 +25,38 @@ export default function Effect({ light }) {
         gammaCorrection: false,
     }
 
+    const props = useControls({
+        'PostEffect': folder({
+            bloomThreshold: { value: 0.3, min: 0, max: 5 },
+            bloomSmoothing: { value: 0.15, min: 0, max: 1 },
+            bloomIntensity: { value: 5, min: 0, max: 20 },
+
+            brightness: { value: 0, min: 0, max: 5 },
+            contrast: { value: 0, min: 0, max: 1 },
+        }),
+    })
+
     useEffect(() => {
-        godray.current = new GodraysPass(light.current.getDirectionalLight(), camera, config)
-        composer.current.addPass(godray.current)
+        const godray = new GodraysPass(light.current.getDirectionalLight(), camera, config)
+        composer.current.addPass(godray)
         return () => {
-            composer.current.removePass(godray.current)
+            composer.current.removePass(godray)
         }
     }, [])
 
     return <>
-        <EffectComposer ref={composer} disableNormalPass multisampling={0}>
+        <EffectComposer ref={composer}>
+            <ToneMapping mode={ToneMappingMode.ACES_FILMIC}/>
             <Bloom
-                luminanceThreshold={0.3}
-                luminanceSmoothing={0.5}
+                luminanceThreshold={props.bloomThreshold}
+                luminanceSmoothing={props.bloomSmoothing}
                 mipmapBlur
-                intensity={10} />
-            <ToneMapping />
+                intensity={props.bloomIntensity} />
+            <BrightnessContrast brightness={props.brightness} contrast={props.contrast}/>
+
             <TiltShift2 blur={0.02} />
             <Noise
-                opacity={0.1}
+                opacity={0}
                 premultiply
                 blendFunction={BlendFunction.ALPHA} />
             <SMAA />
