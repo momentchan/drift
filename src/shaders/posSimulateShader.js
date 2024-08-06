@@ -12,7 +12,7 @@ export default class PosSimulateShaderMaterial extends THREE.ShaderMaterial {
 
                 vec3 pos = texture2D(positionTex, uv).xyz;
                 vec3 vel = texture2D(velocityTex, uv).xyz;
-                vec3 newPos = pos + vel * delta * 0.05;
+                vec3 newPos = pos + vel * delta;
 
                 gl_FragColor = vec4(newPos.xyz, 1.0);
             }`,
