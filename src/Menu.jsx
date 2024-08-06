@@ -7,7 +7,7 @@ import GlobalState from './GlobalState';
 function TriangleOutlinedIcon(props) {
     return (
         <SvgIcon {...props}>
-            <polygon points="12,4 21,19 3,19" style={{ fill: 'none', stroke: 'currentColor', strokeWidth: 2 }} />
+            <polygon points="12,3 21,19 3,19" style={{ fill: 'none', stroke: 'currentColor', strokeWidth: 2 }} />
         </SvgIcon>
     );
 }
