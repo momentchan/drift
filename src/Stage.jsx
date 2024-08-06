@@ -1,14 +1,12 @@
 import { Caustics, Edges, MeshTransmissionMaterial, useFBX, useTexture } from "@react-three/drei";
 import * as THREE from 'three'
 
-import { folder, useControls } from 'leva'
 import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 
-const sphereScaler = 1.1
-export default function Stage({ radius }) {
+function Model({ path, pos }) {
+    const fbx = useFBX(path)
 
-    const fbx = useFBX('Astronaut.fbx')
     const body = useRef()
     const bodyTex = useTexture({
         map: 'Textures/Body/Astronaut_Suit_Body_Albedo.png',
@@ -46,12 +44,20 @@ export default function Stage({ radius }) {
     }, [])
 
     useFrame((state, delta) => {
-        fbx.rotation.set(state.clock.elapsedTime * 0.1, 0, 0)
+        const t = state.clock.elapsedTime * 0.8
+        fbx.rotation.set(t, 0, 0)
     })
 
     return (
+        <primitive position={pos} scale={0.02} object={fbx} ref={body} />
+    )
+}
+
+
+export default function Stage({ }) {
+    return (
         <>
-            <primitive scale={0.02} object={fbx} ref={body} />
+            <Model path={'Astronaut.fbx'} pos={[0, 0, 0]} />
         </>
     )
 }

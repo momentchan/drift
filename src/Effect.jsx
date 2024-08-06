@@ -1,6 +1,6 @@
-import { useFrame, useThree } from "@react-three/fiber";
-import { Bloom, BrightnessContrast, DepthOfField, EffectComposer, GodRays, N8AO, Noise, SMAA, TiltShift2, ToneMapping, Vignette } from "@react-three/postprocessing";
-import { BlendFunction, ToneMappingMode } from 'postprocessing'
+import { useThree } from "@react-three/fiber";
+import { Bloom, DepthOfField, EffectComposer, HueSaturation, ToneMapping } from "@react-three/postprocessing";
+import { ToneMappingMode } from 'postprocessing'
 import { folder, useControls } from 'leva'
 import * as THREE from 'three'
 import { useEffect, useRef } from "react";
@@ -14,25 +14,25 @@ export default function Effect({ light }) {
     const composer = useRef()
 
     const config = {
-        density: 0.02,
-        maxDensity: 5,
-        edgeStrength: 0,
+        density: 0.001,
+        maxDensity: 0.5,
+        edgeStrength: 2,
         edgeRadius: 2,
-        distanceAttenuation: 5,
+        distanceAttenuation: 2,
         color: new THREE.Color(0xffffff),
         raymarchSteps: 30,
         blur: true,
-        gammaCorrection: false,
+        gammaCorrection: true,
     }
 
     const props = useControls({
         'PostEffect': folder({
             bloomThreshold: { value: 0.3, min: 0, max: 5 },
             bloomSmoothing: { value: 0.15, min: 0, max: 1 },
-            bloomIntensity: { value: 5, min: 0, max: 20 },
+            bloomIntensity: { value: 1, min: 0, max: 20 },
 
-            brightness: { value: 0, min: 0, max: 5 },
-            contrast: { value: 0, min: 0, max: 1 },
+            focusDistance: { value: 0, min: 0, max: 50 },
+            focusLength: { value: 0, min: 0, max: 50 },
         }),
     })
 
@@ -46,20 +46,14 @@ export default function Effect({ light }) {
 
     return <>
         <EffectComposer ref={composer}>
-            <ToneMapping mode={ToneMappingMode.ACES_FILMIC}/>
+            <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
+            <HueSaturation saturation={0.4} />
             <Bloom
                 luminanceThreshold={props.bloomThreshold}
                 luminanceSmoothing={props.bloomSmoothing}
                 mipmapBlur
                 intensity={props.bloomIntensity} />
-            <BrightnessContrast brightness={props.brightness} contrast={props.contrast}/>
-
-            <TiltShift2 blur={0.02} />
-            <Noise
-                opacity={0}
-                premultiply
-                blendFunction={BlendFunction.ALPHA} />
-            <SMAA />
+            {/* <DepthOfField focusDistance={props.focusDistance} focalLength={props.focusLength} /> */}
         </EffectComposer>
     </>
 }

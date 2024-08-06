@@ -9,7 +9,9 @@ import Light from "./Light";
 import { useRef } from "react";
 import RayEmitter from "./RayEmitter";
 import * as THREE from 'three';
+import { Perf } from "r3f-perf";
 
+const debug = false
 
 export default function App() {
     const { bgColor } = useControls({
@@ -19,7 +21,7 @@ export default function App() {
     })
 
     const props = {
-        radius: 12,
+        radius: 10,
         length: 64,
         lightPos: [100, 100, 0],
         rayCount: 5
@@ -46,7 +48,7 @@ export default function App() {
     };
 
     return <>
-        <Leva collapsed />
+        <Leva collapsed hidden={!debug} />
         <Canvas
             shadows
             camera={{
@@ -56,9 +58,9 @@ export default function App() {
                 position: [0, 0, 50]
             }}
             gl={{ preserveDrawingBuffer: true }}
-
         >
-            <fogExp2 attach="fog" args={[bgColor, 0.03]} />
+            {debug && <Perf position='top-left' />}
+            <fogExp2 attach="fog" args={[bgColor, 0.05]} />
             <color attach="background" args={[bgColor]} />
 
             <RayEmitter {...props}
