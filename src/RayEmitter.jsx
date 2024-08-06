@@ -7,7 +7,7 @@ import { randFloatSpread } from 'three/src/math/MathUtils.js';
 const rfs = THREE.MathUtils.randFloatSpread
 const speedRange = [-0.5, -1]
 const lengthRange = [5, 20]
-const delayRange = [-5, -10]
+const delayRange = [0, 0]
 
 
 function Triangle({ pos, ratio }) {
@@ -135,6 +135,7 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
     useFrame((state, delta) => {
         setDelay(delay + delta)
         if (delay > 0) {
+
             const dot = points[0].dot(dir.clone().normalize())
 
             setFade(THREE.MathUtils.clamp(delay / 10, 0, 1) * THREE.MathUtils.smootherstep(points[1].y, -50, -30))
@@ -183,22 +184,21 @@ export default function RayEmitter({ rayCount, lightPos, onUpdateTexture }) {
     const [dir, setDir] = useState(new THREE.Vector3());
     const [normal, setNormal] = useState(new THREE.Vector3());
     const [binormal, setBinormal] = useState(new THREE.Vector3());
-    const [pos, setPos] = useState(new THREE.Vector3(lightPos[0], lightPos[1], lightPos[2]))
+    const pos = new THREE.Vector3(lightPos[0], lightPos[1], lightPos[2])
 
     useEffect(() => {
         const newDir = new THREE.Vector3().copy(pos).normalize();
         setDir(newDir);
 
         const newNormal = new THREE.Vector3();
-        newNormal.crossVectors(dir, new THREE.Vector3(1, 0, 0));
+        newNormal.crossVectors(newDir, new THREE.Vector3(1, 0, 0)).normalize();
 
         const newBinormal = new THREE.Vector3();
-        newBinormal.crossVectors(dir, newNormal);
+        newBinormal.crossVectors(newDir, newNormal).normalize();
 
         setNormal(newNormal);
         setBinormal(newBinormal);
-    }, [pos]);
-
+    }, []);
 
     return (
         <>
