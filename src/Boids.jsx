@@ -12,6 +12,7 @@ import BoidsMeshRenderCustomShader from "./shaders/boidsMeshRenderCustomShader";
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla'
 import { getRandomVectorInsideSphere } from "./r3f-gist/utility/Utilities";
 import { useFBX, useGLTF } from '@react-three/drei';
+import GlobalState from './GlobalState';
 
 function initData(count, radius) {
     const data = new Float32Array(count * 4)
@@ -28,6 +29,7 @@ function initData(count, radius) {
 export default function Boids({ radius, length, lightPos, texture, rayCount }) {
     const fbx = useFBX('pyramid.fbx')
     const [geometry, setGeometry] = useState(null);
+    const { isTriangle } = GlobalState();
 
     const props = useControls({
         'Boids': folder({
@@ -179,10 +181,14 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
                     frustumCulled={false}
                     customDepthMaterial={depthMat}
                 >
-                    <primitive attach="geometry" object={geometry} />
-                    {/* <boxGeometry >
-                        <instancedBufferAttribute attach="attributes-uvs" args={[uvs, 3]} />
-                    </boxGeometry> */}
+                    {!isTriangle ?
+                        <primitive attach="geometry" object={geometry} /> :
+                        <boxGeometry args={[0.02, 0.2, 0.2]} >
+                            <instancedBufferAttribute attach="attributes-uvs" args={[uvs, 3]} />
+                        </boxGeometry>
+                    }
+
+
 
                     <ThreeCustomShaderMaterial
                         ref={mat}

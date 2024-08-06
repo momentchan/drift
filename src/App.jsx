@@ -1,7 +1,6 @@
 import { OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber'
 import Utilities from "./r3f-gist/utility/Utilities";
-import Boids from "./Boids";
 import { Leva, folder, useControls } from 'leva'
 import Stage from "./Stage";
 import Effect from "./Effect";
@@ -10,6 +9,8 @@ import { useRef } from "react";
 import RayEmitter from "./RayEmitter";
 import * as THREE from 'three';
 import { Perf } from "r3f-perf";
+import Boids from "./boids";
+import Menu from "./Menu";
 
 const debug = false
 
@@ -80,5 +81,7 @@ export default function App() {
             <Effect light={light} />
 
         </Canvas>
+
+        <Menu/>
     </>
 }
