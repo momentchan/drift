@@ -11,6 +11,7 @@ import { patchShaders } from 'gl-noise'
 import BoidsMeshRenderCustomShader from "./shaders/boidsMeshRenderCustomShader";
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla'
 import { getRandomVectorInsideSphere } from "./r3f-gist/utility/Utilities";
+import { useFBX, useGLTF } from '@react-three/drei';
 
 function initData(count, radius) {
     const data = new Float32Array(count * 4)
@@ -25,18 +26,21 @@ function initData(count, radius) {
 }
 
 export default function Boids({ radius, length, lightPos, texture, rayCount }) {
+    const fbx = useFBX('pyramid.fbx')
+    const [geometry, setGeometry] = useState(null);
+
     const props = useControls({
         'Boids': folder({
             separationDistance: { value: 1, min: 0, max: 5 },
-            alignmentDistance: { value: 2, min: 0, max: 5 },
+            alignmentDistance: { value: 1, min: 0, max: 5 },
             cohesionDistance: { value: 2, min: 0, max: 5 },
 
             separationWeight: { value: 1, min: 0, max: 10 },
-            alignmentWeight: { value: 0.5, min: 0, max: 10 },
+            alignmentWeight: { value: 2, min: 0, max: 10 },
             cohesionWeight: { value: 0.5, min: 0, max: 10 },
-            avoidWallWeight: { value: 10, min: 0, max: 10 },
+            avoidWallWeight: { value: 5, min: 0, max: 10 },
             noiseWeight: { value: 1.2, min: 0, max: 5 },
-            touchWeight: { value: 30, min: 0, max: 50 },
+            touchWeight: { value: 50, min: 0, max: 50 },
 
             noiseFrequency: { value: 0.05, min: 0, max: 0.1 },
             noiseSpeed: { value: 0.1, min: 0, max: 0.5 },
@@ -92,11 +96,15 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
 
     const uvs = useMemo(() => {
         const uvs = new Float32Array(count * 3)
+
         for (let i = 0; i < count; i++) {
             const i3 = i * 3
             uvs[i3 + 0] = (i % length) / length
             uvs[i3 + 1] = i / length / length
         }
+        const geometry = fbx.children[0].geometry
+        geometry.setAttribute('uvs', new THREE.InstancedBufferAttribute(new Float32Array(uvs), 3));
+        setGeometry(geometry)
         return uvs
     }, [count])
 
@@ -162,30 +170,31 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
 
     return (
         <>
-            <instancedMesh
-                ref={mesh}
-                args={[null, null, count]}
-                castShadow
-                receiveShadow
-                frustumCulled={false}
-                customDepthMaterial={depthMat}
-            >
-                <boxGeometry args={[0.05, 0.2, 0.6]}>
-                    <instancedBufferAttribute attach="attributes-uvs" args={[uvs, 3]} />
-                </boxGeometry>
+            {geometry != null &&
+                <instancedMesh
+                    ref={mesh}
+                    args={[null, null, count]}
+                    castShadow
+                    receiveShadow
+                    frustumCulled={false}
+                    customDepthMaterial={depthMat}
+                >
+                    <primitive attach="geometry" object={geometry} />
+                    {/* <boxGeometry >
+                        <instancedBufferAttribute attach="attributes-uvs" args={[uvs, 3]} />
+                    </boxGeometry> */}
 
-                <ThreeCustomShaderMaterial
-                    ref={mat}
-                    baseMaterial={THREE.MeshStandardMaterial}
-                    silent
-                    fragmentShader={patchShaders(renderMat.fragmentShader)}
-                    vertexShader={patchShaders(renderMat.vertexShader)}
-                    uniforms={renderMat.uniforms}
-                    envMapIntensity={0.5}
-                // emissive="white" 
-                // emissiveIntensity={ 1 }
-                />
-            </instancedMesh>
+                    <ThreeCustomShaderMaterial
+                        ref={mat}
+                        baseMaterial={THREE.MeshStandardMaterial}
+                        silent
+                        fragmentShader={patchShaders(renderMat.fragmentShader)}
+                        vertexShader={patchShaders(renderMat.vertexShader)}
+                        uniforms={renderMat.uniforms}
+                        envMapIntensity={0.5}
+                    />
+                </instancedMesh>
+            }
         </>
     )
 }
