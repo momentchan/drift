@@ -1,5 +1,5 @@
 import { useThree } from "@react-three/fiber";
-import { Bloom, DepthOfField, EffectComposer, HueSaturation, ToneMapping } from "@react-three/postprocessing";
+import { Bloom, EffectComposer, HueSaturation, ToneMapping } from "@react-three/postprocessing";
 import { ToneMappingMode } from 'postprocessing'
 import { folder, useControls } from 'leva'
 import * as THREE from 'three'
@@ -7,10 +7,7 @@ import { useEffect, useRef } from "react";
 import { GodraysPass } from 'three-good-godrays';
 
 export default function Effect({ light }) {
-    const gl = useThree((state) => state.gl)
-    const scene = useThree((state) => state.scene)
     const camera = useThree((state) => state.camera)
-    const size = useThree((state) => state.size)
     const composer = useRef()
 
     const config = {
@@ -29,7 +26,7 @@ export default function Effect({ light }) {
         'PostEffect': folder({
             bloomThreshold: { value: 0.3, min: 0, max: 5 },
             bloomSmoothing: { value: 0.15, min: 0, max: 1 },
-            bloomIntensity: { value: 1, min: 0, max: 20 },
+            bloomIntensity: { value: 1.5, min: 0, max: 20 },
 
             focusDistance: { value: 0, min: 0, max: 50 },
             focusLength: { value: 0, min: 0, max: 50 },

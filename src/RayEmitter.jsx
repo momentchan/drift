@@ -5,7 +5,7 @@ import { Line } from '@react-three/drei';
 import { randFloatSpread } from 'three/src/math/MathUtils.js';
 
 const rfs = THREE.MathUtils.randFloatSpread
-const speedRange = [-0.5, -1]
+const speedRange = [-0.3, -0.8]
 const lengthRange = [5, 20]
 const delayRange = [0, 0]
 
@@ -133,7 +133,7 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
     }, [])
 
     useFrame((state, delta) => {
-        setDelay(delay + delta)
+        setDelay(delay + Math.min(delta, 1 / 30))
         if (delay > 0) {
 
             const dot = points[0].dot(dir.clone().normalize())

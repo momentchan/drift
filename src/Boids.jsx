@@ -132,7 +132,7 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
             new THREE.Matrix4().multiplyMatrices(viewMatrix, modelMatrix))
         const inverseModelViewProjectionMatrix = modelViewProjectionMatrix.clone().invert();
 
-        gpgpu.setUniform('positionTex', 'delta', delta)
+        gpgpu.setUniform('positionTex', 'delta', Math.min(delta, 1 / 30))
         gpgpu.setUniform('positionTex', 'time', state.clock.elapsedTime)
 
         gpgpu.setUniform('velocityTex', 'radius', radius)
@@ -181,7 +181,7 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
                     frustumCulled={false}
                     customDepthMaterial={depthMat}
                 >
-                    {!isTriangle ?
+                    {isTriangle ?
                         <primitive attach="geometry" object={geometry} /> :
                         <boxGeometry args={[0.02, 0.2, 0.2]} >
                             <instancedBufferAttribute attach="attributes-uvs" args={[uvs, 3]} />

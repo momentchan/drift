@@ -3,8 +3,10 @@ import * as THREE from 'three'
 
 import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
+import GlobalState from "./GlobalState";
 
 function Model({ path, pos }) {
+    const { loaded, setLoaded } = GlobalState()
     const fbx = useFBX(path)
 
     const body = useRef()
@@ -23,6 +25,8 @@ function Model({ path, pos }) {
     })
 
     useEffect(() => {
+        setLoaded(true)
+
         const bodyMat = new THREE.MeshStandardMaterial({ map: bodyTex.map, aoMap: bodyTex.aoMap, normalMap: bodyTex.normalMap, metalnessMap: bodyTex.metalnessMap });
         const detailMat = new THREE.MeshStandardMaterial({ map: detailTex.map, aoMap: detailTex.aoMap, normalMap: detailTex.normalMap, metalnessMap: detailTex.metalnessMap });
 

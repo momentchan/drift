@@ -1,7 +1,7 @@
 import { IconButton } from '@mui/material';
 import SquareOutlinedIcon from '@mui/icons-material/SquareOutlined';
 import { SvgIcon } from '@mui/material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import GlobalState from './GlobalState';
 
 function TriangleOutlinedIcon(props) {
@@ -14,7 +14,7 @@ function TriangleOutlinedIcon(props) {
 
 export default function Menu({ }) {
 
-    const { isTriangle, setIsTriangle } = GlobalState();
+    const { isTriangle, setIsTriangle, loaded } = GlobalState();
 
     const handleClick = () => {
         setIsTriangle(!isTriangle);
@@ -22,24 +22,23 @@ export default function Menu({ }) {
 
     return (
         <div className="menu">
-            <IconButton
-                onClick={handleClick}
-                sx={{
-                    backgroundColor: '#555555',
-                    '&:hover': {
+            {loaded &&
+                <IconButton
+                    onClick={handleClick}
+                    sx={{
                         backgroundColor: '#555555',
-                        opacity: 0.8
-                    },
-                    padding: 1.2,
-                    opacity: 0.4,
-                }}
-            >
-                {isTriangle ? (
-                    <TriangleOutlinedIcon sx={{ fontSize: 25, color: 'white' }} />
-                ) : (
-                    <SquareOutlinedIcon sx={{ fontSize: 25, color: 'white' }} />
-                )}
-            </IconButton>
+                        '&:hover': {
+                            backgroundColor: '#555555',
+                            opacity: 0.8
+                        },
+                        padding: 1.2,
+                        opacity: 0.4,
+                    }}
+                >
+                    {isTriangle ? (<TriangleOutlinedIcon sx={{ fontSize: 25, color: 'white' }} />) :
+                        (<SquareOutlinedIcon sx={{ fontSize: 25, color: 'white' }} />)}
+                </IconButton>
+            }
         </div>
     );
 }

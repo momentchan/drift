@@ -1,11 +1,11 @@
-import { OrbitControls } from "@react-three/drei";
+import { Loader, OrbitControls } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber'
 import Utilities from "./r3f-gist/utility/Utilities";
 import { Leva, folder, useControls } from 'leva'
 import Stage from "./Stage";
 import Effect from "./Effect";
 import Light from "./Light";
-import { useRef } from "react";
+import { Suspense, useRef } from "react";
 import RayEmitter from "./RayEmitter";
 import * as THREE from 'three';
 import { Perf } from "r3f-perf";
@@ -50,38 +50,42 @@ export default function App() {
 
     return <>
         <Leva collapsed hidden={!debug} />
+
         <Canvas
             shadows
             camera={{
                 fov: 45,
                 near: 0.1,
                 far: 200,
-                position: [0, 0, 50]
+                position: [0, 0, 40]
             }}
             gl={{ preserveDrawingBuffer: true }}
         >
-            {debug && <Perf position='top-left' />}
-            <fogExp2 attach="fog" args={[bgColor, 0.05]} />
-            <color attach="background" args={[bgColor]} />
+            <Suspense fallback={null}>
 
-            <RayEmitter {...props}
-                texture={texture} // Pass the texture to RayEmitter as a prop
-                onUpdateTexture={handleUpdatePoints}
-            />
-            <OrbitControls makeDefault />
+                {debug && <Perf position='top-left' />}
+                <fogExp2 attach="fog" args={[bgColor, 0.05]} />
+                <color attach="background" args={[bgColor]} />
 
-            <Boids {...props} texture={texture} />
+                <RayEmitter {...props}
+                    texture={texture} // Pass the texture to RayEmitter as a prop
+                    onUpdateTexture={handleUpdatePoints}
+                />
+                <OrbitControls makeDefault />
 
-            <Stage {...props} />
+                <Boids {...props} texture={texture} />
 
-            <Light {...props} ref={light} />
+                <Stage {...props} />
 
-            <Utilities />
+                <Light {...props} ref={light} />
 
-            <Effect light={light} />
+                <Utilities />
 
+                <Effect light={light} />
+
+            </Suspense>
         </Canvas>
-
-        <Menu/>
+        <Loader />
+        <Menu />
     </>
 }
