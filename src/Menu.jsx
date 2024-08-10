@@ -1,4 +1,4 @@
-import { IconButton } from '@mui/material';
+import { Button, IconButton } from '@mui/material';
 import SquareOutlinedIcon from '@mui/icons-material/SquareOutlined';
 import { SvgIcon } from '@mui/material';
 import { useEffect, useState } from 'react';
@@ -14,31 +14,54 @@ function TriangleOutlinedIcon(props) {
 
 export default function Menu({ }) {
 
-    const { isTriangle, setIsTriangle, loaded } = GlobalState();
+    const { isTriangle, setIsTriangle, loaded, setLoaded } = GlobalState();
 
     const handleClick = () => {
         setIsTriangle(!isTriangle);
     };
 
     return (
-        <div className="menu">
-            {loaded &&
-                <IconButton
-                    onClick={handleClick}
-                    sx={{
-                        backgroundColor: '#555555',
-                        '&:hover': {
+        <div className='container'>
+            {/* <div className='overlay'/> */}
+            <div className="selection">
+                {loaded &&
+                    <IconButton
+                        onClick={handleClick}
+                        sx={{
                             backgroundColor: '#555555',
-                            opacity: 0.8
-                        },
-                        padding: 1.2,
-                        opacity: 0.4,
-                    }}
-                >
-                    {isTriangle ? (<TriangleOutlinedIcon sx={{ fontSize: 25, color: 'white' }} />) :
-                        (<SquareOutlinedIcon sx={{ fontSize: 25, color: 'white' }} />)}
-                </IconButton>
-            }
+                            '&:hover': {
+                                backgroundColor: '#555555',
+                                opacity: 0.8
+                            },
+                            padding: 1.2,
+                            opacity: 0.4,
+                        }}
+                    >
+                        {isTriangle ? (<TriangleOutlinedIcon sx={{ fontSize: 25, color: 'white' }} />) :
+                            (<SquareOutlinedIcon sx={{ fontSize: 25, color: 'white' }} />)}
+                    </IconButton>
+                }
+            </div>
+
+            <div className='play'>
+                {!loaded &&
+                    <Button
+                        sx={{
+                            backgroundColor: '#00000',
+                            color: 'white',
+                            '&:hover': {
+                                backgroundColor: '#222222', 
+                            }
+                        }}
+                        onClick={() => {
+                            $(".overlay").fadeOut(5000)
+                            setLoaded(true)
+                        }}
+                    >
+                        Start
+                    </Button>
+                }
+            </div>
         </div>
     );
 }

@@ -13,6 +13,7 @@ import CustomShaderMaterial from 'three-custom-shader-material/vanilla'
 import { getRandomVectorInsideSphere } from "./r3f-gist/utility/Utilities";
 import { useFBX, useGLTF } from '@react-three/drei';
 import GlobalState from './GlobalState';
+import { Vector2 } from 'three/src/Three.js';
 
 function initData(count, radius) {
     const data = new Float32Array(count * 4)
@@ -29,7 +30,7 @@ function initData(count, radius) {
 export default function Boids({ radius, length, lightPos, texture, rayCount }) {
     const fbx = useFBX('pyramid.fbx')
     const [geometry, setGeometry] = useState(null);
-    const { isTriangle } = GlobalState();
+    const { isTriangle, loaded } = GlobalState();
 
     const props = useControls({
         'Boids': folder({
@@ -132,6 +133,9 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
             new THREE.Matrix4().multiplyMatrices(viewMatrix, modelMatrix))
         const inverseModelViewProjectionMatrix = modelViewProjectionMatrix.clone().invert();
 
+        
+        
+
         gpgpu.setUniform('positionTex', 'delta', Math.min(delta, 1 / 30))
         gpgpu.setUniform('positionTex', 'time', state.clock.elapsedTime)
 
@@ -147,11 +151,11 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
         gpgpu.setUniform('velocityTex', 'avoidWallWeight', props.avoidWallWeight);
         gpgpu.setUniform('velocityTex', 'noiseWeight', props.noiseWeight);
         gpgpu.setUniform('velocityTex', 'touchWeight', props.touchWeight);
-        gpgpu.setUniform('velocityTex', 'touchPos', state.pointer);
+        gpgpu.setUniform('velocityTex', 'touchPos', loaded ? state.pointer : new Vector2(-1, 1));
 
         gpgpu.setUniform('velocityTex', 'noiseFrequency', props.noiseFrequency);
         gpgpu.setUniform('velocityTex', 'noiseSpeed', props.noiseSpeed);
-        gpgpu.setUniform('velocityTex', 'touchRange', props.touchRange);
+        gpgpu.setUniform('velocityTex', 'touchRange', props.touchRange * THREE.MathUtils.mapLinear(camera.position.length(), 36, 20, 0.6, 1));
 
         gpgpu.setUniform('velocityTex', 'maxSpeed', props.maxSpeed);
         gpgpu.setUniform('velocityTex', 'maxForce', props.maxForce);
@@ -187,8 +191,6 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
                             <instancedBufferAttribute attach="attributes-uvs" args={[uvs, 3]} />
                         </boxGeometry>
                     }
-
-
 
                     <ThreeCustomShaderMaterial
                         ref={mat}

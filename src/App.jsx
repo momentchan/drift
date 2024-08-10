@@ -11,10 +11,14 @@ import * as THREE from 'three';
 import { Perf } from "r3f-perf";
 import Boids from "./boids";
 import Menu from "./Menu";
+import Sound from "./Sound";
+import GlobalState from "./GlobalState";
 
 const debug = false
 
 export default function App() {
+    const { loaded } = GlobalState();
+
     const { bgColor } = useControls({
         'Global': folder({
             bgColor: '#000000'
@@ -57,7 +61,7 @@ export default function App() {
                 fov: 45,
                 near: 0.1,
                 far: 200,
-                position: [0, 0, 40]
+                position: [20, 0, 30]
             }}
             gl={{ preserveDrawingBuffer: true }}
         >
@@ -67,10 +71,13 @@ export default function App() {
                 <fogExp2 attach="fog" args={[bgColor, 0.05]} />
                 <color attach="background" args={[bgColor]} />
 
-                <RayEmitter {...props}
-                    texture={texture} // Pass the texture to RayEmitter as a prop
-                    onUpdateTexture={handleUpdatePoints}
-                />
+                {loaded &&
+                    <RayEmitter {...props}
+                        texture={texture} // Pass the texture to RayEmitter as a prop
+                        onUpdateTexture={handleUpdatePoints}
+                    />
+                }
+                
                 <OrbitControls makeDefault />
 
                 <Boids {...props} texture={texture} />
@@ -82,6 +89,8 @@ export default function App() {
                 <Utilities />
 
                 <Effect light={light} />
+
+                <Sound />
 
             </Suspense>
         </Canvas>

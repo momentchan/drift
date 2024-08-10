@@ -1,6 +1,7 @@
 html,
 body,
-#root {
+#root,
+.overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -10,8 +11,16 @@ body,
     background-color: #171717;
 }
 
-.menu {
+.selection {
     position: fixed;
     top: 15px;
     right: 10px;
+}
+
+.play {
+    z-index: 1 !important;
+    position: fixed;
+    top: 50%;
+    right: 50%;
+    transform: translate(50%, -50%);
 }
