@@ -6,6 +6,21 @@ import * as THREE from 'three'
 import { useEffect, useRef } from "react";
 import { GodraysPass } from 'three-good-godrays';
 
+const GodraysEffect = ({ light, config, composer }) => {
+    const { camera, gl } = useThree();
+
+    useEffect(() => {
+        const godray = new GodraysPass(light.current.getDirectionalLight(), camera, config);
+        composer.current.addPass(godray);
+
+        return () => {
+            composer.current.removePass(godray);
+        };
+    }, [camera, light, config]);
+
+    return null;
+};
+
 export default function Effect({ light }) {
     const camera = useThree((state) => state.camera)
     const composer = useRef()
@@ -33,16 +48,10 @@ export default function Effect({ light }) {
         }),
     })
 
-    useEffect(() => {
-        const godray = new GodraysPass(light.current.getDirectionalLight(), camera, config)
-        composer.current.addPass(godray)
-        return () => {
-            composer.current.removePass(godray)
-        }
-    }, [])
 
     return <>
         <EffectComposer ref={composer}>
+            <GodraysEffect light={light} config={config} composer={composer} />
             <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
             <HueSaturation saturation={0.4} />
             <Bloom
