@@ -7,14 +7,45 @@ function Model({ path, pos }) {
     const fbx = useFBX(path)
     const { ref, actions, names } = useAnimations(fbx.animations);
     const [index, setIndex] = useState(0)
+    const [blendRate, setBlendRate] = useState(0)
 
     const transT = 3
 
+    function easeInOutQuad(t) {
+        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+
+    function applyEasedFade(action, duration, fadeIn = true) {
+        let startTime = performance.now();
+    
+        const interval = setInterval(() => {
+            const elapsed = performance.now() - startTime;
+            const normalizedTime = Math.min(elapsed / (duration * 1000), 1); // Normalized time between 0 and 1
+
+            const blendRate = index === 0 ? 1 - Math.min(elapsed / (transT * 1000), 1) : Math.min(elapsed / (transT * 1000), 1);
+            setBlendRate(blendRate)
+
+            const easedTime = easeInOutQuad(normalizedTime); // Apply easing
+            const weight = fadeIn ? easedTime : 1 - easedTime;
+    
+            action.setEffectiveWeight(weight);
+    
+            if (normalizedTime === 1) {
+                if (!fadeIn) action.stop(); // Stop the action if it's fading out
+                clearInterval(interval);
+            }
+        }, 10);
+    
+        action.play();
+    }
+
     useEffect(() => {
+        const action = actions[names[index]];
         // Reset and fade in animation after an index has been changed
-        actions[names[index]].reset().fadeIn(transT).play()
+        applyEasedFade(action, transT, true); // Eased fade in
+
         // In the clean-up phase, fade it out
-        return () => actions[names[index]].fadeOut(transT)
+        return () => applyEasedFade(action, transT, false); // Eased fade out
     }, [index, actions, names])
 
     const body = useRef()
@@ -54,12 +85,11 @@ function Model({ path, pos }) {
     }, [])
 
     useFrame((state, delta) => {
-        const t = state.clock.elapsedTime * 0.3
-        ref.current.rotation.set(t, 0, 0)
+        ref.current.rotation.x += delta * blendRate * 0.2
     })
 
     return (
-        <group ref={ref} position={pos} onClick={() => setIndex((index + 1) % names.length)}>
+        <group ref={ref} position={pos} onClick={() => { if (blendRate === 0 || blendRate === 1) setIndex((index + 1) % names.length) }}>
             <primitive scale={0.02} object={fbx} />
         </group>
 
