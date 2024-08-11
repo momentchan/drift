@@ -11,10 +11,7 @@ export default function Sound() {
     const { loaded } = GlobalState();
 
     useEffect(() => {
-        console.log(loaded);
         if (loaded) {
-
-            
             // Create an audio listener and add it to the camera
             const listener = new THREE.AudioListener();
             camera.add(listener);

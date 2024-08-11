@@ -45,7 +45,7 @@ function Model({ path, pos }) {
     }, [])
 
     useFrame((state, delta) => {
-        const t = state.clock.elapsedTime * 0.8
+        const t = state.clock.elapsedTime * 0.3
         fbx.rotation.set(t, 0, 0)
     })
 

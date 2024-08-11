@@ -13,6 +13,7 @@ import Boids from "./boids";
 import Menu from "./Menu";
 import Sound from "./Sound";
 import GlobalState from "./GlobalState";
+import Motion from "./Motion";
 
 const debug = false
 
@@ -61,7 +62,7 @@ export default function App() {
                 fov: 45,
                 near: 0.1,
                 far: 200,
-                position: [20, 0, 30]
+                position: [-30,5, 20]
             }}
             gl={{ preserveDrawingBuffer: true }}
         >
@@ -78,8 +79,6 @@ export default function App() {
                     />
                 }
                 
-                <OrbitControls makeDefault />
-
                 <Boids {...props} texture={texture} />
 
                 <Stage {...props} />
@@ -92,9 +91,12 @@ export default function App() {
 
                 <Sound />
 
+                <Motion/>
+
             </Suspense>
         </Canvas>
-        <Loader />
+
         <Menu />
+        <Loader />
     </>
 }

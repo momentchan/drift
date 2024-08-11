@@ -50,7 +50,7 @@ export default function Menu({ }) {
                             backgroundColor: '#00000',
                             color: 'white',
                             '&:hover': {
-                                backgroundColor: '#222222', 
+                                backgroundColor: '#333333',
                             }
                         }}
                         onClick={() => {

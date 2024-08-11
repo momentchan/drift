@@ -7,8 +7,7 @@ import { randFloatSpread } from 'three/src/math/MathUtils.js';
 const rfs = THREE.MathUtils.randFloatSpread
 const speedRange = [-0.3, -0.8]
 const lengthRange = [5, 20]
-const delayRange = [0, 0]
-
+const delayRange = [0, -10]
 
 function Triangle({ pos, ratio }) {
     const [points, setPoints] = useState([]);
