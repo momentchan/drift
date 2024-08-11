@@ -1,12 +1,21 @@
-import { Caustics, Edges, MeshTransmissionMaterial, useFBX, useTexture } from "@react-three/drei";
+import { useAnimations, useFBX, useTexture } from "@react-three/drei";
 import * as THREE from 'three'
-
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
-import GlobalState from "./GlobalState";
 
 function Model({ path, pos }) {
     const fbx = useFBX(path)
+    const { ref, actions, names } = useAnimations(fbx.animations);
+    const [index, setIndex] = useState(0)
+
+    const transT = 3
+
+    useEffect(() => {
+        // Reset and fade in animation after an index has been changed
+        actions[names[index]].reset().fadeIn(transT).play()
+        // In the clean-up phase, fade it out
+        return () => actions[names[index]].fadeOut(transT)
+    }, [index, actions, names])
 
     const body = useRef()
     const bodyTex = useTexture({
@@ -46,14 +55,16 @@ function Model({ path, pos }) {
 
     useFrame((state, delta) => {
         const t = state.clock.elapsedTime * 0.3
-        fbx.rotation.set(t, 0, 0)
+        ref.current.rotation.set(t, 0, 0)
     })
 
     return (
-        <primitive position={pos} scale={0.02} object={fbx} ref={body} />
+        <group ref={ref} position={pos} onClick={() => setIndex((index + 1) % names.length)}>
+            <primitive scale={0.02} object={fbx} />
+        </group>
+
     )
 }
-
 
 export default function Stage({ }) {
     return (
