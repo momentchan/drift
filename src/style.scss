@@ -57,7 +57,7 @@ body,
     /* Add some padding for better spacing */
     pointer-events: none;
 
-    @include sp{
+    @include sp {
         width: 70%;
     }
 }
