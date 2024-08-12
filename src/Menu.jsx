@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import GlobalState from './GlobalState';
 import SpeakerNotesIcon from '@mui/icons-material/SpeakerNotes';
 import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 
 function TriangleOutlinedIcon(props) {
     return (
@@ -16,13 +18,15 @@ function TriangleOutlinedIcon(props) {
 
 export default function Menu({ }) {
 
-    const { isTriangle, setIsTriangle, loaded, setLoaded, noted, setNoted } = GlobalState();
+    const { isTriangle, setIsTriangle, loaded, setLoaded, noted, setNoted, soundOn, setSoundOn } = GlobalState();
+
+    const style = { fontSize: 25, color: 'white' }
 
     return (
         <div className='container'>
             {/* <div className='overlay'/> */}
             <div className='side-menu'>
-                <div className="selection">
+                <div>
                     {loaded &&
                         <IconButton
                             onClick={() => setIsTriangle(!isTriangle)}
@@ -36,12 +40,12 @@ export default function Menu({ }) {
                                 opacity: 0.4,
                             }}
                         >
-                            {isTriangle ? (<TriangleOutlinedIcon sx={{ fontSize: 25, color: 'white' }} />) :
-                                (<SquareOutlinedIcon sx={{ fontSize: 25, color: 'white' }} />)}
+                            {isTriangle ? (<TriangleOutlinedIcon sx={style} />) :
+                                (<SquareOutlinedIcon sx={style} />)}
                         </IconButton>
                     }
                 </div>
-                <div className="selection">
+                <div>
                     {loaded &&
                         <IconButton
                             onClick={() => setNoted(!noted)}
@@ -55,8 +59,28 @@ export default function Menu({ }) {
                                 opacity: 0.4,
                             }}
                         >
-                            {noted ? (<SpeakerNotesIcon sx={{ fontSize: 25, color: 'white' }} />) :
-                                (<SpeakerNotesOffIcon sx={{ fontSize: 25, color: 'white' }} />)}
+                            {noted ? (<SpeakerNotesIcon sx={style} />) :
+                                (<SpeakerNotesOffIcon sx={style} />)}
+                        </IconButton>
+                    }
+                </div>
+
+                <div>
+                    {loaded &&
+                        <IconButton
+                            onClick={() => setSoundOn(!soundOn)}
+                            sx={{
+                                backgroundColor: '#555555',
+                                '&:hover': {
+                                    backgroundColor: '#555555',
+                                    opacity: 0.8
+                                },
+                                padding: 1.2,
+                                opacity: 0.4,
+                            }}
+                        >
+                            {soundOn ? (<VolumeUpIcon sx={style} />) :
+                                (<VolumeOffIcon sx={style} />)}
                         </IconButton>
                     }
                 </div>

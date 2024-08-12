@@ -49,11 +49,7 @@ body,
     pointer-events: none;
 }
 
-h1 {
-    margin-top: 0; /* Remove default margin-top from the header */
-}
-
-pre {
+.diary pre, p {
     white-space: pre-wrap; /* Ensure text wraps within the container */
     font-family: 'Special Elite';
     font-size: small;

@@ -4,9 +4,12 @@ export default create((set) => ({
   isTriangle: false,
   setIsTriangle: (value) => set({ isTriangle: value }),
 
-  loaded: false, 
+  loaded: false,
   setLoaded: (value) => set({ loaded: value }),
 
-  noted:false,
-  setNoted : (value) => set({ noted: value }),
+  noted: false,
+  setNoted: (value) => set({ noted: value }),
+
+  soundOn: true,
+  setSoundOn: (value) => set({ soundOn: value }),
 }))

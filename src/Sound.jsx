@@ -8,7 +8,7 @@ import GlobalState from './GlobalState';
 export default function Sound() {
     const { camera } = useThree();
     const audioRefs = useRef([]);
-    const { loaded } = GlobalState();
+    const { loaded, soundOn } = GlobalState();
 
     useEffect(() => {
         if (loaded) {
@@ -48,6 +48,21 @@ export default function Sound() {
         }
     }, [loaded]);
 
-    return null;
+    useEffect(() => {
+        if (audioRefs.current.length > 0) {
+            audioRefs.current.forEach((sound) => {
+                if (soundOn) {
+                    if (!sound.isPlaying) {
+                        sound.play(); // Play the sound if soundOn is true
+                    }
+                } else {
+                    if (sound.isPlaying) {
+                        sound.stop(); // Stop the sound if soundOn is false
+                    }
+                }
+            });
+        }
+    }, [soundOn]); 
 
+    return null;
 }
