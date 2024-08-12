@@ -1,12 +1,15 @@
 import OpenAI from "openai"
 import { useEffect, useState } from "react"
 import Typewriter from "./Typewriter";
+import GlobalState from "./GlobalState";
 
 
 export default function AI() {
     const [diaryEntry, setDiaryEntry] = useState("");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const { noted } = GlobalState();
+
 
     useEffect(() => {
         const openai = new OpenAI({
@@ -64,9 +67,12 @@ export default function AI() {
         fetchDiaryEntry()
     }, []);  // Empty dependency array means this effect runs once on mount
 
-    return (
-        <div className="diary">
-            {loading ? <p>Loading...</p> : error ? <p>{error}</p> : <Typewriter text={diaryEntry} />}
-        </div>
+    return (<>
+        {noted &&
+            <div className="diary">
+                {loading ? <p>Loading...</p> : error ? <p>{error}</p> : <Typewriter text={diaryEntry} />}
+            </div>
+        }
+    </>
     );
 }

@@ -6,4 +6,7 @@ export default create((set) => ({
 
   loaded: false, 
   setLoaded: (value) => set({ loaded: value }),
+
+  noted:false,
+  setNoted : (value) => set({ noted: value }),
 }))

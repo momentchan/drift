@@ -18,10 +18,14 @@ body,
     background-color: #171717;
 }
 
-.selection {
-    position: fixed;
+.side-menu{
     top: 15px;
     right: 10px;
+    position: fixed;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .play {

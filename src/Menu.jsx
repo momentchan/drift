@@ -3,6 +3,8 @@ import SquareOutlinedIcon from '@mui/icons-material/SquareOutlined';
 import { SvgIcon } from '@mui/material';
 import { useEffect, useState } from 'react';
 import GlobalState from './GlobalState';
+import SpeakerNotesIcon from '@mui/icons-material/SpeakerNotes';
+import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
 
 function TriangleOutlinedIcon(props) {
     return (
@@ -14,33 +16,50 @@ function TriangleOutlinedIcon(props) {
 
 export default function Menu({ }) {
 
-    const { isTriangle, setIsTriangle, loaded, setLoaded } = GlobalState();
-
-    const handleClick = () => {
-        setIsTriangle(!isTriangle);
-    };
+    const { isTriangle, setIsTriangle, loaded, setLoaded, noted, setNoted } = GlobalState();
 
     return (
         <div className='container'>
             {/* <div className='overlay'/> */}
-            <div className="selection">
-                {loaded &&
-                    <IconButton
-                        onClick={handleClick}
-                        sx={{
-                            backgroundColor: '#555555',
-                            '&:hover': {
+            <div className='side-menu'>
+                <div className="selection">
+                    {loaded &&
+                        <IconButton
+                            onClick={() => setIsTriangle(!isTriangle)}
+                            sx={{
                                 backgroundColor: '#555555',
-                                opacity: 0.8
-                            },
-                            padding: 1.2,
-                            opacity: 0.4,
-                        }}
-                    >
-                        {isTriangle ? (<TriangleOutlinedIcon sx={{ fontSize: 25, color: 'white' }} />) :
-                            (<SquareOutlinedIcon sx={{ fontSize: 25, color: 'white' }} />)}
-                    </IconButton>
-                }
+                                '&:hover': {
+                                    backgroundColor: '#555555',
+                                    opacity: 0.8
+                                },
+                                padding: 1.2,
+                                opacity: 0.4,
+                            }}
+                        >
+                            {isTriangle ? (<TriangleOutlinedIcon sx={{ fontSize: 25, color: 'white' }} />) :
+                                (<SquareOutlinedIcon sx={{ fontSize: 25, color: 'white' }} />)}
+                        </IconButton>
+                    }
+                </div>
+                <div className="selection">
+                    {loaded &&
+                        <IconButton
+                            onClick={() => setNoted(!noted)}
+                            sx={{
+                                backgroundColor: '#555555',
+                                '&:hover': {
+                                    backgroundColor: '#555555',
+                                    opacity: 0.8
+                                },
+                                padding: 1.2,
+                                opacity: 0.4,
+                            }}
+                        >
+                            {noted ? (<SpeakerNotesIcon sx={{ fontSize: 25, color: 'white' }} />) :
+                                (<SpeakerNotesOffIcon sx={{ fontSize: 25, color: 'white' }} />)}
+                        </IconButton>
+                    }
+                </div>
             </div>
 
             <div className='play'>
