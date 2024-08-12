@@ -18,7 +18,7 @@ export default function AI() {
         });
 
         async function generateAstronautDiary(date) {
-            const prompt = `You are an astronaut lost in space, unable to return to Earth. It is ${date}. Write a diary entry about your day, reflecting on how much you miss your family and friends. The story should be consistent with previous entries. Make sure the diary entry is about 200 words and ends with a complete thought.`;
+            const prompt = `You are Captain Alex Reynolds, an astronaut who has been lost in the vast expanse of space for several months. With no hope of returning to Earth, you find solace in your daily diary entries. Today is ${date}, and as you float alone in your spacecraft, you reflect on the countless days you’ve spent away from your loved ones. Describe your day in detail, including any small triumphs or struggles you faced. Emphasize the sense of isolation and longing you feel, missing your family, friends, and the simple comforts of Earth. Your entry should convey the emotional weight of your situation, revealing how you cope with loneliness and the passage of time. Ensure that your writing is consistent with your previous entries, capturing the ongoing challenges and the hope that sustains you. Aim for about 200 words and end with a complete thought that leaves a lasting impression of your emotional state.`;
 
             try {
                 const chatCompletion = await openai.chat.completions.create({
@@ -27,7 +27,7 @@ export default function AI() {
                         { role: "system", content: "You are an astronaut lost in space, writing daily diary entries." },
                         { role: "user", content: prompt },
                     ],
-                    max_tokens: 350,  // Increased token limit for flexibility
+                    max_tokens: 200,  // Increased token limit for flexibility
                 });
 
                 let entry = chatCompletion.choices[0].message.content.trim();
