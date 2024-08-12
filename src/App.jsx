@@ -14,6 +14,7 @@ import Menu from "./Menu";
 import Sound from "./Sound";
 import GlobalState from "./GlobalState";
 import Motion from "./Motion";
+import AI from "./AI";
 
 const debug = false
 
@@ -98,5 +99,7 @@ export default function App() {
 
         <Menu />
         <Loader />
+
+        <AI/>
     </>
 }

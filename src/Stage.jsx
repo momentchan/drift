@@ -85,7 +85,7 @@ function Model({ path, pos }) {
     }, [])
 
     useFrame((state, delta) => {
-        ref.current.rotation.x += delta * blendRate * 0.2
+        ref.current.rotation.x += delta * blendRate * 0.5
     })
 
     return (

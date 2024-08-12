@@ -1,3 +1,10 @@
+@font-face {
+    font-family: 'Special Elite';
+    src: url('Cousine-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 html,
 body,
 #root,
@@ -23,4 +30,28 @@ body,
     top: 50%;
     right: 50%;
     transform: translate(50%, -50%);
+}
+
+.diary {
+    position: fixed;
+    top: 0;
+    left: 0; /* Align to the left edge */
+    width: 30%;
+    height: 100%;
+    color: white;
+    overflow-y: auto; /* Allow vertical scrolling if content exceeds height */
+    padding: 20px; /* Add some padding for better spacing */
+    box-sizing: border-box; /* Include padding in the element's total width and height */
+    pointer-events: none;
+}
+
+h1 {
+    margin-top: 0; /* Remove default margin-top from the header */
+}
+
+pre {
+    white-space: pre-wrap; /* Ensure text wraps within the container */
+    font-family: 'Special Elite';
+    font-size: small;
+    line-height: 1.5;
 }
