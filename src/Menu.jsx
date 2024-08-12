@@ -7,6 +7,7 @@ import SpeakerNotesIcon from '@mui/icons-material/SpeakerNotes';
 import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
+import MyLocationIcon from '@mui/icons-material/MyLocation';
 
 function TriangleOutlinedIcon(props) {
     return (
@@ -18,7 +19,17 @@ function TriangleOutlinedIcon(props) {
 
 export default function Menu({ }) {
 
-    const { isTriangle, setIsTriangle, loaded, setLoaded, noted, setNoted, soundOn, setSoundOn } = GlobalState();
+    const { isTriangle, setIsTriangle, loaded, setLoaded, noted, setNoted, soundOn, setSoundOn, resetPos, setResetPos } = GlobalState();
+
+    const commonStyle = {
+        backgroundColor: '#555555',
+        '&:hover': {
+            backgroundColor: '#555555',
+            opacity: 0.8
+        },
+        padding: 1.2,
+        opacity: 0.4,
+    }
 
     const style = { fontSize: 25, color: 'white' }
 
@@ -30,15 +41,7 @@ export default function Menu({ }) {
                     {loaded &&
                         <IconButton
                             onClick={() => setIsTriangle(!isTriangle)}
-                            sx={{
-                                backgroundColor: '#555555',
-                                '&:hover': {
-                                    backgroundColor: '#555555',
-                                    opacity: 0.8
-                                },
-                                padding: 1.2,
-                                opacity: 0.4,
-                            }}
+                            sx={commonStyle}
                         >
                             {isTriangle ? (<TriangleOutlinedIcon sx={style} />) :
                                 (<SquareOutlinedIcon sx={style} />)}
@@ -49,15 +52,7 @@ export default function Menu({ }) {
                     {loaded &&
                         <IconButton
                             onClick={() => setNoted(!noted)}
-                            sx={{
-                                backgroundColor: '#555555',
-                                '&:hover': {
-                                    backgroundColor: '#555555',
-                                    opacity: 0.8
-                                },
-                                padding: 1.2,
-                                opacity: 0.4,
-                            }}
+                            sx={commonStyle}
                         >
                             {noted ? (<SpeakerNotesIcon sx={style} />) :
                                 (<SpeakerNotesOffIcon sx={style} />)}
@@ -69,18 +64,21 @@ export default function Menu({ }) {
                     {loaded &&
                         <IconButton
                             onClick={() => setSoundOn(!soundOn)}
-                            sx={{
-                                backgroundColor: '#555555',
-                                '&:hover': {
-                                    backgroundColor: '#555555',
-                                    opacity: 0.8
-                                },
-                                padding: 1.2,
-                                opacity: 0.4,
-                            }}
+                            sx={commonStyle}
                         >
                             {soundOn ? (<VolumeUpIcon sx={style} />) :
                                 (<VolumeOffIcon sx={style} />)}
+                        </IconButton>
+                    }
+                </div>
+
+                <div>
+                    {loaded &&
+                        <IconButton
+                            onClick={() => setResetPos(!resetPos)}
+                            sx={commonStyle}
+                        >
+                            <MyLocationIcon sx={style} />
                         </IconButton>
                     }
                 </div>

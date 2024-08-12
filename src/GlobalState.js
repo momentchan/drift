@@ -12,4 +12,7 @@ export default create((set) => ({
 
   soundOn: true,
   setSoundOn: (value) => set({ soundOn: value }),
+
+  resetPos: false,
+  setResetPos: (value) => set({ resetPos: value })
 }))
