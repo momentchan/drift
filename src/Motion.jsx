@@ -54,12 +54,12 @@ export default function Motion() {
     }
 
     useEffect(() => {
-        if (finished && controlsRef.current) {
+        if (controlsRef.current) {
             controlsRef.current.minDistance = 5;  // Minimum zoom distance
             controlsRef.current.maxDistance = 35; // Maximum zoom distance
             //controlsRef.current.enablePan = false
         }
-    }, [finished]);
+    }, [controlsRef.current]);
 
     useEffect(() => {
         if (loaded) {

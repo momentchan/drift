@@ -1,6 +1,6 @@
 import { useAnimations, useFBX, useTexture } from "@react-three/drei";
 import * as THREE from 'three'
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 
 function Model({ path, pos }) {
@@ -16,6 +16,8 @@ function Model({ path, pos }) {
     }
 
     function applyEasedFade(action, duration, fadeIn = true) {
+        action.setEffectiveWeight(fadeIn ? 0 : 1);
+
         let startTime = performance.now();
     
         const interval = setInterval(() => {
@@ -48,7 +50,6 @@ function Model({ path, pos }) {
         return () => applyEasedFade(action, transT, false); // Eased fade out
     }, [index, actions, names])
 
-    const body = useRef()
     const bodyTex = useTexture({
         map: 'Textures/Body/Astronaut_Suit_Body_Albedo.png',
         metalnessMap: 'Textures/Body/Astronaut_Suit_Body_Metallic.png',
