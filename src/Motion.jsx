@@ -10,7 +10,8 @@ export default function Motion() {
     const [finished, setFinished] = useState(false)
 
     const { loaded, resetPos } = GlobalState();
-    const { camera } = useThree()
+    const { camera } = useThree();
+    const controlsRef = useRef();
 
     function moveToClose(distance, duration) {
         setFinished(false)
@@ -52,10 +53,17 @@ export default function Motion() {
         });
     }
 
+    useEffect(() => {
+        if (finished && controlsRef.current) {
+            controlsRef.current.minDistance = 5;  // Minimum zoom distance
+            controlsRef.current.maxDistance = 35; // Maximum zoom distance
+            //controlsRef.current.enablePan = false
+        }
+    }, [finished]);
 
     useEffect(() => {
         if (loaded) {
-            moveToClose(25, 5)
+            moveToClose(20, 5)
         }
     }, [loaded])
 
@@ -66,6 +74,6 @@ export default function Motion() {
         }
     }, [resetPos])
 
-    return (<>{finished && <OrbitControls makeDefault />}</>)
+    return (<>{finished && <OrbitControls ref={controlsRef} makeDefault />}</>)
 
 }
