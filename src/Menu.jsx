@@ -19,7 +19,7 @@ function TriangleOutlinedIcon(props) {
 
 export default function Menu({ }) {
 
-    const { isTriangle, setIsTriangle, loaded, setLoaded, noted, setNoted, soundOn, setSoundOn, resetPos, setResetPos } = GlobalState();
+    const { isTriangle, setIsTriangle, loaded, setLoaded, noted, setNoted, soundOn, setSoundOn, resetPos, setResetPos, setIsMobile } = GlobalState();
 
     const commonStyle = {
         backgroundColor: '#555555',
@@ -32,6 +32,13 @@ export default function Menu({ }) {
     }
 
     const style = { fontSize: 25, color: 'white' }
+
+    useEffect(() => {
+        const userAgent = navigator.userAgent;
+        const isMobileDevice =
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+        setIsMobile(isMobileDevice);
+    }, [])
 
     return (
         <div className='container'>

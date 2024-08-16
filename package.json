@@ -39,6 +39,7 @@
     "three": "^0.160.0",
     "three-custom-shader-material": "^5.4.0",
     "three-good-godrays": "^0.6.1",
+    "three-mesh-bvh": "^0.7.6",
     "valtio": "^1.13.2",
     "wouter": "2.11.0",
     "zustand": "^4.5.2"
