@@ -19,20 +19,30 @@ function TriangleOutlinedIcon(props) {
 
 export default function Menu({ }) {
 
-    const { isTriangle, setIsTriangle, loaded, setLoaded, noted, setNoted, soundOn, setSoundOn, resetPos, setResetPos } = GlobalState();
+    const { isTriangle, setIsTriangle, loaded, setLoaded, noted, setNoted, soundOn, setSoundOn, resetPos, setResetPos, isMobile, setIsMobile } = GlobalState();
 
+    useEffect(() => {
+        const userAgent = navigator.userAgent;
+        const isMobileDevice =
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+        setIsMobile(isMobileDevice);
+    }, [])
+
+    // Adjust styles based on whether the user is on a mobile device
     const commonStyle = {
-        backgroundColor: '#555555',
-        '&:hover': {
-            backgroundColor: '#555555',
-            opacity: 0.8
-        },
-        padding: 1.2,
-        opacity: 0.4,
-    }
+     backgroundColor: '#555555',
+     '&:hover': {
+         backgroundColor: '#555555',
+         opacity: 0.8
+     },
+     padding: isMobile ? '0.8' : '1.2', // Adjust padding based on device
+     opacity: 0.4,
+ };
 
-    const style = { fontSize: 25, color: 'white' }
-
+ const style = {
+     fontSize: isMobile ? '18px' : '25px', // Adjust font size based on device
+     color: 'white'
+ };
     return (
         <div className='container'>
             {/* <div className='overlay'/> */}

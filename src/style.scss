@@ -33,6 +33,10 @@ body,
     display: flex;
     flex-direction: column;
     gap: 10px;
+
+    @include sp{
+        gap: 6px;
+    }
 }
 
 .play {
@@ -47,14 +51,11 @@ body,
     position: fixed;
     top: 0;
     left: 0;
-    /* Align to the left edge */
     width: 30%;
     height: 100%;
     color: white;
-    overflow-y: auto;
-    /* Allow vertical scrolling if content exceeds height */
+    overflow-y: scroll;
     padding: 20px;
-    /* Add some padding for better spacing */
     pointer-events: none;
 
     @include sp {

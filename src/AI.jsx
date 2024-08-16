@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Typewriter from "./Typewriter";
 import GlobalState from "./GlobalState";
 
@@ -7,6 +7,7 @@ export default function AI() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const { noted } = GlobalState();
+    const writerRef = useRef(null);
 
     useEffect(() => {
         async function fetchDiaryEntry() {
@@ -21,6 +22,8 @@ export default function AI() {
             } else {
                 // Fetch new entry from Render backend
                 try {
+                    setLoading(true);
+
                     const response = await fetch('https://openai-api-backend.onrender.com/api/diary/', {
                         method: 'POST',
                         headers: {
@@ -31,6 +34,10 @@ export default function AI() {
 
                     if (!response.ok) {
                         throw new Error('Network response was not ok');
+                    } else {
+                        if (writerRef.current) {
+                            writerRef.current.reset();
+                        }
                     }
 
                     const data = await response.json();
@@ -43,7 +50,7 @@ export default function AI() {
                     setDiaryEntry(lastCompleteSentence);
                     setLoading(false);
                 } catch (error) {
-                    setError('Error generating diary entry: ' + error.message);
+                    setError('Strange... Some signals are hard to catch in the void. I’ll keep trying until I get through.');
                     setLoading(false);
                 }
             }
@@ -52,12 +59,17 @@ export default function AI() {
         fetchDiaryEntry();
     }, []);  // Empty dependency array means this effect runs once on mount
 
-    return (<>
-        {noted &&
-            <div className="diary">
-                {loading ? <p>Loading...</p> : error ? <p>{error}</p> : <Typewriter text={diaryEntry} />}
-            </div>
-        }
-    </>
+    const typewriterText = loading ?
+        'Waiting for cosmic signals... The universe is vast, but we\'ll connect soon.' :
+        error || diaryEntry;
+
+    return (
+        <>
+            {noted &&
+                <div className="diary">
+                    <Typewriter ref={writerRef} text={typewriterText} />
+                </div>
+            }
+        </>
     );
 }

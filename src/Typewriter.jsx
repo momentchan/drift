@@ -1,7 +1,13 @@
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 
-export default function Typewriter({ text, speed = 50 }) {
+const Typewriter = forwardRef(({ text, speed = 5 }, ref) => {
     const [displayedText, setDisplayedText] = useState("");
+
+    useImperativeHandle(ref, () => ({
+        reset() {
+            setDisplayedText(""); // Clear the displayed text
+        }
+    }));
 
     useEffect(() => {
         if (!text) {
@@ -45,4 +51,6 @@ export default function Typewriter({ text, speed = 50 }) {
     }, [text, speed]);
 
     return <pre>{displayedText}</pre>; // Use <pre> to preserve whitespace and line breaks
-};
+});
+
+export default Typewriter;
