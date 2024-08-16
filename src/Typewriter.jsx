@@ -1,6 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 
-const Typewriter = forwardRef(({ text, speed = 5 }, ref) => {
+const Typewriter = forwardRef(({ text, speed = 50 }, ref) => {
     const [displayedText, setDisplayedText] = useState("");
 
     useImperativeHandle(ref, () => ({
@@ -38,6 +38,17 @@ const Typewriter = forwardRef(({ text, speed = 5 }, ref) => {
                         clearInterval(typingTimer);
                         typeLine(); // Move to the next line
                     }
+
+                    const diary = $('.diary');
+                    const scrollHeight = diary[0].scrollHeight;
+                    const clientHeight = diary[0].clientHeight;
+
+                    if (scrollHeight > clientHeight) {
+                        diary.css('pointer-events', 'auto');
+                    } else {
+                        diary.css('pointer-events', 'none');
+                    }
+
                     return newText;
                 });
             };
