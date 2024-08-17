@@ -9,6 +9,7 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import ShareIcon from '@mui/icons-material/Share';
+import html2canvas from 'html2canvas';
 
 function TriangleOutlinedIcon(props) {
     return (

@@ -33,7 +33,7 @@ export default function Sound() {
                 }
             };
         }
-    }, [noted]);
+    }, [audioUrl, noted]);
 
     useEffect(() => {
         if (loaded) {
