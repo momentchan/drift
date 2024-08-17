@@ -1,6 +1,8 @@
 import react from '@vitejs/plugin-react'
 import { transformWithEsbuild } from 'vite'
 import glsl from 'vite-plugin-glsl'
+import basicSsl from '@vitejs/plugin-basic-ssl';
+
 export default {
     root: 'src/',
     publicDir: '../public/',
@@ -25,12 +27,15 @@ export default {
             },
         },
         
-        glsl()
+        glsl(),
+
+        basicSsl()
     ],
     server:
     {
         host: true, // Open to local network and display URL
-        open: !('SANDBOX_URL' in process.env || 'CODESANDBOX_HOST' in process.env) // Open if it's not a CodeSandbox
+        open: !('SANDBOX_URL' in process.env || 'CODESANDBOX_HOST' in process.env), // Open if it's not a CodeSandbox
+        https: true
     },
     build:
     {
