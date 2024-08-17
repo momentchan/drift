@@ -67,6 +67,9 @@ body,
 
 .intro {
     width: 30%;
+    @include sp{
+        width: 70%;
+    }
 }
 
 .play {

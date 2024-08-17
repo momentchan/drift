@@ -8,26 +8,49 @@ import GlobalState from './GlobalState';
 export default function Sound() {
     const { camera } = useThree();
     const audioRefs = useRef([]);
-    const { loaded, soundOn } = GlobalState();
+    const { loaded, soundOn, audioUrl, noted } = GlobalState();
+    const listener = useRef(new THREE.AudioListener()).current;
+
+    useEffect(() => {
+        if (audioUrl && noted) {
+            const audio = new THREE.Audio(listener);
+
+            const audioLoader = new THREE.AudioLoader();
+            audioLoader.load(audioUrl, (buffer) => {
+                audio.setBuffer(buffer);
+                audio.setLoop(false);
+                audio.setVolume(0.5);
+                if (noted) {
+                    audio.play();
+                }
+            });
+
+            // Cleanup the specific audio when `audioUrl` or `noted` changes
+            return () => {
+                if (audio.isPlaying) {
+                    audio.stop();
+                    audioRefs.current.remo
+                }
+            };
+        }
+    }, [noted]);
 
     useEffect(() => {
         if (loaded) {
-            // Create an audio listener and add it to the camera
-            const listener = new THREE.AudioListener();
             camera.add(listener);
 
             // Define sound files to play
             const soundData = [
                 { file: 'space.mp3', volume: 0.2 },
                 { file: 'noise.wav', volume: 0.3 },
-                { file: '617633__w1zy__42819_2_cut.mp3', volume: 0.2 }
+                // { file: '617633__w1zy__42819_2_cut.mp3', volume: 0.2 }
             ];
-    
+
             soundData.forEach((soundInfo, index) => {
                 // Create a global audio source for each sound
                 const sound = new THREE.Audio(listener);
                 audioRefs.current.push(sound);
-    
+
                 // Load the audio file and set it as the audio source buffer
                 const audioLoader = new THREE.AudioLoader();
                 audioLoader.load(soundInfo.file, (buffer) => {
@@ -63,7 +86,7 @@ export default function Sound() {
                 }
             });
         }
-    }, [soundOn]); 
+    }, [soundOn]);
 
     return null;
 }

@@ -58,6 +58,11 @@ body,
 .intro {
   width: 30%;
 }
+@media screen and (width < 769px) {
+  .intro {
+    width: 70%;
+  }
+}
 
 .play {
   z-index: 1 !important;
