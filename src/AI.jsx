@@ -68,8 +68,7 @@ export default function AI() {
 
         async function fetchAudioFile(text) {
             try {
-                const response = await fetch(`http://localhost:3000/api/speech?text=${encodeURIComponent(text)}`, {
-                // const response = await fetch(`https://openai-api-backend.onrender.com/api/speech?text=${encodeURIComponent(text)}`, {
+                const response = await fetch(`https://openai-api-backend.onrender.com/api/speech?text=${encodeURIComponent(text)}`, {
                     method: 'GET',
                 });
 

@@ -8,6 +8,7 @@ import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
+import ShareIcon from '@mui/icons-material/Share';
 
 function TriangleOutlinedIcon(props) {
     return (
@@ -43,6 +44,38 @@ export default function Menu({ }) {
         fontSize: isMobile ? '18px' : '25px', // Adjust font size based on device
         color: 'white'
     };
+
+
+    async function Share(name = 'Screenshot.png') {
+        try {
+            const canvas = await html2canvas(document.getElementById('root'), {
+                ignoreElements: function (element) {
+                    if (element.classList.contains('container')) {
+                        return true;
+                    }
+                }
+            })
+    
+            // Convert the final canvas to a data URL
+            const dataUrl = canvas.toDataURL('image/png');
+            const blob = await fetch(dataUrl).then(res => res.blob());
+            const file = new File([blob], name, { type: 'image/png' });
+    
+            // Check if the Web Share API is supported and share the file
+            if (navigator.share) {
+                await navigator.share({
+                    files: [file],
+                });
+                console.log('Canvas shared successfully!');
+            } else {
+                console.log('Web Share API not supported in this browser.');
+            }
+        } catch (error) {
+            console.error('Error sharing canvas:', error);
+        }
+    }
+
+
     return (
         <div className='container'>
             {/* <div className='overlay'/> */}
@@ -89,6 +122,17 @@ export default function Menu({ }) {
                             sx={commonStyle}
                         >
                             <MyLocationIcon sx={style} />
+                        </IconButton>
+                    }
+                </div>
+
+                <div>
+                    {loaded && isMobile &&
+                        <IconButton
+                            onClick={() => Share()}
+                            sx={commonStyle}
+                        >
+                            <ShareIcon sx={style} />
                         </IconButton>
                     }
                 </div>
