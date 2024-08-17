@@ -23,6 +23,19 @@ body,
     height: 100%;
     overflow: hidden;
     background-color: #171717;
+    font-family: 'Cousine';
+    color: white;
+    font-size: small;
+    line-height: 1.5;
+
+    -webkit-user-select: none;
+    /* Safari */
+    -moz-user-select: none;
+    /* Firefox */
+    -ms-user-select: none;
+    /* IE10+/Edge */
+    user-select: none;
+    /* Standard */
 }
 
 .side-menu {
@@ -39,12 +52,25 @@ body,
     }
 }
 
+.entry {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.intro {
+    width: 30%;
+}
+
 .play {
     z-index: 1 !important;
-    position: fixed;
-    top: 50%;
-    right: 50%;
-    transform: translate(50%, -50%);
 }
 
 .diary {
@@ -53,13 +79,12 @@ body,
     left: 0;
     width: 30%;
     height: 100%;
-    color: white;
     overflow-y: auto;
     padding: 20px;
     pointer-events: none;
-    pointer-events: none; /* Disable pointer events */
-    scrollbar-width: none; /* For Firefox */
-    -ms-overflow-style: none; /* For Internet Explorer and Edge */
+    pointer-events: none;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 
     @include sp {
         width: 70%;
@@ -74,8 +99,4 @@ body,
 .diary pre,
 p {
     white-space: pre-wrap;
-    /* Ensure text wraps within the container */
-    font-family: 'Cousine';
-    font-size: small;
-    line-height: 1.5;
 }

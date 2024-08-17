@@ -19,7 +19,8 @@ export default function Sound() {
             // Define sound files to play
             const soundData = [
                 { file: 'space.mp3', volume: 0.2 },
-                { file: 'noise.wav', volume: 0.5 }
+                { file: 'noise.wav', volume: 0.3 },
+                { file: '617633__w1zy__42819_2_cut.mp3', volume: 0.2 }
             ];
     
             soundData.forEach((soundInfo, index) => {
