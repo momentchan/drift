@@ -80,12 +80,10 @@ export default function App() {
                 <fogExp2 attach="fog" args={[bgColor, 0.05]} />
                 <color attach="background" args={[bgColor]} />
 
-                {started &&
-                    <RayEmitter {...props}
-                        texture={texture} // Pass the texture to RayEmitter as a prop
-                        onUpdateTexture={handleUpdatePoints}
-                    />
-                }
+                <RayEmitter {...props}
+                    texture={texture} // Pass the texture to RayEmitter as a prop
+                    onUpdateTexture={handleUpdatePoints}
+                />
 
                 <Boids {...props} texture={texture} />
 
@@ -105,7 +103,8 @@ export default function App() {
         </Canvas>
 
         <Menu />
-        <Loader />
+
+        {!started && <Loader />}
 
         <AI />
     </>

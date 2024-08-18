@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Line } from '@react-three/drei';
 import { randFloatSpread } from 'three/src/math/MathUtils.js';
+import GlobalState from './GlobalState';
 
 const rfs = THREE.MathUtils.randFloatSpread
 const speedRange = [-0.3, -0.8]
@@ -92,6 +93,10 @@ function Rectangle({ pos, ratio }) {
 }
 
 function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range = 30, onUpdatePoints }) {
+
+    const { started } = GlobalState();
+
+
     const [delay, setDelay] = useState(THREE.MathUtils.randFloat(delayRange[0], delayRange[1]))
     const [speed, setSpeed] = useState(THREE.MathUtils.randFloat(speedRange[0], speedRange[1]))
     const [length, setLength] = useState(THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1]))
@@ -132,6 +137,8 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
     }, [])
 
     useFrame((state, delta) => {
+        if (!started) return
+
         setDelay(delay + Math.min(delta, 1 / 30))
         if (delay > 0) {
 
@@ -184,6 +191,7 @@ export default function RayEmitter({ rayCount, lightPos, onUpdateTexture }) {
     const [normal, setNormal] = useState(new THREE.Vector3());
     const [binormal, setBinormal] = useState(new THREE.Vector3());
     const pos = new THREE.Vector3(lightPos[0], lightPos[1], lightPos[2])
+
 
     useEffect(() => {
         const newDir = new THREE.Vector3().copy(pos).normalize();
