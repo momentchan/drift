@@ -9,7 +9,7 @@ export default function Motion() {
 
     const [finished, setFinished] = useState(false)
 
-    const { loaded, resetPos } = GlobalState();
+    const { played, resetPos } = GlobalState();
     const { camera } = useThree();
     const controlsRef = useRef();
 
@@ -62,14 +62,14 @@ export default function Motion() {
     }, [controlsRef.current]);
 
     useEffect(() => {
-        if (loaded) {
+        if (played) {
             moveToClose(20, 5)
         }
-    }, [loaded])
+    }, [played])
 
 
     useEffect(() => {
-        if (loaded) {
+        if (played) {
             moveToClose(10, 2)
         }
     }, [resetPos])

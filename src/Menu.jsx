@@ -21,7 +21,7 @@ function TriangleOutlinedIcon(props) {
 
 export default function Menu({ }) {
 
-    const { isTriangle, setIsTriangle, loaded, setLoaded, noted, setNoted, soundOn, setSoundOn, resetPos, setResetPos, isMobile, setIsMobile } = GlobalState();
+    const { isTriangle, setIsTriangle, played, setPlayed, noted, setNoted, soundOn, setSoundOn, resetPos, setResetPos, isMobile, setIsMobile } = GlobalState();
 
     useEffect(() => {
         const userAgent = navigator.userAgent;
@@ -62,12 +62,12 @@ export default function Menu({ }) {
                 height: height,
                 backgroundColor: null,
             })
-    
+
             // Convert the final canvas to a data URL
             const dataUrl = canvas.toDataURL('image/png');
             const blob = await fetch(dataUrl).then(res => res.blob());
             const file = new File([blob], name, { type: 'image/png' });
-    
+
             // Check if the Web Share API is supported and share the file
             if (navigator.share) {
                 await navigator.share({
@@ -88,7 +88,7 @@ export default function Menu({ }) {
             {/* <div className='overlay'/> */}
             <div className='side-menu'>
                 <div>
-                    {loaded &&
+                    {played &&
                         <IconButton
                             onClick={() => setIsTriangle(!isTriangle)}
                             sx={commonStyle}
@@ -99,7 +99,7 @@ export default function Menu({ }) {
                     }
                 </div>
                 <div>
-                    {loaded &&
+                    {played &&
                         <IconButton
                             onClick={() => setNoted(!noted)}
                             sx={commonStyle}
@@ -110,8 +110,20 @@ export default function Menu({ }) {
                     }
                 </div>
 
+
                 <div>
-                    {loaded &&
+                    {played &&
+                        <IconButton
+                            onClick={() => setResetPos(!resetPos)}
+                            sx={commonStyle}
+                        >
+                            <MyLocationIcon sx={style} />
+                        </IconButton>
+                    }
+                </div>
+
+                <div>
+                    {played &&
                         <IconButton
                             onClick={() => setSoundOn(!soundOn)}
                             sx={commonStyle}
@@ -123,18 +135,7 @@ export default function Menu({ }) {
                 </div>
 
                 <div>
-                    {loaded &&
-                        <IconButton
-                            onClick={() => setResetPos(!resetPos)}
-                            sx={commonStyle}
-                        >
-                            <MyLocationIcon sx={style} />
-                        </IconButton>
-                    }
-                </div>
-
-                <div>
-                    {loaded && isMobile &&
+                    {played && isMobile &&
                         <IconButton
                             onClick={() => Share()}
                             sx={commonStyle}
@@ -145,7 +146,7 @@ export default function Menu({ }) {
                 </div>
             </div>
 
-            {!loaded &&
+            {!played &&
                 <div className='entry'>
                     <div className='intro'>
                         <p>Welcome to the digital realm as Captain Alex Reynolds, an astronaut lost in space.</p>
@@ -164,7 +165,7 @@ export default function Menu({ }) {
                             }}
                             onClick={() => {
                                 $(".overlay").fadeOut(5000)
-                                setLoaded(true)
+                                setPlayed(true)
                             }}
                         >
                             Start

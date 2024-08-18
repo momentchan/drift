@@ -8,7 +8,7 @@ import GlobalState from './GlobalState';
 export default function Sound() {
     const { camera } = useThree();
     const audioRefs = useRef([]);
-    const { loaded, soundOn, audioUrl, noted } = GlobalState();
+    const { played, soundOn, audioUrl, noted } = GlobalState();
     const listener = useRef(new THREE.AudioListener()).current;
 
     useEffect(() => {
@@ -36,14 +36,14 @@ export default function Sound() {
     }, [audioUrl, noted]);
 
     useEffect(() => {
-        if (loaded) {
+        if (played) {
             camera.add(listener);
 
             // Define sound files to play
             const soundData = [
-                { file: 'space.mp3', volume: 0.15 },
-                { file: 'noise.wav', volume: 0.25 },
-                { file: '617633__w1zy__42819_2_cut.mp3', volume: 0.1 }
+                { file: 'space.mp3', volume: 0.15, delay: 0 },
+                { file: 'noise.wav', volume: 0.25, delay: 0 },
+                { file: '617633__w1zy__42819_2_cut.mp3', volume: 0.05, delay: 5 }
             ];
 
             soundData.forEach((soundInfo, index) => {
@@ -57,7 +57,7 @@ export default function Sound() {
                     sound.setBuffer(buffer);
                     sound.setLoop(true); // Set loop if needed
                     sound.setVolume(soundInfo.volume); // Set individual volume
-                    sound.play(); // Play the sound
+                    sound.play(soundInfo.delay); // Play the sound
                 });
             });
 
@@ -70,7 +70,7 @@ export default function Sound() {
                 });
             };
         }
-    }, [loaded]);
+    }, [played]);
 
     useEffect(() => {
         if (audioRefs.current.length > 0) {

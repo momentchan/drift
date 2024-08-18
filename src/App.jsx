@@ -19,7 +19,7 @@ import AI from "./AI";
 const debug = false
 
 export default function App() {
-    const { loaded } = GlobalState();
+    const { played } = GlobalState();
 
     const { bgColor } = useControls({
         'Global': folder({
@@ -63,7 +63,7 @@ export default function App() {
                 fov: 45,
                 near: 0.1,
                 far: 200,
-                position: [-30,5, 20]
+                position: [-30, 5, 20]
             }}
             gl={{ preserveDrawingBuffer: true }}
         >
@@ -73,13 +73,13 @@ export default function App() {
                 <fogExp2 attach="fog" args={[bgColor, 0.05]} />
                 <color attach="background" args={[bgColor]} />
 
-                {loaded &&
+                {played &&
                     <RayEmitter {...props}
                         texture={texture} // Pass the texture to RayEmitter as a prop
                         onUpdateTexture={handleUpdatePoints}
                     />
                 }
-                
+
                 <Boids {...props} texture={texture} />
 
                 <Stage {...props} />
@@ -92,7 +92,7 @@ export default function App() {
 
                 <Sound />
 
-                <Motion/>
+                <Motion />
 
             </Suspense>
         </Canvas>
@@ -100,6 +100,6 @@ export default function App() {
         <Menu />
         <Loader />
 
-        <AI/>
+        <AI />
     </>
 }
