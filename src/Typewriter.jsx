@@ -1,6 +1,6 @@
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 
-const Typewriter = forwardRef(({ text, speed = 50 }, ref) => {
+const Typewriter = forwardRef(({ text, speed = 60 }, ref) => {
     const [displayedText, setDisplayedText] = useState("");
 
     useImperativeHandle(ref, () => ({
