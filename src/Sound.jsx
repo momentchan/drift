@@ -8,7 +8,7 @@ import GlobalState from './GlobalState';
 export default function Sound() {
     const { camera } = useThree();
     const audioRefs = useRef([]);
-    const { played, soundOn, audioUrl, noted } = GlobalState();
+    const { started, soundOn, audioUrl, noted } = GlobalState();
     const listener = useRef(new THREE.AudioListener()).current;
 
     useEffect(() => {
@@ -36,7 +36,7 @@ export default function Sound() {
     }, [audioUrl, noted]);
 
     useEffect(() => {
-        if (played) {
+        if (started) {
             camera.add(listener);
 
             // Define sound files to play
@@ -70,7 +70,7 @@ export default function Sound() {
                 });
             };
         }
-    }, [played]);
+    }, [started]);
 
     useEffect(() => {
         if (audioRefs.current.length > 0) {

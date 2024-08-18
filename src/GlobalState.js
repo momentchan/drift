@@ -7,8 +7,8 @@ export default create((set) => ({
   isTriangle: false,
   setIsTriangle: (value) => set({ isTriangle: value }),
 
-  played: false,
-  setPlayed: (value) => set({ played: value }),
+  started: false,
+  setStarted: (value) => set({ started: value }),
 
   noted: false,
   setNoted: (value) => set({ noted: value }),

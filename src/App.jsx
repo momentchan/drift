@@ -1,4 +1,4 @@
-import { Loader, OrbitControls } from "@react-three/drei";
+import { Loader, Preload, useProgress } from "@react-three/drei";
 import { Canvas } from '@react-three/fiber'
 import Utilities from "./r3f-gist/utility/Utilities";
 import { Leva, folder, useControls } from 'leva'
@@ -19,7 +19,7 @@ import AI from "./AI";
 const debug = false
 
 export default function App() {
-    const { played } = GlobalState();
+    const { started } = GlobalState();
 
     const { bgColor } = useControls({
         'Global': folder({
@@ -54,6 +54,13 @@ export default function App() {
         texture.needsUpdate = true;
     };
 
+
+    function ShowLoadingInfo() {
+        const { item } = useProgress()
+        console.log(item);
+        return <></>
+    }
+
     return <>
         <Leva collapsed hidden={!debug} />
 
@@ -67,13 +74,13 @@ export default function App() {
             }}
             gl={{ preserveDrawingBuffer: true }}
         >
-            <Suspense fallback={null}>
+            <Suspense fallback={<ShowLoadingInfo />}>
 
                 {debug && <Perf position='top-left' />}
                 <fogExp2 attach="fog" args={[bgColor, 0.05]} />
                 <color attach="background" args={[bgColor]} />
 
-                {played &&
+                {started &&
                     <RayEmitter {...props}
                         texture={texture} // Pass the texture to RayEmitter as a prop
                         onUpdateTexture={handleUpdatePoints}
@@ -93,7 +100,7 @@ export default function App() {
                 <Sound />
 
                 <Motion />
-
+                <Preload all />
             </Suspense>
         </Canvas>
 

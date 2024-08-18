@@ -21,7 +21,7 @@ function TriangleOutlinedIcon(props) {
 
 export default function Menu({ }) {
 
-    const { isTriangle, setIsTriangle, played, setPlayed, noted, setNoted, soundOn, setSoundOn, resetPos, setResetPos, isMobile, setIsMobile } = GlobalState();
+    const { isTriangle, setIsTriangle, started, setStarted, noted, setNoted, soundOn, setSoundOn, resetPos, setResetPos, isMobile, setIsMobile } = GlobalState();
 
     useEffect(() => {
         const userAgent = navigator.userAgent;
@@ -88,7 +88,7 @@ export default function Menu({ }) {
             {/* <div className='overlay'/> */}
             <div className='side-menu'>
                 <div>
-                    {played &&
+                    {started &&
                         <IconButton
                             onClick={() => setIsTriangle(!isTriangle)}
                             sx={commonStyle}
@@ -99,7 +99,7 @@ export default function Menu({ }) {
                     }
                 </div>
                 <div>
-                    {played &&
+                    {started &&
                         <IconButton
                             onClick={() => setNoted(!noted)}
                             sx={commonStyle}
@@ -112,7 +112,7 @@ export default function Menu({ }) {
 
 
                 <div>
-                    {played &&
+                    {started &&
                         <IconButton
                             onClick={() => setResetPos(!resetPos)}
                             sx={commonStyle}
@@ -123,7 +123,7 @@ export default function Menu({ }) {
                 </div>
 
                 <div>
-                    {played &&
+                    {started &&
                         <IconButton
                             onClick={() => setSoundOn(!soundOn)}
                             sx={commonStyle}
@@ -135,7 +135,7 @@ export default function Menu({ }) {
                 </div>
 
                 <div>
-                    {played && isMobile &&
+                    {started && isMobile &&
                         <IconButton
                             onClick={() => Share()}
                             sx={commonStyle}
@@ -146,7 +146,7 @@ export default function Menu({ }) {
                 </div>
             </div>
 
-            {!played &&
+            {!started &&
                 <div className='entry'>
                     <div className='intro'>
                         <p>Welcome to the digital realm as Captain Alex Reynolds, an astronaut lost in space.</p>
@@ -165,7 +165,7 @@ export default function Menu({ }) {
                             }}
                             onClick={() => {
                                 $(".overlay").fadeOut(5000)
-                                setPlayed(true)
+                                setStarted(true)
                             }}
                         >
                             Start
