@@ -49,12 +49,18 @@ export default function Menu({ }) {
 
     async function Share(name = 'Screenshot.png') {
         try {
-            const canvas = await html2canvas(document.getElementById('root'), {
+            const rootElement = document.getElementById('root');
+            const width = Math.round(rootElement.clientWidth);
+            const height = Math.round(rootElement.clientHeight);
+            const canvas = await html2canvas(rootElement, {
                 ignoreElements: function (element) {
                     if (element.classList.contains('container')) {
                         return true;
                     }
-                }
+                },
+                width: width,
+                height: height,
+                backgroundColor: null,
             })
     
             // Convert the final canvas to a data URL
