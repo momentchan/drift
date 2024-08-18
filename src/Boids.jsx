@@ -30,7 +30,7 @@ function initData(count, radius) {
 export default function Boids({ radius, length, lightPos, texture, rayCount }) {
     const fbx = useFBX('pyramid.fbx')
     const [geometry, setGeometry] = useState(null);
-    const { isTriangle, loaded } = GlobalState();
+    const { isTriangle, started } = GlobalState();
 
     const props = useControls({
         'Boids': folder({
@@ -151,7 +151,7 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
         gpgpu.setUniform('velocityTex', 'avoidWallWeight', props.avoidWallWeight);
         gpgpu.setUniform('velocityTex', 'noiseWeight', props.noiseWeight);
         gpgpu.setUniform('velocityTex', 'touchWeight', props.touchWeight);
-        gpgpu.setUniform('velocityTex', 'touchPos', loaded ? state.pointer : new Vector2(-1, 1));
+        gpgpu.setUniform('velocityTex', 'touchPos', started ? state.pointer : new Vector2(-1, 1));
 
         gpgpu.setUniform('velocityTex', 'noiseFrequency', props.noiseFrequency);
         gpgpu.setUniform('velocityTex', 'noiseSpeed', props.noiseSpeed);
