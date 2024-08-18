@@ -1,17 +1,16 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import GlobalState from "./GlobalState";
 import { useThree } from "@react-three/fiber";
 import gsap from "gsap";
 import * as THREE from 'three'
-import { OrbitControls } from "@react-three/drei";
+import CameraControls from "./r3f-gist/utility/CameraControls";
+
 
 export default function Motion() {
 
     const [finished, setFinished] = useState(false)
-
     const { started, resetPos } = GlobalState();
     const { camera } = useThree();
-    const controlsRef = useRef();
 
     function moveToClose(distance, duration) {
         setFinished(false)
@@ -28,7 +27,7 @@ export default function Motion() {
             new THREE.Matrix4().lookAt(newPosition, targetPosition, new THREE.Vector3(0, 1, 0))
         );
 
-        
+
         const tl = gsap.timeline({
             onUpdate: () => {
                 // Calculate the progress of the timeline
@@ -54,14 +53,6 @@ export default function Motion() {
     }
 
     useEffect(() => {
-        if (controlsRef.current) {
-            controlsRef.current.minDistance = 5;  // Minimum zoom distance
-            controlsRef.current.maxDistance = 35; // Maximum zoom distance
-            //controlsRef.current.enablePan = false
-        }
-    }, [controlsRef.current]);
-
-    useEffect(() => {
         if (started) {
             moveToClose(20, 5)
         }
@@ -74,6 +65,8 @@ export default function Motion() {
         }
     }, [resetPos])
 
-    return (<>{finished && <OrbitControls ref={controlsRef} makeDefault />}</>)
+    return (<>{
+        finished && <CameraControls minDistance={5} maxDistance={35} zoomSpeed={0.8} />
+    }</>)
 
 }

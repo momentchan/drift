@@ -43,7 +43,7 @@ export default function Sound() {
             const soundData = [
                 { file: 'space.mp3', volume: 0.15, delay: 0 },
                 { file: 'noise.wav', volume: 0.25, delay: 0 },
-                { file: '617633__w1zy__42819_2_cut.mp3', volume: 0.05, delay: 5 }
+                { file: '617633__w1zy__42819_2_cut.mp3', volume: 0.07, delay: 5 }
             ];
 
             soundData.forEach((soundInfo, index) => {
