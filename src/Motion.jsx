@@ -3,8 +3,7 @@ import GlobalState from "./GlobalState";
 import { useThree } from "@react-three/fiber";
 import gsap from "gsap";
 import * as THREE from 'three'
-import CameraControls from "./r3f-gist/utility/CameraControls";
-
+import { CameraControls } from "@react-three/drei";
 
 export default function Motion() {
 
@@ -66,7 +65,7 @@ export default function Motion() {
     }, [resetPos])
 
     return (<>{
-        finished && <CameraControls minDistance={5} maxDistance={35} zoomSpeed={0.8} />
+        finished && <CameraControls minDistance={5} maxDistance={35} zoomSpeed={0.8} makeDefault />
     }</>)
 
 }
