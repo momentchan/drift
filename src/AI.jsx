@@ -91,6 +91,42 @@ export default function AI() {
             }
         }
 
+        async function fetchAudioAndTranscription(text) {
+            try {
+                const response = await fetch('http://localhost:3000/api/speech-and-transcribe', {
+                    // const response = await fetch('https://openai-api-backend.onrender.com/api/speech-and-transcribe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text })
+                });
+
+                // Check for server response errors
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server responded with status ${response.status}: ${errorText}`);
+                }
+
+                // Parse JSON response
+                const data = await response.json();
+                const audioBase64 = data.audioBase64;
+                const transcription = data.transcription;
+
+                // Save the audio to local storage
+                localStorage.setItem('diaryAudio', audioBase64);
+
+                // Store the audio URL in state
+                setAudioUrl(audioBase64);
+
+                // Save the transcription to local storage
+                localStorage.setItem('diaryTranscription', JSON.stringify(transcription));
+
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
         function blobToBase64(blob) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
