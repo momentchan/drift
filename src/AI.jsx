@@ -1,13 +1,18 @@
 import { useEffect, useRef, useState } from "react"
 import Typewriter from "./Typewriter";
+import TypewriterNew from "./TypewriterNew";
 import GlobalState from "./GlobalState";
 
 export default function AI() {
     const [diaryEntry, setDiaryEntry] = useState("");
+    const [transcription, setTranscription] = useState();
+    const [audioUrl, setAudioUrl] = useState();
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-    const { noted, setAudioUrl } = GlobalState();
+    const [error, setError] = useState(false);
+    const [noSound, setNoSound] = useState(false);
+    const { noted } = GlobalState()
     const writerRef = useRef(null);
+    const server = 'https://openai-api-backend.onrender.com'
 
     useEffect(() => {
         async function fetchDiaryEntry() {
@@ -15,150 +20,110 @@ export default function AI() {
             const storedDate = localStorage.getItem('diaryDate');
             const storedEntry = localStorage.getItem('diaryEntry');
             const storedAudio = localStorage.getItem('diaryAudio');
+            const storedTranscription = localStorage.getItem('diaryTranscription');
 
             if (storedDate === currentDate && storedEntry) {
-                // Use stored entry if it matches today's date
-                setDiaryEntry(storedEntry);
-                setLoading(false);
-
-                if (storedAudio) {
-                    const audioUrl = `data:audio/mp3;base64,${storedAudio}`;
-                    setAudioUrl(audioUrl);
-                } else {
-                    // Fetch new audio if not available
-                    fetchAudioFile(storedEntry);
-                }
+                handleStoredDiary(storedEntry, storedAudio, storedTranscription);
             } else {
-                // Fetch new entry from Render backend
-                try {
-                    const response = await fetch('https://openai-api-backend.onrender.com/api/diary/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ date: currentDate })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    } else {
-                        if (writerRef.current) {
-                            writerRef.current.reset();
-                        }
-                    }
-
-                    const data = await response.json();
-                    const lastCompleteSentence = data.diaryEntry;
-
-                    // Save to local storage
-                    localStorage.setItem('diaryEntry', lastCompleteSentence);
-                    localStorage.setItem('diaryDate', currentDate);
-
-                    setDiaryEntry(lastCompleteSentence);
-                    setLoading(false);
-
-                    // Fetch audio for the new diary entry
-                    fetchAudioFile(lastCompleteSentence);
-                } catch (error) {
-                    setError('Strange... Some signals are hard to catch in the void. I’ll keep trying until I get through.');
-                    setLoading(false);
-                }
+                fetchNewDiary(currentDate);
             }
         }
 
-        async function fetchAudioFile(text) {
+        async function fetchNewDiary(currentDate) {
             try {
-                const response = await fetch(`https://openai-api-backend.onrender.com/api/speech?text=${encodeURIComponent(text)}`, {
-                    method: 'GET',
+                const response = await fetch(`${server}/api/diary/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ date: currentDate })
                 });
 
                 if (!response.ok) throw new Error('Network response was not ok');
 
-                const audioBlob = await response.blob();
-                const base64String = await blobToBase64(audioBlob);
+                const data = await response.json();
+                const lastCompleteSentence = data.diaryEntry;
 
-                // Save to local storage
-                localStorage.setItem('diaryAudio', base64String);
+                // Reset typewriter and update state
+                writerRef.current?.reset();
+                saveDiaryToLocalStorage(currentDate, lastCompleteSentence);
+                setDiaryEntry(lastCompleteSentence);
+                setLoading(false);
 
-                // Store the audio URL in state
-                const audioUrl = URL.createObjectURL(audioBlob);
-                setAudioUrl(audioUrl);
-
-                // Download audio file
-                // downloadAudioFile(audioUrl);
+                // Fetch audio and transcription
+                fetchAudioAndTranscription(lastCompleteSentence);
             } catch (error) {
-                console.error(error);
+                handleError(error);
             }
         }
 
         async function fetchAudioAndTranscription(text) {
             try {
-                const response = await fetch('http://localhost:3000/api/speech-and-transcribe', {
-                    // const response = await fetch('https://openai-api-backend.onrender.com/api/speech-and-transcribe', {
+                const response = await fetch(`${server}/api/speech-and-transcribe`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text })
                 });
 
-                // Check for server response errors
                 if (!response.ok) {
                     const errorText = await response.text();
                     throw new Error(`Server responded with status ${response.status}: ${errorText}`);
                 }
 
-                // Parse JSON response
                 const data = await response.json();
-                const audioBase64 = data.audioBase64;
-                const transcription = data.transcription;
+                const { audioBase64, transcription } = data;
 
-                // Save the audio to local storage
+                // Save audio and transcription to local storage
                 localStorage.setItem('diaryAudio', audioBase64);
-
-                // Store the audio URL in state
-                setAudioUrl(audioBase64);
-
-                // Save the transcription to local storage
                 localStorage.setItem('diaryTranscription', JSON.stringify(transcription));
 
+                // Set audio and transcription in the global state
+                setAudioUrl(audioBase64);
+                setTranscription(transcription);
             } catch (error) {
-                console.error(error);
+                setNoSound(true)
+                console.error("Failed to fetch audio and transcription:", error);
             }
         }
 
-        function blobToBase64(blob) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result.split(',')[1]);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
+        function handleStoredDiary(storedEntry, storedAudio, storedTranscription) {
+            setDiaryEntry(storedEntry);
+            setLoading(false);
+
+            if (storedAudio) {
+                setAudioUrl(storedAudio);
+                setTranscription(JSON.parse(storedTranscription));
+            } else {
+                fetchAudioAndTranscription(storedEntry);
+            }
         }
 
-        function downloadAudioFile(url) {
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'speech.mp3'; // Specify the filename for download
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+        function saveDiaryToLocalStorage(currentDate, diaryEntry) {
+            localStorage.setItem('diaryDate', currentDate);
+            localStorage.setItem('diaryEntry', diaryEntry);
+        }
+
+        function handleError(error) {
+            console.error(error);
+            setError(true);
+            setLoading(false);
         }
 
         fetchDiaryEntry();
+    }, []);
 
-    }, []);  // Empty dependency array means this effect runs once on mount
-
-    const typewriterText = loading ?
-        'Waiting for cosmic signals... The universe is vast, but we\'ll connect soon.' :
-        error || diaryEntry;
+    const typewriterText = loading ? 'Waiting for cosmic signals... The universe is vast, but we\'ll connect soon.' :
+        error ? 'Strange... Some signals are hard to catch in the void. I’ll keep trying until I get through.' : diaryEntry;
 
     return (
         <>
             {noted &&
-                <div className="diary">
-                    <Typewriter ref={writerRef} text={typewriterText} />
-                </div>
+                (
+                    <div className="diary">
+                        {loading || error || noSound ?
+                            <Typewriter ref={writerRef} text={typewriterText} /> :
+                            <TypewriterNew ref={writerRef} transcription={transcription} audioUrl={audioUrl} />
+                        }
+                    </div>
+                )
             }
         </>
     );

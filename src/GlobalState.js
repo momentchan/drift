@@ -19,6 +19,6 @@ export default create((set) => ({
   resetPos: false,
   setResetPos: (value) => set({ resetPos: value }),
   
-  audioUrl: null,
-  setAudioUrl: (url) => set({ audioUrl: url }),
+  displayedText: null,
+  setDisplayedText: (value) => set({ displayedText: value }),
 }))
