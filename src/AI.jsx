@@ -10,6 +10,7 @@ export default function AI() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [noSound, setNoSound] = useState(false);
+    const [firstWords, setFirstWords] = useState([])
     const { noted } = GlobalState()
     const writerRef = useRef(null);
     const server = 'https://openai-api-backend.onrender.com'
@@ -113,6 +114,20 @@ export default function AI() {
     const typewriterText = loading ? 'Waiting for cosmic signals... The universe is vast, but we\'ll connect soon.' :
         error ? 'Strange... Some signals are hard to catch in the void. I’ll keep trying until I get through.' : diaryEntry;
 
+    useEffect(() => {
+        function parseFirstWords(text) {
+            const lines = text.split('\n');
+
+            // Filter out any empty lines, and map each line to its first word
+            const firstWords = lines
+                .filter(line => line.trim() !== '')  // Ignore empty lines
+                .map(line => line.trim().split(' ')[0]); // Split each line into words and take the first one
+
+            return firstWords
+        }
+        setFirstWords(parseFirstWords(diaryEntry));
+    }, [diaryEntry])
+
     return (
         <>
             {noted &&
@@ -120,7 +135,7 @@ export default function AI() {
                     <div className="diary">
                         {loading || error || noSound ?
                             <Typewriter ref={writerRef} text={typewriterText} /> :
-                            <TypewriterNew ref={writerRef} transcription={transcription} audioUrl={audioUrl} />
+                            <TypewriterNew ref={writerRef} transcription={transcription} audioUrl={audioUrl} firstWords={firstWords} />
                         }
                     </div>
                 )

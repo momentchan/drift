@@ -16,7 +16,7 @@ export default function Sound() {
     const soundData = [
         { file: 'space.mp3', volume: 0.15, delay: 0, signal: false },
         { file: 'noise.wav', volume: 0.25, delay: 0, signal: false },
-        { file: '338070__zbylut__160225_iss_3.mp3', volume: 0.03, delay: 5, signal: true }
+        { file: '338070__zbylut__160225_iss_3.mp3', volume: 0.03, delay: 3, signal: true }
     ];
 
     useEffect(() => {
