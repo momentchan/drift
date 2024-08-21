@@ -49,7 +49,8 @@ export default function Sound() {
         if (bgmRefs.current.length > 0) {
             bgmRefs.current.forEach((bgm) => {
                 if (soundOn) {
-                    bgm.audio.play(bgm.data.delay);
+                    if (!bgm.data.signal || (bgm.data.signal && !noted))
+                        bgm.audio.play(bgm.data.delay);
                 } else {
                     bgm.audio.stop();
                 }
@@ -64,7 +65,7 @@ export default function Sound() {
                 if (bgm.data.signal) {
                     if (noted) {
                         bgm.audio.stop();
-                    } else {
+                    } else if (soundOn) {
                         bgm.audio.play(bgm.data.delay);
                     }
                 }

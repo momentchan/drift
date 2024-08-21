@@ -9,14 +9,6 @@ const TypewriterNew = forwardRef(({ transcription, audioUrl, firstWords }, ref) 
     const data = useRef([])
     const [timer, setTimer] = useState(0)
 
-    useImperativeHandle(ref, () => ({
-        reset() {
-            setDisplayedText("");
-            setTimer(0);
-            setCurrentChar(0)
-        }
-    }));
-
     // set Audio
     useEffect(() => {
         if (!audio.current && audioUrl) {
@@ -92,7 +84,7 @@ const TypewriterNew = forwardRef(({ transcription, audioUrl, firstWords }, ref) 
     }, [timer])
 
     useEffect(() => {
-        if (noted) {
+        if (noted && audio.current) {
 
             audio.current.play();
 
@@ -114,7 +106,7 @@ const TypewriterNew = forwardRef(({ transcription, audioUrl, firstWords }, ref) 
                 setTimer(0)
             };
         }
-    }, [noted, transcription]);
+    }, [noted, transcription, audio]);
 
 
     return <pre>{displayedText}</pre>;

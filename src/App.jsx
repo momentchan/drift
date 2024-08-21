@@ -74,7 +74,7 @@ export default function App() {
             }}
             gl={{ preserveDrawingBuffer: true }}
         >
-            <Suspense fallback={<ShowLoadingInfo />}>
+            <Suspense fallback={null}>
 
                 {debug && <Perf position='top-left' />}
                 <fogExp2 attach="fog" args={[bgColor, 0.05]} />

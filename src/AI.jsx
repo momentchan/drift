@@ -9,7 +9,6 @@ export default function AI() {
     const [audioUrl, setAudioUrl] = useState();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
-    const [noSound, setNoSound] = useState(false);
     const [firstWords, setFirstWords] = useState([])
     const { noted } = GlobalState()
     const writerRef = useRef(null);
@@ -44,7 +43,6 @@ export default function AI() {
                 const lastCompleteSentence = data.diaryEntry;
 
                 // Reset typewriter and update state
-                writerRef.current?.reset();
                 saveDiaryToLocalStorage(currentDate, lastCompleteSentence);
                 setDiaryEntry(lastCompleteSentence);
                 setLoading(false);
@@ -72,6 +70,7 @@ export default function AI() {
                 const data = await response.json();
                 const { audioBase64, transcription } = data;
 
+
                 // Save audio and transcription to local storage
                 localStorage.setItem('diaryAudio', audioBase64);
                 localStorage.setItem('diaryTranscription', JSON.stringify(transcription));
@@ -79,8 +78,9 @@ export default function AI() {
                 // Set audio and transcription in the global state
                 setAudioUrl(audioBase64);
                 setTranscription(transcription);
+
+                writerRef.current?.reset();
             } catch (error) {
-                setNoSound(true)
                 console.error("Failed to fetch audio and transcription:", error);
             }
         }
@@ -111,8 +111,8 @@ export default function AI() {
         fetchDiaryEntry();
     }, []);
 
-    const typewriterText = loading ? 'Waiting for cosmic signals... The universe is vast, but we\'ll connect soon.' :
-        error ? 'Strange... Some signals are hard to catch in the void. I’ll keep trying until I get through.' : diaryEntry;
+    const typewriterText = (loading || !audioUrl) ? 'Waiting for cosmic signals... The universe is vast, but we\'ll connect soon.' :
+        'Strange... Some signals are hard to catch in the void. I’ll keep trying until I get through.';
 
     useEffect(() => {
         function parseFirstWords(text) {
@@ -133,9 +133,9 @@ export default function AI() {
             {noted &&
                 (
                     <div className="diary">
-                        {loading || error || noSound ?
+                        {loading || error || !audioUrl ?
                             <Typewriter ref={writerRef} text={typewriterText} /> :
-                            <TypewriterNew ref={writerRef} transcription={transcription} audioUrl={audioUrl} firstWords={firstWords} />
+                            <TypewriterNew transcription={transcription} audioUrl={audioUrl} firstWords={firstWords} />
                         }
                     </div>
                 )
