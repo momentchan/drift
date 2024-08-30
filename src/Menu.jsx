@@ -9,6 +9,7 @@ import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import ShareIcon from '@mui/icons-material/Share';
+import FlareIcon from '@mui/icons-material/Flare';
 import html2canvas from 'html2canvas';
 
 function TriangleOutlinedIcon(props) {
@@ -21,7 +22,7 @@ function TriangleOutlinedIcon(props) {
 
 export default function Menu({ }) {
 
-    const { isTriangle, setIsTriangle, started, setStarted, noted, setNoted, soundOn, setSoundOn, resetPos, setResetPos, isMobile, setIsMobile } = GlobalState();
+    const { isTriangle, setIsTriangle, started, setStarted, noted, setNoted, soundOn, setSoundOn, resetPos, setResetPos, isMobile, setIsMobile, triggerFlare, setTriggerFlare } = GlobalState();
 
     useEffect(() => {
         const userAgent = navigator.userAgent;
@@ -98,6 +99,18 @@ export default function Menu({ }) {
                         </IconButton>
                     }
                 </div>
+
+                <div>
+                    {started &&
+                        <IconButton
+                            onClick={() => setTriggerFlare(!triggerFlare)}
+                            sx={commonStyle}
+                        >
+                            <FlareIcon sx={style} />
+                        </IconButton>
+                    }
+                </div>
+
                 <div>
                     {started &&
                         <IconButton
@@ -148,6 +161,9 @@ export default function Menu({ }) {
 
             {!started &&
                 <div className='entry'>
+                    <div className='title'>
+                        DRIFT
+                    </div>
                     <div className='intro'>
                         <p>Welcome to the digital realm as Captain Alex Reynolds, an astronaut lost in space.</p>
                         <p>Each day, AI-generated diary entries reveal the profound isolation and dwindling hope of returning to Earth.</p>

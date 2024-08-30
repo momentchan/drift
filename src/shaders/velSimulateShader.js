@@ -46,6 +46,8 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
             uniform float rayCount;
             uniform sampler2D rayTex;
 
+            uniform float waveRate;
+
             vec3 avoidWall(vec3 pos) {
                 return length(pos) > radius ? -normalize(pos) : vec3(0.0);
             }
@@ -207,6 +209,14 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
                     debug += 1.0 * pow(smoothstep(5.0, 0.0, d2), 2.0)  * mask;
                 }
 
+
+                // wave 
+                float d = length(pp);
+                float range = waveRate * radius * 1.3;
+                float wave = smoothstep(0.5, 0.0, abs(d - range)) * 0.5;
+                debug += wave;
+
+
                 force += sepSteer * separationWeight;
                 force += aliSteer * alignmentWeight;
                 force += cohSteer * cohesionWeight;
@@ -264,7 +274,9 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
 
                 radius: { value: 0 },
 
-                lightPos: { value: 0 }
+                lightPos: { value: 0 },
+
+                waveRate: { value: 0 }
             }
         })
     }

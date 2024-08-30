@@ -14,6 +14,7 @@ import { getRandomVectorInsideSphere } from "./r3f-gist/utility/Utilities";
 import { useFBX, useGLTF } from '@react-three/drei';
 import GlobalState from './GlobalState';
 import { Vector2 } from 'three/src/Three.js';
+import gsap from 'gsap';
 
 function initData(count, radius) {
     const data = new Float32Array(count * 4)
@@ -30,7 +31,7 @@ function initData(count, radius) {
 export default function Boids({ radius, length, lightPos, texture, rayCount }) {
     const fbx = useFBX('pyramid.fbx')
     const [geometry, setGeometry] = useState(null);
-    const { isTriangle, started } = GlobalState();
+    const { isTriangle, started, triggerFlare } = GlobalState();
 
     const props = useControls({
         'Boids': folder({
@@ -59,6 +60,8 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
     const { gl, camera, size } = useThree()
 
     const [touchDir, setTouchDir] = useState(0);
+
+    const [waveRate, setWaveRate] = useState(0);
 
     const handleCanvasClick = event => {
         if (event.button === 0) {
@@ -125,7 +128,30 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
         return gpgpu
     }, [length])
 
+
+    useEffect(() => {
+        const animateWaveRate = () => {
+            const animationObject = { value: 0 }; // Temporary object for GSAP to manipulate
+
+            gsap.to(animationObject, {
+                value: 1,
+                duration: 3,
+                ease: "Power2.easeIn", 
+                onStart: () => {
+                    setWaveRate(0); // Reset the state to 0 at the start
+                },
+                onUpdate: () => {
+                    setWaveRate(animationObject.value); // Update the state during animation
+                }
+            });
+        };
+
+        animateWaveRate()
+
+    }, [triggerFlare])
+
     useFrame((state, delta) => {
+
         const modelMatrix = mesh.current.matrixWorld;
         const viewMatrix = camera.matrixWorldInverse;
         const projectionMatrix = camera.projectionMatrix;
@@ -152,6 +178,7 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
         gpgpu.setUniform('velocityTex', 'noiseWeight', props.noiseWeight);
         gpgpu.setUniform('velocityTex', 'touchWeight', props.touchWeight);
         gpgpu.setUniform('velocityTex', 'touchPos', started ? state.pointer : new Vector2(-1, 1));
+        gpgpu.setUniform('velocityTex', 'waveRate', waveRate);
 
         gpgpu.setUniform('velocityTex', 'noiseFrequency', props.noiseFrequency);
         gpgpu.setUniform('velocityTex', 'noiseSpeed', props.noiseSpeed);

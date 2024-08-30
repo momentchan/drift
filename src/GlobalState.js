@@ -21,4 +21,7 @@ export default create((set) => ({
   
   displayedText: null,
   setDisplayedText: (value) => set({ displayedText: value }),
+
+  triggerFlare: false,
+  setTriggerFlare: (value) => set({ triggerFlare: value }),
 }))
