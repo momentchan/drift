@@ -16,6 +16,10 @@ import GlobalState from './GlobalState';
 import { Vector2 } from 'three/src/Three.js';
 import gsap from 'gsap';
 
+
+const durationRange = [3, 6]
+const delayRange = [10000, 20000]
+
 function initData(count, radius) {
     const data = new Float32Array(count * 4)
     for (let i = 0; i < data.length; i += 4) {
@@ -29,15 +33,15 @@ function initData(count, radius) {
 }
 
 function Circles({ waveRates, setWaveRates, currentId, setCurrentId, radius }) {
-    const { triggerFlare } = GlobalState();
+    const { started } = GlobalState();
 
     useEffect(() => {
         const animateWaveRate = () => {
-            const animationObject = { value: 0 }; // Temporary object for GSAP to manipulate
+            const animationObject = { value: 0 }; 
 
             gsap.to(animationObject, {
                 value: 1,
-                duration: 3,
+                duration: THREE.MathUtils.randFloat(durationRange[0], durationRange[1]),
                 ease: "Power2.easeInOut",
                 onStart: () => {
                     setWaveRates(prevWaveRates => {
@@ -52,14 +56,25 @@ function Circles({ waveRates, setWaveRates, currentId, setCurrentId, radius }) {
                         newWaveRates[currentId] = animationObject.value; // Update only the current ID's element
                         return newWaveRates;
                     });
+                },
+                onComplete: () => {
+                    // After animation completes, set a new random interval and call animateWaveRate again
+                    const randomDelay = THREE.MathUtils.randFloat(delayRange[0], delayRange[1]); // Random delay between 3-10 seconds
+                    setTimeout(() => {
+                        setCurrentId(prev => (prev + 1) % waveRates.length); // Move to the next ID
+                        animateWaveRate(); // Start the animation again
+                    }, randomDelay);
                 }
             });
         };
+        if (started) {
+            const initialDelay = THREE.MathUtils.randFloat(delayRange[0], delayRange[1]); // Random delay between 3-10 seconds for the first animation
+            setTimeout(() => {
+                animateWaveRate(); // Start the first animation after the initial random delay
+            }, initialDelay);
+        }
 
-        animateWaveRate();
-        setCurrentId(prev => (prev + 1) % waveRates.length)
-
-    }, [triggerFlare]);
+    }, [started]);
 
 
     return (
@@ -125,7 +140,7 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
 
     const { gl, camera, size } = useThree()
 
-    const [waveRates, setWaveRates] = useState(Array(10).fill(0));
+    const [waveRates, setWaveRates] = useState(Array(5).fill(0));
     const [currentId, setCurrentId] = useState(0)
 
     const renderMat = new BoidsMeshRenderCustomShader()
