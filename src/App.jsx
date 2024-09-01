@@ -31,7 +31,7 @@ export default function App() {
         radius: 10,
         length: 64,
         lightPos: [100, 100, 0],
-        rayCount: 10
+        rayCount: 6
     }
 
     const light = useRef()

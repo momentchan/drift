@@ -212,10 +212,10 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
 
                 // wave 
                 float d = length(pp);
-                for(float w = 0.0; w < 10.0; w++) {
+                for(float w = 0.0; w < 5.0; w++) {
                     float rate = waveRates[int(w)];
                     float range = rate * radius * 1.5;
-                    float wave = smoothstep(2.0, 0.0, abs(d - range)) * 0.5;
+                    float wave = smoothstep(2.0, 0.0, abs(d - range)) * 0.3;
                     debug += wave;
                 }
 
