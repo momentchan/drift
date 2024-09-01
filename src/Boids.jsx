@@ -1,17 +1,17 @@
 import * as THREE from 'three'
 import { useEffect, useMemo, useRef, useState } from "react";
+import GPGPU from "./r3f-gist/gpgpu/GPGPU";
 import "./shaders/boidsPointRenderShader";
 import PosSimulateShaderMaterial from "./shaders/posSimulateShader";
 import { useFrame, useThree } from "@react-three/fiber";
 import VelSimulateShaderMaterial from "./shaders/velSimulateShader";
-import GPGPU from "./r3f-gist/gpgpu/GPGPU";
 import { folder, useControls } from 'leva'
 import ThreeCustomShaderMaterial from 'three-custom-shader-material'
 import { patchShaders } from 'gl-noise'
 import BoidsMeshRenderCustomShader from "./shaders/boidsMeshRenderCustomShader";
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla'
 import { getRandomVectorInsideSphere } from "./r3f-gist/utility/Utilities";
-import { useFBX, useGLTF } from '@react-three/drei';
+import { useFBX } from '@react-three/drei';
 import GlobalState from './GlobalState';
 import { Vector2 } from 'three/src/Three.js';
 import gsap from 'gsap';
@@ -28,10 +28,73 @@ function initData(count, radius) {
     return data
 }
 
+function Circles({ waveRates, setWaveRates, currentId, setCurrentId, radius }) {
+    const { triggerFlare } = GlobalState();
+
+    useEffect(() => {
+        const animateWaveRate = () => {
+            const animationObject = { value: 0 }; // Temporary object for GSAP to manipulate
+
+            gsap.to(animationObject, {
+                value: 1,
+                duration: 3,
+                ease: "Power2.easeInOut",
+                onStart: () => {
+                    setWaveRates(prevWaveRates => {
+                        const newWaveRates = [...prevWaveRates];
+                        newWaveRates[currentId] = 0;
+                        return newWaveRates;
+                    });
+                },
+                onUpdate: () => {
+                    setWaveRates(prevWaveRates => {
+                        const newWaveRates = [...prevWaveRates];
+                        newWaveRates[currentId] = animationObject.value; // Update only the current ID's element
+                        return newWaveRates;
+                    });
+                }
+            });
+        };
+
+        animateWaveRate();
+        setCurrentId(prev => (prev + 1) % waveRates.length)
+
+    }, [triggerFlare]);
+
+
+    return (
+        <>
+            {
+                waveRates.map((rate, i) => (
+                    <Circle key={i} rate={rate} radius={radius} />
+                ))
+            }
+        </>
+    )
+}
+
+function Circle({ rate, radius }) {
+    const circleRef = useRef()
+    const { camera } = useThree()
+    useFrame(() => {
+        if (circleRef.current) {
+            circleRef.current.lookAt(camera.position)
+        }
+    })
+
+
+    return <>
+        <mesh ref={circleRef}>
+            <ringGeometry args={[rate * radius * 0.99, rate * radius, 64]} />
+            <meshStandardMaterial emissive='white' emissiveIntensity={1000} transparent opacity={THREE.MathUtils.smoothstep(1 - rate, 0, 1)} />
+        </mesh>
+    </>
+}
+
 export default function Boids({ radius, length, lightPos, texture, rayCount }) {
     const fbx = useFBX('pyramid.fbx')
     const [geometry, setGeometry] = useState(null);
-    const { isTriangle, started, triggerFlare } = GlobalState();
+    const { isTriangle, started } = GlobalState();
 
     const props = useControls({
         'Boids': folder({
@@ -59,30 +122,8 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
 
     const { gl, camera, size } = useThree()
 
-    const [touchDir, setTouchDir] = useState(0);
-
-    const [waveRate, setWaveRate] = useState(0);
-
-    const handleCanvasClick = event => {
-        if (event.button === 0) {
-            setTouchDir(1);
-        } else if (event.button === 2) {
-            setTouchDir(-1);
-        }
-    };
-
-    const handleCanvasMouseUp = () => {
-        setTouchDir(0);
-    };
-
-    useEffect(() => {
-        gl.domElement.addEventListener('mousedown', handleCanvasClick);
-        gl.domElement.addEventListener('mouseup', handleCanvasMouseUp);
-        return () => {
-            gl.domElement.removeEventListener('mousedown', handleCanvasClick);
-            gl.domElement.removeEventListener('mouseup', handleCanvasMouseUp);
-        }
-    }, [gl])
+    const [waveRates, setWaveRates] = useState(Array(10).fill(0));
+    const [currentId, setCurrentId] = useState(0)
 
     const renderMat = new BoidsMeshRenderCustomShader()
 
@@ -129,38 +170,13 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
     }, [length])
 
 
-    useEffect(() => {
-        const animateWaveRate = () => {
-            const animationObject = { value: 0 }; // Temporary object for GSAP to manipulate
-
-            gsap.to(animationObject, {
-                value: 1,
-                duration: 3,
-                ease: "Power2.easeIn", 
-                onStart: () => {
-                    setWaveRate(0); // Reset the state to 0 at the start
-                },
-                onUpdate: () => {
-                    setWaveRate(animationObject.value); // Update the state during animation
-                }
-            });
-        };
-
-        animateWaveRate()
-
-    }, [triggerFlare])
-
     useFrame((state, delta) => {
-
         const modelMatrix = mesh.current.matrixWorld;
         const viewMatrix = camera.matrixWorldInverse;
         const projectionMatrix = camera.projectionMatrix;
         const modelViewProjectionMatrix = new THREE.Matrix4().multiplyMatrices(projectionMatrix,
             new THREE.Matrix4().multiplyMatrices(viewMatrix, modelMatrix))
         const inverseModelViewProjectionMatrix = modelViewProjectionMatrix.clone().invert();
-
-        
-        
 
         gpgpu.setUniform('positionTex', 'delta', Math.min(delta, 1 / 30))
         gpgpu.setUniform('positionTex', 'time', state.clock.elapsedTime)
@@ -178,7 +194,7 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
         gpgpu.setUniform('velocityTex', 'noiseWeight', props.noiseWeight);
         gpgpu.setUniform('velocityTex', 'touchWeight', props.touchWeight);
         gpgpu.setUniform('velocityTex', 'touchPos', started ? state.pointer : new Vector2(-1, 1));
-        gpgpu.setUniform('velocityTex', 'waveRate', waveRate);
+        gpgpu.setUniform('velocityTex', 'waveRates', waveRates);
 
         gpgpu.setUniform('velocityTex', 'noiseFrequency', props.noiseFrequency);
         gpgpu.setUniform('velocityTex', 'noiseSpeed', props.noiseSpeed);
@@ -230,6 +246,8 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
                     />
                 </instancedMesh>
             }
+
+            <Circles radius={radius} waveRates={waveRates} setWaveRates={setWaveRates} currentId={currentId} setCurrentId={setCurrentId} />
         </>
     )
 }
