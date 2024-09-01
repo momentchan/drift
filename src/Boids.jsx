@@ -84,10 +84,13 @@ function Circle({ rate, radius }) {
 
 
     return <>
-        <mesh ref={circleRef}>
-            <ringGeometry args={[rate * radius * 0.99, rate * radius, 64]} />
-            <meshStandardMaterial emissive='white' emissiveIntensity={1000} transparent opacity={THREE.MathUtils.smoothstep(1 - rate, 0, 1)} />
-        </mesh>
+        {
+            rate != 0 && rate != 1 &&
+            <mesh ref={circleRef}>
+                <ringGeometry args={[rate * radius * 0.99, rate * radius, 64]} />
+                <meshStandardMaterial emissive='white' emissiveIntensity={1000} transparent opacity={THREE.MathUtils.smoothstep(1 - rate, 0, 1)} />
+            </mesh>
+        }
     </>
 }
 
