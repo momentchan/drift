@@ -153,10 +153,10 @@ export default function Menu({ }) {
                         DRIFT
                     </div>
                     <div className='intro'>
-                        <p>Welcome to the digital realm as Captain Alex Reynolds, an astronaut lost in space.</p>
-                        <p>Each day, AI-generated diary entries reveal the profound isolation and dwindling hope of returning to Earth.</p>
-                        <p>Move your mouse to explore a vast, starry expanse, interact with floating particles, and delve into the captain's thoughts.</p>
-                        <p>This isn't just a story—it's a voyage through a living universe that reacts to your every move.</p>
+                        <p>Step into the shoes of Captain Alex Reynolds, an astronaut adrift in the vastness of space.</p>
+                        <p>Each day, you'll uncover AI-generated diary entries that delve into the depths of isolation and the fading dream of returning home.</p>
+                        <p>Navigate a sprawling, starry void with your mouse, interact with drifting particles, and immerse yourself in the captain's reflections.</p>
+                        <p>This experience goes beyond storytelling—it's a dynamic journey through a living cosmos that responds to your every move.</p>
                     </div>
                     <div className='play'>
                         <Button
