@@ -43,6 +43,21 @@ function Circle({ rate, radius }) {
         }
     })
 
+    useEffect(() => {
+        const listener = camera.children.find(child => child instanceof THREE.AudioListener);
+
+        const sound = new THREE.PositionalAudio(listener);
+        // Load the audio file
+        const audioLoader = new THREE.AudioLoader();
+        audioLoader.load('/wave02.mp3', (buffer) => {
+            sound.setBuffer(buffer);
+            sound.setLoop(false); // Play only once
+            sound.setVolume(0.3); // Set volume
+            sound.setRefDistance(10);
+            sound.play();
+        });
+    }, [])
+
 
     return (
         <mesh ref={circleRef}>
@@ -66,7 +81,7 @@ function Circles({ waveRates, setWaveRates, currentId, setCurrentId, radius }) {
             gsap.to(animationObject, {
                 value: 1,
                 duration: THREE.MathUtils.randFloat(durationRange[0], durationRange[1]),
-                ease: "Power2.easeInOut",
+                ease: "Power2.easeOut",
                 onStart: () => {
                     setWaveRates(prevWaveRates => {
                         const newWaveRates = [...prevWaveRates];
@@ -170,7 +185,7 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
         return uvs;
     }, [count, fbx.children])
 
-     // GPGPU setup
+    // GPGPU setup
     const gpgpu = useMemo(() => {
         const gpgpu = new GPGPU(gl, length, length)
         gpgpu.addVariable('positionTex', initData(length * length, radius), new PosSimulateShaderMaterial())

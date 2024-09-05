@@ -11,7 +11,7 @@ import * as THREE from 'three';
 import { Perf } from "r3f-perf";
 import Boids from "./boids";
 import Menu from "./Menu";
-import Sound from "./Sound";
+import BGM from "./Bgm";
 import GlobalState from "./GlobalState";
 import Motion from "./Motion";
 import AI from "./AI";
@@ -95,7 +95,7 @@ export default function App() {
 
                 <Effect light={light} />
 
-                <Sound />
+                <BGM />
 
                 <Motion />
                 <Preload all />

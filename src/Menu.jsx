@@ -46,6 +46,14 @@ export default function Menu({ }) {
         color: 'white'
     };
 
+    function playClickSound(id) {
+        const source = ['click01.mp3', 'click02.mp3']
+
+        const audio = new Audio(source[id]);
+        audio.volume = 0.5
+        audio.play();
+    }
+
 
     async function Share(name = 'Screenshot.png') {
         try {
@@ -90,11 +98,28 @@ export default function Menu({ }) {
                 <div>
                     {started &&
                         <IconButton
-                            onClick={() => setIsTriangle(!isTriangle)}
+                            onClick={() => {
+                                setIsTriangle(!isTriangle);
+                                playClickSound(1);
+                            }}
                             sx={commonStyle}
                         >
                             {isTriangle ? (<TriangleOutlinedIcon sx={style} />) :
                                 (<SquareOutlinedIcon sx={style} />)}
+                        </IconButton>
+                    }
+                </div>
+
+                <div>
+                    {started &&
+                        <IconButton
+                            onClick={() => {
+                                setResetPos(!resetPos);
+                                playClickSound(0);
+                            }}
+                            sx={commonStyle}
+                        >
+                            <MyLocationIcon sx={style} />
                         </IconButton>
                     }
                 </div>
@@ -107,18 +132,6 @@ export default function Menu({ }) {
                         >
                             {noted ? (<SpeakerNotesIcon sx={style} />) :
                                 (<SpeakerNotesOffIcon sx={style} />)}
-                        </IconButton>
-                    }
-                </div>
-
-
-                <div>
-                    {started &&
-                        <IconButton
-                            onClick={() => setResetPos(!resetPos)}
-                            sx={commonStyle}
-                        >
-                            <MyLocationIcon sx={style} />
                         </IconButton>
                     }
                 </div>
@@ -168,8 +181,8 @@ export default function Menu({ }) {
                                 }
                             }}
                             onClick={() => {
-                                $(".overlay").fadeOut(5000)
-                                setStarted(true)
+                                setStarted(true);
+                                playClickSound(0);
                             }}
                         >
                             Start

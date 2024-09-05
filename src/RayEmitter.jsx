@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Line } from '@react-three/drei';
 import { randFloatSpread } from 'three/src/math/MathUtils.js';
@@ -113,10 +113,15 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
     const [time, setTime] = useState(0)
     const [duration, setDuration] = useState(THREE.MathUtils.randFloat(2, 5))
 
+    const [sound, setSound] = useState(false)
+    const { camera } = useThree()
+    const soundRef = useRef();
+
     function getRandomPos() {
         setDuration(THREE.MathUtils.randFloat(2, 5))
         setTime(0)
         setStop(false)
+        setSound(false)
         setTriPos([new THREE.Vector3(-100, -100, -100), new THREE.Vector3(-100, -100, -100)])
 
         setLength(THREE.MathUtils.randFloat(lengthRange[0], lengthRange[1]))
@@ -135,6 +140,23 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
     useEffect(() => {
         getRandomPos()
     }, [])
+
+    useEffect(() => {
+        if (started) {
+            const listener = camera.children.find(child => child instanceof THREE.AudioListener);
+
+            const sound = new THREE.PositionalAudio(listener);
+            // Load the audio file
+            const audioLoader = new THREE.AudioLoader();
+            audioLoader.load('/wave01.mp3', (buffer) => {
+                sound.setBuffer(buffer);
+                sound.setLoop(false); // Play only once
+                sound.setVolume(0.3); // Set volume
+                sound.setRefDistance(10);
+                soundRef.current = sound;
+            });
+        }
+    }, [started])
 
     useFrame((state, delta) => {
         if (!started) return
@@ -155,15 +177,21 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, range
                 }
             }
 
-            if (length == 0) {
-                setTime(time + delta)
-            }
-
             const p1 = points[0].add(velocity)
             const p2 = p1.clone().add(velocity.clone().normalize().multiplyScalar(length))
             setPoints([p1, p2])
 
             onUpdatePoints(index, points[0], length)
+
+            if (length == 0) {
+                setTime(time + delta)
+
+                if (!sound) {
+                    soundRef.current.position.copy(p1);
+                    soundRef.current.play();
+                    setSound(true);
+                }
+            }
 
             if (points[1].y < -100) {
                 getRandomPos()

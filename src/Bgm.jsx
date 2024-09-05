@@ -4,7 +4,7 @@ import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import GlobalState from './GlobalState';
 
-export default function Sound() {
+export default function BGM() {
     const { camera } = useThree();
 
     const bgmRefs = useRef([]);
@@ -15,14 +15,16 @@ export default function Sound() {
     // Define sound files to play
     const soundData = [
         { file: 'space.mp3', volume: 0.15, delay: 0, signal: false },
-        { file: 'noise.wav', volume: 0.25, delay: 0, signal: false },
-        { file: '338070__zbylut__160225_iss_3.mp3', volume: 0.03, delay: 3, signal: true }
+        { file: 'noise.mp3', volume: 0.15, delay: 0, signal: false },
+        { file: 'narrative.mp3', volume: 0.02, delay: 3, signal: true }
     ];
 
     useEffect(() => {
-        if (started) {
-            camera.add(listener);
+        camera.add(listener);
+    }, [])
 
+    useEffect(() => {
+        if (started) {
             soundData.forEach(data => {
                 const audio = new THREE.Audio(listener);
                 const audioLoader = new THREE.AudioLoader();
