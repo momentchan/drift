@@ -49,7 +49,7 @@ function Circle({ rate, radius }) {
         const sound = new THREE.PositionalAudio(listener);
         // Load the audio file
         const audioLoader = new THREE.AudioLoader();
-        audioLoader.load('/wave02.mp3', (buffer) => {
+        audioLoader.load('wave02.mp3', (buffer) => {
             sound.setBuffer(buffer);
             sound.setLoop(false); // Play only once
             sound.setVolume(0.3); // Set volume
