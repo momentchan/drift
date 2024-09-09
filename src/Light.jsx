@@ -25,11 +25,12 @@ export default forwardRef(function Light(props, ref) {
                 intensity={2}
                 position={props.lightPos}
                 castShadow
-                shadow-mapSize={[4096, 4096]}
-                shadow-camera-top={props.radius * 1.5}
-                shadow-camera-right={props.radius * 1.5}
-                shadow-camera-bottom={- props.radius * 1.5}
-                shadow-camera-left={- props.radius * 1.5}
+                shadow-mapSize={[8192, 8192]}
+                shadow-camera-top={props.radius * 1.2}
+                shadow-camera-right={props.radius * 1.2}
+                shadow-camera-bottom={- props.radius * 1.2}
+                shadow-camera-left={- props.radius * 1.2}
+                shadow-bias={-0.001}
             />
 
             <Environment preset="city" />

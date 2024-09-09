@@ -72,7 +72,10 @@ export default function App() {
                 far: 200,
                 position: [-30, 5, 20]
             }}
-            gl={{ preserveDrawingBuffer: true }}
+            gl={{
+                preserveDrawingBuffer: true,
+                shadowMapType: THREE.PCFSoftShadowMap
+            }}
         >
             <Suspense fallback={null}>
 
