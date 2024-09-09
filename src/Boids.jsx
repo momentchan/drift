@@ -131,6 +131,7 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
     const fbx = useFBX('pyramid.fbx')
     const [geometry, setGeometry] = useState(null);
     const { isTriangle, started } = GlobalState();
+    const [ready, setReady] = useState(false)
 
     const props = useControls({
         'Boids': folder({
@@ -197,6 +198,14 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
     }, [gl, length, radius])
 
 
+    useEffect(() => {
+        if (started) {
+            setTimeout(()=> setReady(true), 5000)
+        }
+
+    }, [started])
+
+
     useFrame((state, delta) => {
         const modelMatrix = mesh.current.matrixWorld;
         const viewMatrix = camera.matrixWorldInverse;
@@ -214,7 +223,7 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
         gpgpu.setUniform('velocityTex', 'aspect', size.width / size.height);
         gpgpu.setUniform('velocityTex', 'modelViewProjectionMatrix', modelViewProjectionMatrix)
         gpgpu.setUniform('velocityTex', 'inverseModelViewProjectionMatrix', inverseModelViewProjectionMatrix)
-        
+
         gpgpu.setUniform('velocityTex', 'alignmentDistance', props.alignmentDistance);
         gpgpu.setUniform('velocityTex', 'separationDistance', props.separationDistance);
         gpgpu.setUniform('velocityTex', 'cohesionDistance', props.cohesionDistance);
@@ -222,18 +231,18 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
         gpgpu.setUniform('velocityTex', 'alignmentWeight', props.alignmentWeight);
         gpgpu.setUniform('velocityTex', 'cohesionWeight', props.cohesionWeight);
         gpgpu.setUniform('velocityTex', 'avoidWallWeight', props.avoidWallWeight);
-        
+
         gpgpu.setUniform('velocityTex', 'noiseWeight', props.noiseWeight);
         gpgpu.setUniform('velocityTex', 'noiseFrequency', props.noiseFrequency);
         gpgpu.setUniform('velocityTex', 'noiseSpeed', props.noiseSpeed);
 
         gpgpu.setUniform('velocityTex', 'touchRange', props.touchRange * THREE.MathUtils.mapLinear(camera.position.length(), 36, 20, 0.6, 1));
         gpgpu.setUniform('velocityTex', 'touchWeight', props.touchWeight);
-        gpgpu.setUniform('velocityTex', 'touchPos', started ? state.pointer : new Vector2(-1, 1));
-        
+        gpgpu.setUniform('velocityTex', 'touchPos', ready ? state.pointer : new Vector2(-1, 1));
+
         gpgpu.setUniform('velocityTex', 'maxSpeed', props.maxSpeed);
         gpgpu.setUniform('velocityTex', 'maxForce', props.maxForce);
-        
+
         gpgpu.setUniform('velocityTex', 'lightPos', lightPos)
         gpgpu.setUniform('velocityTex', 'rayCount', rayCount)
         gpgpu.setUniform('velocityTex', 'rayTex', texture)
