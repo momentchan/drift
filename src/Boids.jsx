@@ -157,6 +157,7 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }) {
 
     const count = length * length
     const { gl, camera, size } = useThree()
+
     const [waveRates, setWaveRates] = useState(Array(5).fill(0));
     const [currentId, setCurrentId] = useState(0)
 

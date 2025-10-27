@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import utility from '../r3f-gist/shader/cginc/utility'
+import utility from '../r3f-gist/shader/cginc/utility.glsl'
 import snoise from '../r3f-gist/shader/cginc/noise/simplexNoise'
 
 export default class BoidsMeshRenderCustomShader extends THREE.ShaderMaterial {

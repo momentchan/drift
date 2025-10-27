@@ -1,5 +1,5 @@
 import { Loader, Preload, useProgress } from "@react-three/drei";
-import { Canvas } from '@react-three/fiber'
+import WebGLCanvas from "./WebGLCanvas";
 import Utilities from "./r3f-gist/utility/Utilities";
 import { Leva, folder, useControls } from 'leva'
 import Stage from "./Stage";
@@ -64,7 +64,7 @@ export default function App() {
     return <>
         <Leva collapsed hidden={!debug} />
 
-        <Canvas
+        <WebGLCanvas
             shadows
             camera={{
                 fov: 45,
@@ -103,7 +103,7 @@ export default function App() {
                 <Motion />
                 <Preload all />
             </Suspense>
-        </Canvas>
+        </WebGLCanvas>
 
         <Menu />
 
