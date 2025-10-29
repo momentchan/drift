@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import utility from '../r3f-gist/shader/cginc/utility'
+import utility from '@packages/r3f-gist/shaders/cginc/math/utility.glsl'
 
 export default class BoidsMeshRenderShader extends THREE.ShaderMaterial {
     constructor() {

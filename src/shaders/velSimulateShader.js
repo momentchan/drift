@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import snoise from '../r3f-gist/shader/cginc/noise/simplexNoise'
+import snoise from '@packages/r3f-gist/shaders/cginc/noise/simplexNoise.glsl'
 
 export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
     constructor() {

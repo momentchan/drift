@@ -1,16 +1,16 @@
 import * as THREE from 'three'
 import { useEffect, useMemo, useRef, useState } from "react";
-import GPGPU from "./r3f-gist/gpgpu/GPGPU";
-import "./shaders/boidsPointRenderShader";
-import PosSimulateShaderMaterial from "./shaders/posSimulateShader";
-import VelSimulateShaderMaterial from "./shaders/velSimulateShader";
-import BoidsMeshRenderCustomShader from "./shaders/boidsMeshRenderCustomShader";
+import GPGPU from "@packages/r3f-gist/gpgpu/GPGPU";
+import "../shaders/boidsPointRenderShader";
+import PosSimulateShaderMaterial from "../shaders/posSimulateShader";
+import VelSimulateShaderMaterial from "../shaders/velSimulateShader";
+import BoidsMeshRenderCustomShader from "../shaders/boidsMeshRenderCustomShader";
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla'
 import ThreeCustomShaderMaterial from 'three-custom-shader-material'
 import { patchShaders } from 'gl-noise'
 import { useFrame, useThree } from "@react-three/fiber";
 import { folder, useControls } from 'leva'
-import { getRandomVectorInsideSphere } from "./r3f-gist/utility/Utilities";
+import { getRandomVectorInsideSphere } from "@packages/r3f-gist/utils/math";
 import { Vector2 } from 'three/src/Three.js';
 import gsap from 'gsap';
 import { useFBX } from '@react-three/drei';

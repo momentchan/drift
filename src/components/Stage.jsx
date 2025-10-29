@@ -51,17 +51,17 @@ function Model({ path, pos }) {
     }, [index, actions, names])
 
     const bodyTex = useTexture({
-        map: 'Textures/Body/Astronaut_Suit_Body_Albedo.png',
-        metalnessMap: 'Textures/Body/Astronaut_Suit_Body_Metallic.png',
-        aoMap: 'Textures/Body/Astronaut_Suit_Body_Ao.png',
-        normalMap: 'Textures/Body/Astronaut_Suit_Body_Normals.png'
+        map: 'textures/Body/Astronaut_Suit_Body_Albedo.png',
+        metalnessMap: 'textures/Body/Astronaut_Suit_Body_Metallic.png',
+        aoMap: 'textures/Body/Astronaut_Suit_Body_Ao.png',
+        normalMap: 'textures/Body/Astronaut_Suit_Body_Normals.png'
     })
 
     const detailTex = useTexture({
-        map: 'Textures/Details/Astronaut_Suit_Details_Albedo.png',
-        metalnessMap: 'Textures/Details/Astronaut_Suit_Details_Metallic.png',
-        aoMap: 'Textures/Details/Astronaut_Suit_Details_Ao.png',
-        normalMap: 'Textures/Details/Astronaut_Suit_Details_Normals.png'
+        map: 'textures/Details/Astronaut_Suit_Details_Albedo.png',
+        metalnessMap: 'textures/Details/Astronaut_Suit_Details_Metallic.png',
+        aoMap: 'textures/Details/Astronaut_Suit_Details_Ao.png',
+        normalMap: 'textures/Details/Astronaut_Suit_Details_Normals.png'
     })
 
     useEffect(() => {

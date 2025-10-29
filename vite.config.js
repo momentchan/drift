@@ -2,11 +2,17 @@ import react from '@vitejs/plugin-react'
 import { transformWithEsbuild } from 'vite'
 import glsl from 'vite-plugin-glsl'
 import basicSsl from '@vitejs/plugin-basic-ssl';
+import { resolve } from 'path';
 
 export default {
     root: 'src/',
     publicDir: '../public/',
     base: './',
+    resolve: {
+        alias: {
+            '@packages': resolve(__dirname, 'packages')
+        }
+    },
     plugins:
     [
         // React support

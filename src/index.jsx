@@ -1,6 +1,5 @@
-import './style.css'
+import './styles/style.scss'
 import { createRoot } from 'react-dom/client'
-import App from './App'
-import { StrictMode } from 'react'
+import App from './app/App'
 
 createRoot(document.querySelector('#root')).render(<App />)
