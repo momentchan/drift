@@ -1,15 +1,15 @@
-import { Loader, Preload, useProgress } from "@react-three/drei";
-import { Leva, folder, useControls } from "leva";
+import { Loader, Preload } from "@react-three/drei";
+import { folder, useControls } from "leva";
 import Stage from "../components/3d/Stage";
 import Effect from "../components/effects/Effect";
-import Light from "../components/3d/Light";
+import Light, { LightRef } from "../components/3d/Light";
 import { Suspense, useRef } from "react";
 import RayEmitter from "../components/3d/RayEmitter";
 import * as THREE from "three";
 import { Perf } from "r3f-perf";
 import Boids from "../components/3d/Boids";
 import Menu from "../components/ui/Menu";
-import BGM from "../components/audio/Bgm";
+// import BGM from "../components/audio/Bgm";
 import GlobalState from "../components/GlobalState";
 import Motion from "../components/3d/Motion";
 import AI from "../components/ai/AI";
@@ -20,6 +20,15 @@ import LevaWrapper from "@packages/r3f-gist/components/ui/LevaWrapper";
 
 const debug = false;
 
+
+interface ComponentProps {
+  radius: number;
+  length: number;
+  lightPos: [number, number, number];
+  rayCount: number;
+  texture?: THREE.DataTexture;
+}
+
 export default function App() {
   const { started } = GlobalState();
 
@@ -29,14 +38,14 @@ export default function App() {
     }),
   });
 
-  const props = {
+  const props: ComponentProps = {
     radius: 10,
     length: 64,
     lightPos: [100, 100, 0],
     rayCount: 6,
   };
 
-  const light = useRef();
+  const light = useRef<LightRef | null>(null);
 
   const textureData = new Float32Array(props.rayCount * 4);
 
@@ -48,7 +57,7 @@ export default function App() {
     THREE.FloatType
   );
 
-  const handleUpdatePoints = (index, point, length) => {
+  const handleUpdatePoints = (index: number, point: THREE.Vector3, length: number): void => {
     textureData[index * 4 + 0] = point.x;
     textureData[index * 4 + 1] = point.y;
     textureData[index * 4 + 2] = point.z;
@@ -56,15 +65,9 @@ export default function App() {
     texture.needsUpdate = true;
   };
 
-  function ShowLoadingInfo() {
-    const { item } = useProgress();
-    console.log(item);
-    return <></>;
-  }
-
   return (
     <>
-      <LevaWrapper hidden={true}/>
+      <LevaWrapper initialHidden={true} />
 
       <Canvas
         shadows
@@ -82,7 +85,7 @@ export default function App() {
         <Suspense fallback={null}>
           <AdaptiveDPRMonitor
             initialDPR={1}
-            onDPRChange={(dpr) => {
+            onDPRChange={(dpr: number) => {
               console.log("dpr", dpr);
             }}
           />
@@ -95,13 +98,13 @@ export default function App() {
 
           <RayEmitter
             {...props}
-            texture={texture} // Pass the texture to RayEmitter as a prop
+            texture={texture}
             onUpdateTexture={handleUpdatePoints}
           />
 
           <Boids {...props} texture={texture} />
 
-          <Stage {...props} />
+          <Stage />
 
           <Light {...props} ref={light} />
 
@@ -124,3 +127,4 @@ export default function App() {
     </>
   );
 }
+

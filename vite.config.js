@@ -10,7 +10,8 @@ export default {
     base: './',
     resolve: {
         alias: {
-            '@packages': resolve(__dirname, 'packages')
+            '@packages': resolve(__dirname, 'packages'),
+            'three': resolve(__dirname, 'node_modules/three')
         }
     },
     plugins:

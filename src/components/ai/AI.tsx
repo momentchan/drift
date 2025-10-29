@@ -1,0 +1,161 @@
+import { useEffect, useRef, useState } from "react";
+import Typewriter from "../ui/Typewriter";
+import TypewriterNew from "../ui/TypewriterNew";
+import GlobalState from "../GlobalState";
+
+interface TranscriptionSegment {
+  id: number;
+  start: number;
+  end: number;
+  text: string;
+}
+
+interface Transcription {
+  segments: TranscriptionSegment[];
+}
+
+interface TypewriterRef {
+  reset: () => void;
+}
+
+export default function AI() {
+  const [diaryEntry, setDiaryEntry] = useState<string>("");
+  const [transcription, setTranscription] = useState<Transcription | undefined>();
+  const [audioUrl, setAudioUrl] = useState<string | undefined>();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<boolean>(false);
+  const [firstWords, setFirstWords] = useState<string[]>([]);
+  const { noted } = GlobalState();
+  const writerRef = useRef<TypewriterRef | null>(null);
+  const server = 'https://openai-api-backend.onrender.com';
+
+  useEffect(() => {
+    async function fetchDiaryEntry() {
+      const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      const storedDate = localStorage.getItem('diaryDate');
+      const storedEntry = localStorage.getItem('diaryEntry');
+      const storedAudio = localStorage.getItem('diaryAudio');
+      const storedTranscription = localStorage.getItem('diaryTranscription');
+
+      if (storedDate === currentDate && storedEntry) {
+        handleStoredDiary(storedEntry, storedAudio, storedTranscription);
+      } else {
+        fetchNewDiary(currentDate);
+      }
+    }
+
+    async function fetchNewDiary(currentDate: string) {
+      try {
+        const response = await fetch(`${server}/api/diary/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date: currentDate })
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const data = await response.json();
+        const lastCompleteSentence = data.diaryEntry;
+
+        // Reset typewriter and update state
+        saveDiaryToLocalStorage(currentDate, lastCompleteSentence);
+        setDiaryEntry(lastCompleteSentence);
+        setLoading(false);
+
+        // Fetch audio and transcription
+        fetchAudioAndTranscription(lastCompleteSentence);
+      } catch (error) {
+        handleError(error);
+      }
+    }
+
+    async function fetchAudioAndTranscription(text: string) {
+      try {
+        const response = await fetch(`${server}/api/speech-and-transcribe`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Server responded with status ${response.status}: ${errorText}`);
+        }
+
+        const data = await response.json();
+        const { audioBase64, transcription } = data;
+
+        // Save audio and transcription to local storage
+        localStorage.setItem('diaryAudio', audioBase64);
+        localStorage.setItem('diaryTranscription', JSON.stringify(transcription));
+
+        // Set audio and transcription in the global state
+        setAudioUrl(audioBase64);
+        setTranscription(transcription);
+
+        writerRef.current?.reset();
+      } catch (error) {
+        console.error("Failed to fetch audio and transcription:", error);
+      }
+    }
+
+    function handleStoredDiary(storedEntry: string, storedAudio: string | null, storedTranscription: string | null) {
+      setDiaryEntry(storedEntry);
+      setLoading(false);
+
+      if (storedAudio && storedTranscription) {
+        setAudioUrl(storedAudio);
+        setTranscription(JSON.parse(storedTranscription));
+      } else {
+        fetchAudioAndTranscription(storedEntry);
+      }
+    }
+
+    function saveDiaryToLocalStorage(currentDate: string, diaryEntry: string) {
+      localStorage.setItem('diaryDate', currentDate);
+      localStorage.setItem('diaryEntry', diaryEntry);
+    }
+
+    function handleError(error: unknown) {
+      console.error(error);
+      setError(true);
+      setLoading(false);
+    }
+
+    fetchDiaryEntry();
+  }, []);
+
+  const typewriterText = (loading || !audioUrl) ? 'Waiting for cosmic signals... The universe is vast, but we\'ll connect soon.' :
+    'Strange... Some signals are hard to catch in the void. I\'ll keep trying until I get through.';
+
+  useEffect(() => {
+    function parseFirstWords(text: string): string[] {
+      const lines = text.split('\n');
+
+      // Filter out any empty lines, and map each line to its first word
+      const firstWords = lines
+        .filter(line => line.trim() !== '')  // Ignore empty lines
+        .map(line => line.trim().split(' ')[0]); // Split each line into words and take the first one
+
+      return firstWords;
+    }
+    setFirstWords(parseFirstWords(diaryEntry));
+  }, [diaryEntry]);
+
+  return (
+    <>
+      {noted &&
+        (
+          <div className="diary">
+            {loading || error || !audioUrl ?
+              <Typewriter ref={writerRef} text={typewriterText} /> :
+              <TypewriterNew transcription={transcription} audioUrl={audioUrl} firstWords={firstWords} />
+            }
+          </div>
+        )
+      }
+    </>
+  );
+}
+
+

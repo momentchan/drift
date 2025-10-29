@@ -1,6 +1,29 @@
 import { create } from "zustand";
 
-export default create((set) => ({
+interface GlobalState {
+  isMobile: boolean;
+  setIsMobile: (value: boolean) => void;
+  
+  isTriangle: boolean;
+  setIsTriangle: (value: boolean) => void;
+
+  started: boolean;
+  setStarted: (value: boolean) => void;
+
+  noted: boolean;
+  setNoted: (value: boolean) => void;
+
+  soundOn: boolean;
+  setSoundOn: (value: boolean) => void;
+
+  resetPos: boolean;
+  setResetPos: (value: boolean) => void;
+  
+  displayedText: string | null;
+  setDisplayedText: (value: string | null) => void;
+}
+
+export default create<GlobalState>((set) => ({
   isMobile: false, // Initial value of the global variable
   setIsMobile: (value) => set({ isMobile: value }),
   
@@ -21,4 +44,4 @@ export default create((set) => ({
   
   displayedText: null,
   setDisplayedText: (value) => set({ displayedText: value }),
-}))
+}));
