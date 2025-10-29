@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
-import GlobalState from "./GlobalState";
+import GlobalState from "../GlobalState";
 
 const TypewriterNew = forwardRef(({ transcription, audioUrl, firstWords }, ref) => {
     const { noted } = GlobalState();

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import GlobalState from "./GlobalState";
+import GlobalState from "../GlobalState";
 import { useThree } from "@react-three/fiber";
 import gsap from "gsap";
 import * as THREE from 'three'

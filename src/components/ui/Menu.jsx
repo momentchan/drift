@@ -2,7 +2,7 @@ import { Button, IconButton } from '@mui/material';
 import SquareOutlinedIcon from '@mui/icons-material/SquareOutlined';
 import { SvgIcon } from '@mui/material';
 import { useEffect, useState } from 'react';
-import GlobalState from './GlobalState';
+import GlobalState from '../GlobalState';
 import SpeakerNotesIcon from '@mui/icons-material/SpeakerNotes';
 import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';

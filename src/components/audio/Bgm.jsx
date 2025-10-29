@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Audio, AudioLoader } from 'three';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
-import GlobalState from './GlobalState';
+import GlobalState from '../GlobalState';
 
 export default function BGM() {
     const { camera } = useThree();

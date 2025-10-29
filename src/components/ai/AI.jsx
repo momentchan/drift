@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react"
-import Typewriter from "./Typewriter";
-import TypewriterNew from "./TypewriterNew";
-import GlobalState from "./GlobalState";
+import Typewriter from "../ui/Typewriter";
+import TypewriterNew from "../ui/TypewriterNew";
+import GlobalState from "../GlobalState";
 
 export default function AI() {
     const [diaryEntry, setDiaryEntry] = useState("");

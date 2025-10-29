@@ -1,6 +1,6 @@
 import { Environment, useHelper } from "@react-three/drei"
 import { forwardRef, useEffect, useImperativeHandle, useRef } from "react"
-import GlobalState from "./GlobalState"
+import GlobalState from "../GlobalState"
 
 export default forwardRef(function Light(props, ref) {
 

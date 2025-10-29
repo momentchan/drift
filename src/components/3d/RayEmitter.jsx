@@ -3,7 +3,7 @@ import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { Line } from '@react-three/drei';
 import { randFloatSpread } from 'three/src/math/MathUtils.js';
-import GlobalState from './GlobalState';
+import GlobalState from '../GlobalState';
 import gsap from 'gsap';
 
 const rfs = THREE.MathUtils.randFloatSpread

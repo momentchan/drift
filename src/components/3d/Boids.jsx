@@ -1,10 +1,10 @@
 import * as THREE from 'three'
 import { useEffect, useMemo, useRef, useState } from "react";
 import GPGPU from "@packages/r3f-gist/gpgpu/GPGPU";
-import "../shaders/boidsPointRenderShader";
-import PosSimulateShaderMaterial from "../shaders/posSimulateShader";
-import VelSimulateShaderMaterial from "../shaders/velSimulateShader";
-import BoidsMeshRenderCustomShader from "../shaders/boidsMeshRenderCustomShader";
+import "../../shaders/boidsPointRenderShader";
+import PosSimulateShaderMaterial from "../../shaders/posSimulateShader";
+import VelSimulateShaderMaterial from "../../shaders/velSimulateShader";
+import BoidsMeshRenderCustomShader from "../../shaders/boidsMeshRenderCustomShader";
 import CustomShaderMaterial from 'three-custom-shader-material/vanilla'
 import ThreeCustomShaderMaterial from 'three-custom-shader-material'
 import { patchShaders } from 'gl-noise'
@@ -14,7 +14,7 @@ import { getRandomVectorInsideSphere } from "@packages/r3f-gist/utils/math";
 import { Vector2 } from 'three/src/Three.js';
 import gsap from 'gsap';
 import { useFBX } from '@react-three/drei';
-import GlobalState from './GlobalState';
+import GlobalState from '../GlobalState';
 
 // Duration and delay ranges
 const durationRange = [3, 6]

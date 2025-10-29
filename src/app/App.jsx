@@ -1,21 +1,21 @@
 import { Loader, Preload, useProgress } from "@react-three/drei";
 import { Leva, folder, useControls } from "leva";
-import Stage from "../components/Stage";
-import Effect from "../components/Effect";
-import Light from "../components/Light";
+import Stage from "../components/3d/Stage";
+import Effect from "../components/effects/Effect";
+import Light from "../components/3d/Light";
 import { Suspense, useRef } from "react";
-import RayEmitter from "../components/RayEmitter";
+import RayEmitter from "../components/3d/RayEmitter";
 import * as THREE from "three";
 import { Perf } from "r3f-perf";
-import Boids from "../components/Boids";
-import Menu from "../components/Menu";
-import BGM from "../components/Bgm";
+import Boids from "../components/3d/Boids";
+import Menu from "../components/ui/Menu";
+import BGM from "../components/audio/Bgm";
 import GlobalState from "../components/GlobalState";
-import Motion from "../components/Motion";
-import AI from "../components/AI";
+import Motion from "../components/3d/Motion";
+import AI from "../components/ai/AI";
 import CanvasCapture from "@packages/r3f-gist/components/utility/CanvasCapture";
 import { Canvas } from "@react-three/fiber";
-import { AdaptiveDPRMonitor } from "@packages/r3f-gist/components/webgl";
+import { AdaptiveDPRMonitor } from "@packages/r3f-gist/components/webgl/AdaptiveDPRMonitor";
 import LevaWrapper from "@packages/r3f-gist/components/ui/LevaWrapper";
 
 const debug = false;
@@ -64,7 +64,7 @@ export default function App() {
 
   return (
     <>
-      <LevaWrapper />
+      <LevaWrapper hidden={true}/>
 
       <Canvas
         shadows
@@ -81,6 +81,7 @@ export default function App() {
       >
         <Suspense fallback={null}>
           <AdaptiveDPRMonitor
+            initialDPR={1}
             onDPRChange={(dpr) => {
               console.log("dpr", dpr);
             }}
@@ -89,6 +90,8 @@ export default function App() {
           {debug && <Perf position="top-left" />}
           <fogExp2 attach="fog" args={[bgColor, 0.05]} />
           <color attach="background" args={[bgColor]} />
+
+          <Perf position="top-left" />
 
           <RayEmitter
             {...props}
@@ -106,7 +109,7 @@ export default function App() {
 
           <Effect light={light} />
 
-          <BGM />
+          {/* <BGM /> */}
 
           <Motion />
           <Preload all />
