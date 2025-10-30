@@ -84,7 +84,7 @@ export default function Effect({ light }: EffectProps) {
       <EffectComposer
         ref={composer}
         multisampling={0}
-        resolutionScale={0.8}
+        resolutionScale={1}
         frameBufferType={THREE.HalfFloatType}
         enableNormalPass={false}
       >

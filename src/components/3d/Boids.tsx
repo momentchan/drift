@@ -58,7 +58,7 @@ function Circle({ rate, radius }: CircleProps) {
       audioLoader.load('wave02.mp3', (buffer) => {
         sound.setBuffer(buffer);
         sound.setLoop(false); // Play only once
-        sound.setVolume(0.3); // Set volume
+        sound.setVolume(0.05); // Set volume
         sound.setRefDistance(10);
         sound.play();
       });
@@ -88,46 +88,74 @@ interface CirclesProps {
 
 function Circles({ waveRates, setWaveRates, currentId, setCurrentId, radius }: CirclesProps) {
   const { started } = GlobalState();
+  const isRunningRef = useRef(false);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tweenRef = useRef<gsap.core.Tween | null>(null);
+  const currentIdRef = useRef(currentId);
+
+  // keep a cosmetic state in sync without re-triggering the effect
+  useEffect(() => {
+    currentIdRef.current = currentId;
+  }, [currentId]);
 
   useEffect(() => {
-    const animateWaveRate = () => {
-      const animationObject = { value: 0 };
+    const startLoop = () => {
+      if (isRunningRef.current) return;
+      isRunningRef.current = true;
 
-      gsap.to(animationObject, {
-        value: 1,
-        duration: THREE.MathUtils.randFloat(durationRange[0], durationRange[1]),
-        ease: "Power2.easeOut",
-        onStart: () => {
-          setWaveRates(prevWaveRates => {
-            const newWaveRates = [...prevWaveRates];
-            newWaveRates[currentId] = 0;
-            return newWaveRates;
-          });
-        },
-        onUpdate: () => {
-          setWaveRates(prevWaveRates => {
-            const newWaveRates = [...prevWaveRates];
-            newWaveRates[currentId] = animationObject.value; // Update only the current ID's element
-            return newWaveRates;
-          });
-        },
-        onComplete: () => {
-          const randomDelay = THREE.MathUtils.randFloat(delayRange[0], delayRange[1]); // Random delay between 3-10 seconds
-          setTimeout(() => {
-            setCurrentId(prev => (prev + 1) % waveRates.length); // Move to the next ID
-            animateWaveRate();
-          }, randomDelay);
-        }
-      });
+      const loop = () => {
+        const id = currentIdRef.current;
+        const animationObject = { value: 0 };
+
+        // reset selected wave rate to 0 before animating
+        setWaveRates(prev => {
+          const next = [...prev];
+          next[id] = 0;
+          return next;
+        });
+
+        tweenRef.current = gsap.to(animationObject, {
+          value: 1,
+          duration: THREE.MathUtils.randFloat(durationRange[0], durationRange[1]),
+          ease: "Power2.easeOut",
+          onUpdate: () => {
+            setWaveRates(prev => {
+              const next = [...prev];
+              next[id] = animationObject.value;
+              return next;
+            });
+          },
+          onComplete: () => {
+            const randomDelay = THREE.MathUtils.randFloat(delayRange[0], delayRange[1]);
+            timeoutRef.current = setTimeout(() => {
+              // advance id without re-triggering effect
+              const nextId = (id + 1) % waveRates.length;
+              currentIdRef.current = nextId;
+              setCurrentId(nextId);
+              loop();
+            }, randomDelay);
+          }
+        });
+      };
+
+      const initialDelay = THREE.MathUtils.randFloat(delayRange[0], delayRange[1]);
+      timeoutRef.current = setTimeout(loop, initialDelay);
     };
 
-    if (started) {
-      const initialDelay = THREE.MathUtils.randFloat(delayRange[0], delayRange[1]); // Random delay between 3-10 seconds for the first animation
-      setTimeout(() => {
-        animateWaveRate();
-      }, initialDelay);
-    }
-  }, [started, currentId, waveRates.length, setWaveRates, setCurrentId]);
+    if (started) startLoop();
+
+    return () => {
+      isRunningRef.current = false;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+      if (tweenRef.current) {
+        tweenRef.current.kill();
+        tweenRef.current = null;
+      }
+    };
+  }, [started, waveRates.length, setWaveRates, setCurrentId]);
 
   return (
     <>
@@ -183,7 +211,7 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }: B
   const renderMat = new BoidsMeshRenderCustomShader();
   const depthMat = new CustomShaderMaterial({
     baseMaterial: THREE.MeshDepthMaterial,
-    vertexShader: renderMat.vertexShader,
+    vertexShader: patchShaders(renderMat.vertexShader) as string,
     uniforms: renderMat.uniforms,
     silent: true,
     depthPacking: THREE.RGBADepthPacking
@@ -280,7 +308,7 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }: B
       {geometry != null &&
         <instancedMesh
           ref={mesh}
-          args={[null, null, count]}
+          args={[undefined, undefined, count]}
           castShadow
           receiveShadow
           frustumCulled={false}
@@ -297,8 +325,8 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }: B
             ref={mat}
             baseMaterial={THREE.MeshStandardMaterial}
             silent
-            fragmentShader={patchShaders(renderMat.fragmentShader)}
-            vertexShader={patchShaders(renderMat.vertexShader)}
+            fragmentShader={patchShaders(renderMat.fragmentShader) as string}
+            vertexShader={patchShaders(renderMat.vertexShader) as string}
             uniforms={renderMat.uniforms}
             envMapIntensity={0.5}
           />

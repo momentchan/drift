@@ -10,13 +10,13 @@ import { Perf } from "r3f-perf";
 import Boids from "../components/3d/Boids";
 import Menu from "../components/ui/Menu";
 import Bgm from "../components/audio/Bgm";
-import GlobalState from "../components/GlobalState";
 import Motion from "../components/3d/Motion";
 import AI from "../components/ai/AI";
 import CanvasCapture from "@packages/r3f-gist/components/utility/CanvasCapture";
 import { Canvas } from "@react-three/fiber";
 import { AdaptiveDPRMonitor } from "@packages/r3f-gist/components/webgl/AdaptiveDPRMonitor";
 import LevaWrapper from "@packages/r3f-gist/components/ui/LevaWrapper";
+import RotatingCursor from "../components/ui/RotatingCursor";
 
 const debug = false;
 
@@ -65,6 +65,7 @@ export default function App() {
   return (
     <>
       <LevaWrapper initialHidden={true} />
+      <RotatingCursor />
 
       <Canvas
         shadows

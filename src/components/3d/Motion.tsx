@@ -51,13 +51,13 @@ export default function Motion() {
 
   useEffect(() => {
     if (started) {
-      moveToClose(20, 5);
+      moveToClose(20, 4);
     }
   }, [started]);
 
   useEffect(() => {
     if (started) {
-      moveToClose(10, 2);
+      moveToClose(10, 1.5);
     }
   }, [resetPos]);
 
