@@ -1,5 +1,5 @@
 import { useThree } from "@react-three/fiber";
-import { Bloom, EffectComposer, HueSaturation, ToneMapping } from "@react-three/postprocessing";
+import { Bloom, EffectComposer, HueSaturation, SMAA, ToneMapping } from "@react-three/postprocessing";
 import { ToneMappingMode } from 'postprocessing';
 import { folder, useControls } from 'leva';
 import * as THREE from 'three';
@@ -63,8 +63,8 @@ export default function Effect({ light }: EffectProps) {
     edgeRadius: 2,
     distanceAttenuation: 2,
     color: new THREE.Color(0xffffff),
-    raymarchSteps: 30,
-    blur: true,
+    raymarchSteps: 20,
+    blur: false,
     gammaCorrection: true,
   };
 
@@ -81,7 +81,13 @@ export default function Effect({ light }: EffectProps) {
 
   return (
     <>
-      <EffectComposer ref={composer}>
+      <EffectComposer
+        ref={composer}
+        multisampling={0}
+        resolutionScale={0.8}
+        frameBufferType={THREE.HalfFloatType}
+        enableNormalPass={false}
+      >
         <GodraysEffect light={light} config={config} composer={composer} />
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
         <HueSaturation saturation={0.4} />
@@ -90,7 +96,7 @@ export default function Effect({ light }: EffectProps) {
           luminanceSmoothing={props.bloomSmoothing}
           mipmapBlur
           intensity={props.bloomIntensity} />
-        {/* <DepthOfField focusDistance={props.focusDistance} focalLength={props.focusLength} /> */}
+        <SMAA />
       </EffectComposer>
     </>
   );
