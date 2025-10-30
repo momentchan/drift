@@ -28,7 +28,7 @@ function Wave({ rate, radius }: WaveProps) {
     if (listener) {
       const sound = new THREE.PositionalAudio(listener);
       const audioLoader = new THREE.AudioLoader();
-      audioLoader.load('wave02.mp3', (buffer) => {
+      audioLoader.load('audio/wave02.mp3', (buffer) => {
         sound.setBuffer(buffer);
         sound.setLoop(false);
         sound.setVolume(0.05);

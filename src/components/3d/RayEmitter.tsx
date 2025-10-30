@@ -153,7 +153,7 @@ function Ray({ index, pos, dir, normal, binormal, lengthRange, speedRange, onUpd
         const sound = new THREE.PositionalAudio(listener);
         // Load the audio file
         const audioLoader = new THREE.AudioLoader();
-        audioLoader.load('wave01.mp3', (buffer) => {
+        audioLoader.load('audio/wave01.mp3', (buffer) => {
           sound.setBuffer(buffer);
           sound.setLoop(false); // Play only once
           sound.setVolume(0.3); // Set volume

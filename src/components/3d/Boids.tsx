@@ -38,7 +38,7 @@ interface BoidsProps {
 }
 
 export default function Boids({ radius, length, lightPos, texture, rayCount }: BoidsProps) {
-  const fbx = useFBX('pyramid.fbx');
+  const fbx = useFBX('models/pyramid.fbx');
   const [geometry, setGeometry] = useState<THREE.BufferGeometry | null>(null);
   const { isTriangle, started } = GlobalState();
   const [ready, setReady] = useState(false);

@@ -129,7 +129,7 @@ function Model({ path, pos }: ModelProps) {
 export default function Stage() {
   return (
     <>
-      <Model path={'Astronaut.fbx'} pos={[0, 0, 0]} />
+      <Model path={'models/Astronaut.fbx'} pos={[0, 0, 0]} />
     </>
   );
 }

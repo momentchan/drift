@@ -62,7 +62,7 @@ export default function Menu() {
   } as const;
 
   function playClickSound(id: number): void {
-    const source = ['click01.mp3', 'click02.mp3'];
+    const source = ['audio/click01.mp3', 'audio/click02.mp3'];
 
     const audio = new Audio(source[id]);
     audio.volume = 0.5;

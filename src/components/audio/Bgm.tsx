@@ -25,9 +25,9 @@ export default function BGM() {
 
   // Define sound files to play
   const soundData: SoundData[] = [
-    { file: 'space.m4a', volume: 0.15, delay: 0, signal: false },
-    { file: 'noise.mp3', volume: 0.15, delay: 0, signal: false },
-    { file: 'narrative.m4a', volume: 0.02, delay: 3, signal: true }
+    { file: 'audio/space.m4a', volume: 0.15, delay: 0, signal: false },
+    { file: 'audio/noise.mp3', volume: 0.15, delay: 0, signal: false },
+    { file: 'audio/narrative.m4a', volume: 0.02, delay: 3, signal: true }
   ];
 
   useEffect(() => {
