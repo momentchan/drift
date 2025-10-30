@@ -9,7 +9,7 @@ import * as THREE from "three";
 import { Perf } from "r3f-perf";
 import Boids from "../components/3d/Boids";
 import Menu from "../components/ui/Menu";
-// import BGM from "../components/audio/Bgm";
+import Bgm from "../components/audio/Bgm";
 import GlobalState from "../components/GlobalState";
 import Motion from "../components/3d/Motion";
 import AI from "../components/ai/AI";
@@ -83,18 +83,13 @@ export default function App() {
         }}
       >
         <Suspense fallback={null}>
-          <AdaptiveDPRMonitor
-            initialDPR={1}
-            onDPRChange={(dpr: number) => {
-              console.log("dpr", dpr);
-            }}
-          />
+          <AdaptiveDPRMonitor initialDPR={1} />
 
           {debug && <Perf position="top-left" />}
           <fogExp2 attach="fog" args={[bgColor, 0.05]} />
           <color attach="background" args={[bgColor]} />
 
-          <Perf position="top-left" />
+          {/* <Perf position="top-left" /> */}
 
           <RayEmitter
             {...props}
@@ -112,7 +107,7 @@ export default function App() {
 
           <Effect light={light} />
 
-          {/* <BGM /> */}
+          <Bgm />
 
           <Motion />
           <Preload all />

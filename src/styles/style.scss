@@ -1,8 +1,12 @@
 @font-face {
-    font-family: 'Cousine';
+    font-family: 'Pragmatica';
     src: url('/fonts/Cousine-Regular.ttf') format('truetype');
-    font-weight: normal;
+    font-weight: 300;
     font-style: normal;
+    font-display: swap;
+    font-feature-settings: normal;
+    font-variant-ligatures: none;
+    text-rendering: optimizeSpeed;
 }
 
 @mixin sp {
@@ -23,10 +27,17 @@ body,
     height: 100%;
     overflow: hidden;
     background-color: #171717;
-    font-family: 'Cousine';
+    font-family: 'Pragmatica', 'Arial', 'Helvetica', sans-serif;
     color: white;
     font-size: small;
     line-height: 1.5;
+    
+    /* Disable advanced font features to prevent warnings */
+    font-feature-settings: normal;
+    font-variant-ligatures: none;
+    text-rendering: optimizeSpeed;
+    -webkit-font-feature-settings: normal;
+    -moz-font-feature-settings: normal;
 
     -webkit-user-select: none;
     /* Safari */
@@ -102,4 +113,10 @@ body,
 .diary pre,
 p {
     white-space: pre-wrap;
+}
+
+/* Suppress font-related console warnings globally */
+* {
+    font-feature-settings: normal !important;
+    font-variant-ligatures: none !important;
 }

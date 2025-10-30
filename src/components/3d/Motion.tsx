@@ -63,7 +63,7 @@ export default function Motion() {
 
   return (
     <>
-      {finished && <CameraControls minDistance={5} maxDistance={35} zoomSpeed={0.8} makeDefault />}
+      {finished && <CameraControls minDistance={5} maxDistance={35} makeDefault />}
     </>
   );
 }

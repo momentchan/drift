@@ -7,6 +7,20 @@ import { TGALoader } from 'three-stdlib';
 // Register TGA loader globally
 THREE.DefaultLoadingManager.addHandler(/\.tga$/i, new TGALoader());
 
+// Suppress FBX loader warnings
+const originalWarn = console.warn;
+console.warn = (...args) => {
+  const message = args[0];
+  if (typeof message === 'string' && (
+    message.includes('ReflectionFactor map is not supported') ||
+    message.includes('Vertex has more than 4 skinning weights') ||
+    message.includes('TGA loader not found')
+  )) {
+    return; // Suppress these specific warnings
+  }
+  originalWarn.apply(console, args);
+};
+
 interface ModelProps {
   path: string;
   pos: [number, number, number];
@@ -19,7 +33,8 @@ function Model({ path, pos }: ModelProps) {
     actions: { [key: string]: THREE.AnimationAction | null };
     names: string[];
   };
-  const [index, setIndex] = useState(0);
+
+  const [index, setIndex] = useState(1);
   const [blendRate, setBlendRate] = useState(0);
 
   const transT = 3;
@@ -37,7 +52,7 @@ function Model({ path, pos }: ModelProps) {
       const elapsed = performance.now() - startTime;
       const normalizedTime = Math.min(elapsed / (duration * 1000), 1); // Normalized time between 0 and 1
 
-      const blendRate = index === 0 ? 1 - Math.min(elapsed / (transT * 1000), 1) : Math.min(elapsed / (transT * 1000), 1);
+      const blendRate = index === 1 ? 1 - Math.min(elapsed / (transT * 1000), 1) : Math.min(elapsed / (transT * 1000), 1);
       setBlendRate(blendRate);
 
       const easedTime = easeInOutQuad(normalizedTime); // Apply easing
@@ -114,7 +129,7 @@ function Model({ path, pos }: ModelProps) {
 export default function Stage() {
   return (
     <>
-      <Model path={'Astronaut.fbx'} pos={[0, 0, 0]} />
+      <Model path={'Astronaut_fix.fbx'} pos={[0, 0, 0]} />
     </>
   );
 }
