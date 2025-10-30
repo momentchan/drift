@@ -39,7 +39,9 @@ export default class BoidsPointRenderShader extends THREE.ShaderMaterial {
             uniforms: {
                 positionTex: { value: null }
             },
-            transparent: { value: true }
+            transparent: true
         })
     }
 }
+
+

@@ -35,7 +35,7 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
             uniform float delta;
             uniform float radius;
 
-			uniform float maxSpeed;
+            uniform float maxSpeed;
             uniform float maxForce;
 
             const float width = resolution.x;
@@ -283,3 +283,5 @@ export default class VelSimulateShaderMaterial extends THREE.ShaderMaterial {
         })
     }
 }
+
+

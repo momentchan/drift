@@ -1,6 +1,6 @@
 import { Button, IconButton, SvgIcon } from '@mui/material';
 import SquareOutlinedIcon from '@mui/icons-material/SquareOutlined';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import GlobalState from '../GlobalState';
 import SpeakerNotesIcon from '@mui/icons-material/SpeakerNotes';
 import SpeakerNotesOffIcon from '@mui/icons-material/SpeakerNotesOff';
@@ -9,6 +9,8 @@ import VolumeOffIcon from '@mui/icons-material/VolumeOff';
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import ShareIcon from '@mui/icons-material/Share';
 import html2canvas from 'html2canvas';
+import { useProgress } from '@react-three/drei';
+import { useLoadedFileCount } from '../../hooks/useLoadedFileCount';
 
 interface TriangleOutlinedIconProps {
   sx?: Record<string, string | number>;
@@ -23,6 +25,17 @@ function TriangleOutlinedIcon(props: TriangleOutlinedIconProps) {
 }
 
 export default function Menu() {
+  const { progress } = useProgress();
+  const { count, loaded } = useLoadedFileCount(12);
+
+  const loadedRef = useRef(false);
+  useEffect(() => {
+    if (loadedRef.current) return;
+    loadedRef.current = loaded;
+  }, [loaded]);
+
+
+
   const { isTriangle, setIsTriangle, started, setStarted, noted, setNoted, soundOn, setSoundOn, resetPos, setResetPos, isMobile, setIsMobile } = GlobalState();
 
   useEffect(() => {
@@ -64,7 +77,9 @@ export default function Menu() {
       const width = Math.round(rootElement.clientWidth);
       const height = Math.round(rootElement.clientHeight);
       const canvas = await html2canvas(rootElement, {
-        ignoreElements: function (element) {
+        // The built-in html2canvas types may not include ignoreElements in some versions
+        // Cast options to any to allow this predicate option
+        ignoreElements: function (element: HTMLElement) {
           if (element.classList.contains('container')) {
             return true;
           }
@@ -73,7 +88,7 @@ export default function Menu() {
         width: width,
         height: height,
         backgroundColor: null,
-      });
+      } as any);
 
       // Convert the final canvas to a data URL
       const dataUrl = canvas.toDataURL('image/png');
@@ -94,106 +109,128 @@ export default function Menu() {
     }
   }
 
+
+
   return (
-    <div className='container'>
-      {/* <div className='overlay'/> */}
-      <div className='side-menu'>
-        <div>
-          {started &&
-            <IconButton
-              onClick={() => {
-                setIsTriangle(!isTriangle);
-                playClickSound(1);
-              }}
-              sx={commonStyle}
-            >
-              {isTriangle ? (<TriangleOutlinedIcon sx={style} />) :
-                (<SquareOutlinedIcon sx={style} />)}
-            </IconButton>
-          }
-        </div>
-
-        <div>
-          {started &&
-            <IconButton
-              onClick={() => {
-                setResetPos(!resetPos);
-                playClickSound(0);
-              }}
-              sx={commonStyle}
-            >
-              <MyLocationIcon sx={style} />
-            </IconButton>
-          }
-        </div>
-
-        <div>
-          {started &&
-            <IconButton
-              onClick={() => setNoted(!noted)}
-              sx={commonStyle}
-            >
-              {noted ? (<SpeakerNotesIcon sx={style} />) :
-                (<SpeakerNotesOffIcon sx={style} />)}
-            </IconButton>
-          }
-        </div>
-
-        <div>
-          {started &&
-            <IconButton
-              onClick={() => setSoundOn(!soundOn)}
-              sx={commonStyle}
-            >
-              {soundOn ? (<VolumeUpIcon sx={style} />) :
-                (<VolumeOffIcon sx={style} />)}
-            </IconButton>
-          }
-        </div>
-
-        <div>
-          {started && isMobile &&
-            <IconButton
-              onClick={() => Share()}
-              sx={commonStyle}
-            >
-              <ShareIcon sx={style} />
-            </IconButton>
-          }
-        </div>
+    <>
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          display: 'grid',
+          placeItems: 'center',
+          background: 'rgba(0,0,0,1)',
+          color: '#fff',
+          fontSize: 20,
+          opacity: loadedRef.current ? 0 : 1,
+          transition: 'opacity 0.8s ease',
+          pointerEvents: loadedRef.current ? 'none' : 'auto'
+        }}
+      >
+        Loading… {Math.round(progress)}%
       </div>
 
-      {!started &&
-        <div className='entry'>
-          <div className='title'>
-            DRIFT
+
+      <div className='container'>
+        {/* <div className='overlay'/> */}
+        <div className='side-menu'>
+          <div>
+            {started &&
+              <IconButton
+                onClick={() => {
+                  setIsTriangle(!isTriangle);
+                  playClickSound(1);
+                }}
+                sx={commonStyle}
+              >
+                {isTriangle ? (<TriangleOutlinedIcon sx={style} />) :
+                  (<SquareOutlinedIcon sx={style} />)}
+              </IconButton>
+            }
           </div>
-          <div className='intro'>
-            <p>Step into the shoes of Captain Alex Reynolds, an astronaut adrift in the vastness of space.</p>
-            <p>Each day, you'll uncover AI-generated diary entries that delve into the depths of isolation and the fading dream of returning home.</p>
-            <p>Navigate a sprawling, starry void with your mouse, interact with drifting particles, and immerse yourself in the captain's reflections.</p>
-            <p>This experience goes beyond storytelling—it's a dynamic journey through a living cosmos that responds to your every move.</p>
+
+          <div>
+            {started &&
+              <IconButton
+                onClick={() => {
+                  setResetPos(!resetPos);
+                  playClickSound(0);
+                }}
+                sx={commonStyle}
+              >
+                <MyLocationIcon sx={style} />
+              </IconButton>
+            }
           </div>
-          <div className='play'>
-            <Button
-              sx={{
-                backgroundColor: '#00000',
-                color: 'white',
-                '&:hover': {
-                  backgroundColor: '#333333',
-                }
-              }}
-              onClick={() => {
-                setStarted(true);
-                playClickSound(0);
-              }}
-            >
-              Start
-            </Button>
+
+          <div>
+            {started &&
+              <IconButton
+                onClick={() => setNoted(!noted)}
+                sx={commonStyle}
+              >
+                {noted ? (<SpeakerNotesIcon sx={style} />) :
+                  (<SpeakerNotesOffIcon sx={style} />)}
+              </IconButton>
+            }
+          </div>
+
+          <div>
+            {started &&
+              <IconButton
+                onClick={() => setSoundOn(!soundOn)}
+                sx={commonStyle}
+              >
+                {soundOn ? (<VolumeUpIcon sx={style} />) :
+                  (<VolumeOffIcon sx={style} />)}
+              </IconButton>
+            }
+          </div>
+
+          <div>
+            {started && isMobile &&
+              <IconButton
+                onClick={() => Share()}
+                sx={commonStyle}
+              >
+                <ShareIcon sx={style} />
+              </IconButton>
+            }
           </div>
         </div>
-      }
-    </div>
+
+        {!started &&
+          <div className='entry' style={{ opacity: loadedRef.current ? 1 : 0, transition: 'opacity 2s ease' }}>
+            <div className='title'>
+              DRIFT
+            </div>
+            <div className='intro'>
+              <p>Step into the shoes of Captain Alex Reynolds, an astronaut adrift in the vastness of space.</p>
+              <p>Each day, you'll uncover AI-generated diary entries that delve into the depths of isolation and the fading dream of returning home.</p>
+              <p>Navigate a sprawling, starry void with your mouse, interact with drifting particles, and immerse yourself in the captain's reflections.</p>
+              <p>This experience goes beyond storytelling—it's a dynamic journey through a living cosmos that responds to your every move.</p>
+            </div>
+            <div className='play'>
+              <Button
+                sx={{
+                  backgroundColor: '#00000',
+                  color: 'white',
+                  '&:hover': {
+                    backgroundColor: '#333333',
+                  }
+                }}
+                onClick={() => {
+                  setStarted(true);
+                  playClickSound(0);
+                }}
+              >
+                Start
+              </Button>
+            </div>
+          </div>
+        }
+      </div>
+    </>
   );
 }
 

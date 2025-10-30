@@ -73,7 +73,9 @@ export default class BoidsMeshRenderCustomShader extends THREE.ShaderMaterial {
                 velocityTex: { value: null },
                 time: { value: 0 }
             },
-            transparent: { value: true }
+            transparent: true
         })
     }
 }
+
+

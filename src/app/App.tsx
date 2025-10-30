@@ -1,4 +1,4 @@
-import { Loader, Preload } from "@react-three/drei";
+import { Preload } from "@react-three/drei";
 import { folder, useControls } from "leva";
 import Stage from "../components/3d/Stage";
 import Effect from "../components/effects/Effect";
@@ -20,7 +20,6 @@ import LevaWrapper from "@packages/r3f-gist/components/ui/LevaWrapper";
 
 const debug = false;
 
-
 interface ComponentProps {
   radius: number;
   length: number;
@@ -30,8 +29,6 @@ interface ComponentProps {
 }
 
 export default function App() {
-  const { started } = GlobalState();
-
   const { bgColor } = useControls({
     Global: folder({
       bgColor: "#000000",
@@ -113,11 +110,7 @@ export default function App() {
           <Preload all />
         </Suspense>
       </Canvas>
-
       <Menu />
-
-      {!started && <Loader />}
-
       <AI />
     </>
   );

@@ -35,7 +35,7 @@ const Light = forwardRef<LightRef, LightProps>(function Light(props, ref) {
         intensity={2}
         position={props.lightPos}
         castShadow
-        shadow-mapSize={isMobile ? [4096, 4096] : [8192, 8192]}
+        shadow-mapSize={isMobile ? [2048, 2048] : [4096, 4096]}
         shadow-camera-top={props.radius * 1.2}
         shadow-camera-right={props.radius * 1.2}
         shadow-camera-bottom={-props.radius * 1.2}

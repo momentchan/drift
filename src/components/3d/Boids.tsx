@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import { useEffect, useMemo, useRef, useState } from "react";
 import GPGPU from "@packages/r3f-gist/gpgpu/GPGPU";
-import "../../shaders/boidsPointRenderShader";
 import PosSimulateShaderMaterial from "../../shaders/posSimulateShader";
 import VelSimulateShaderMaterial from "../../shaders/velSimulateShader";
 import BoidsMeshRenderCustomShader from "../../shaders/boidsMeshRenderCustomShader";
