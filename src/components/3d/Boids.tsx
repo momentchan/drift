@@ -14,10 +14,7 @@ import { Vector2 } from 'three/src/Three.js';
 import gsap from 'gsap';
 import { useFBX } from '@react-three/drei';
 import GlobalState from '../GlobalState';
-
-// Duration and delay ranges
-const durationRange = [3, 6] as const;
-const delayRange = [10000, 20000] as const;
+import Waves from './Waves';
 
 // Initialize data for GPGPU
 function initData(count: number, radius: number): Float32Array {
@@ -30,140 +27,6 @@ function initData(count: number, radius: number): Float32Array {
     data[i + 3] = 1;
   }
   return data;
-}
-
-// Circle Component
-interface CircleProps {
-  rate: number;
-  radius: number;
-}
-
-function Circle({ rate, radius }: CircleProps) {
-  const circleRef = useRef<THREE.Mesh>(null);
-  const { camera } = useThree();
-
-  useFrame(() => {
-    if (circleRef.current) {
-      circleRef.current.lookAt(camera.position);
-    }
-  });
-
-  useEffect(() => {
-    const listener = camera.children.find(child => child instanceof THREE.AudioListener) as THREE.AudioListener | undefined;
-
-    if (listener) {
-      const sound = new THREE.PositionalAudio(listener);
-      // Load the audio file
-      const audioLoader = new THREE.AudioLoader();
-      audioLoader.load('wave02.mp3', (buffer) => {
-        sound.setBuffer(buffer);
-        sound.setLoop(false); // Play only once
-        sound.setVolume(0.05); // Set volume
-        sound.setRefDistance(10);
-        sound.play();
-      });
-    }
-  }, [camera]);
-
-  return (
-    <mesh ref={circleRef}>
-      <ringGeometry args={[rate * radius * 0.99, rate * radius, 128]} />
-      <meshStandardMaterial
-        emissive='white'
-        emissiveIntensity={1000}
-        transparent
-        opacity={THREE.MathUtils.smoothstep(1 - rate, 0, 1)}
-      />
-    </mesh>
-  );
-}
-
-interface CirclesProps {
-  waveRates: number[];
-  setWaveRates: React.Dispatch<React.SetStateAction<number[]>>;
-  currentId: number;
-  setCurrentId: React.Dispatch<React.SetStateAction<number>>;
-  radius: number;
-}
-
-function Circles({ waveRates, setWaveRates, currentId, setCurrentId, radius }: CirclesProps) {
-  const { started } = GlobalState();
-  const isRunningRef = useRef(false);
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const tweenRef = useRef<gsap.core.Tween | null>(null);
-  const currentIdRef = useRef(currentId);
-
-  // keep a cosmetic state in sync without re-triggering the effect
-  useEffect(() => {
-    currentIdRef.current = currentId;
-  }, [currentId]);
-
-  useEffect(() => {
-    const startLoop = () => {
-      if (isRunningRef.current) return;
-      isRunningRef.current = true;
-
-      const loop = () => {
-        const id = currentIdRef.current;
-        const animationObject = { value: 0 };
-
-        // reset selected wave rate to 0 before animating
-        setWaveRates(prev => {
-          const next = [...prev];
-          next[id] = 0;
-          return next;
-        });
-
-        tweenRef.current = gsap.to(animationObject, {
-          value: 1,
-          duration: THREE.MathUtils.randFloat(durationRange[0], durationRange[1]),
-          ease: "Power2.easeOut",
-          onUpdate: () => {
-            setWaveRates(prev => {
-              const next = [...prev];
-              next[id] = animationObject.value;
-              return next;
-            });
-          },
-          onComplete: () => {
-            const randomDelay = THREE.MathUtils.randFloat(delayRange[0], delayRange[1]);
-            timeoutRef.current = setTimeout(() => {
-              // advance id without re-triggering effect
-              const nextId = (id + 1) % waveRates.length;
-              currentIdRef.current = nextId;
-              setCurrentId(nextId);
-              loop();
-            }, randomDelay);
-          }
-        });
-      };
-
-      const initialDelay = THREE.MathUtils.randFloat(delayRange[0], delayRange[1]);
-      timeoutRef.current = setTimeout(loop, initialDelay);
-    };
-
-    if (started) startLoop();
-
-    return () => {
-      isRunningRef.current = false;
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-      if (tweenRef.current) {
-        tweenRef.current.kill();
-        tweenRef.current = null;
-      }
-    };
-  }, [started, waveRates.length, setWaveRates, setCurrentId]);
-
-  return (
-    <>
-      {waveRates.map((rate, i) => rate > 0 && rate < 1 ? (
-        <Circle key={i} rate={rate} radius={radius} />
-      ) : null)}
-    </>
-  );
 }
 
 interface BoidsProps {
@@ -333,7 +196,7 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }: B
         </instancedMesh>
       }
 
-      <Circles radius={radius} waveRates={waveRates} setWaveRates={setWaveRates} currentId={currentId} setCurrentId={setCurrentId} />
+      <Waves radius={radius} waveRates={waveRates} setWaveRates={setWaveRates} currentId={currentId} setCurrentId={setCurrentId} />
     </>
   );
 }
