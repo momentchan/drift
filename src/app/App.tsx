@@ -1,4 +1,4 @@
-import { Preload } from "@react-three/drei";
+import { AdaptiveDpr, Preload } from "@react-three/drei";
 import { folder, useControls } from "leva";
 import Stage from "../components/3d/Stage";
 import Effect from "../components/effects/Effect";
@@ -14,9 +14,9 @@ import Motion from "../components/3d/Motion";
 import AI from "../components/ai/AI";
 import CanvasCapture from "@packages/r3f-gist/components/utility/CanvasCapture";
 import { Canvas } from "@react-three/fiber";
-import { AdaptiveDPRMonitor } from "@packages/r3f-gist/components/webgl/AdaptiveDPRMonitor";
 import LevaWrapper from "@packages/r3f-gist/components/ui/LevaWrapper";
 import RotatingCursor from "../components/ui/RotatingCursor";
+import GlobalState from "../components/GlobalState";
 
 const debug = false;
 
@@ -34,6 +34,8 @@ export default function App() {
       bgColor: "#000000",
     }),
   });
+
+  const { isMobile } = GlobalState();
 
   const props: ComponentProps = {
     radius: 10,
@@ -65,7 +67,7 @@ export default function App() {
   return (
     <>
       <LevaWrapper initialHidden={true} />
-      <RotatingCursor />
+      {!isMobile && <RotatingCursor />}
 
       <Canvas
         shadows
@@ -79,9 +81,13 @@ export default function App() {
           preserveDrawingBuffer: true,
           shadowMapType: THREE.PCFSoftShadowMap,
         }}
+
+        dpr={[1, 2]}
+        performance={{ min: 0.5, max: 1 }}
       >
         <Suspense fallback={null}>
-          <AdaptiveDPRMonitor initialDPR={1} />
+
+          <AdaptiveDpr pixelated/>
 
           {debug && <Perf position="top-left" />}
           <fogExp2 attach="fog" args={[bgColor, 0.05]} />
