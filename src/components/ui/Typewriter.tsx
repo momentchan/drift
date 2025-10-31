@@ -2,82 +2,93 @@ import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 
 interface TypewriterProps {
   text: string;
-  speed?: number;
+  speed?: number; // ms per char
 }
 
 interface TypewriterRef {
   reset: () => void;
 }
 
-declare const $: (selector: string) => {
+// Simple declaration: keep if you actually use jQuery; otherwise remove it
+declare const $: undefined | ((selector: string) => {
+  length: number;
   [index: number]: HTMLElement;
   css: (prop: string, value: string | number) => void;
-};
+});
 
-const Typewriter = forwardRef<TypewriterRef, TypewriterProps>(({ text, speed = 60 }, ref) => {
-  const [displayedText, setDisplayedText] = useState("");
+const Typewriter = forwardRef<TypewriterRef, TypewriterProps>(
+  ({ text, speed = 60 }, ref) => {
+    const [displayedText, setDisplayedText] = useState("");
 
-  useImperativeHandle(ref, () => ({
-    reset() {
-      setDisplayedText(""); // Clear the displayed text
-    }
-  }));
+    useImperativeHandle(ref, () => ({
+      reset() {
+        setDisplayedText("");
+      },
+    }));
 
-  useEffect(() => {
-    if (!text) {
-      setDisplayedText(""); // Clear text if none provided
-      return;
-    }
-
-    let index = 0;
-    let currentLine = 0;
-    const lines = text.split('\n'); // Split text by line breaks
-    let typingTimer: ReturnType<typeof setInterval>;
-
-    const typeLine = () => {
-      if (currentLine >= lines.length) {
+    useEffect(() => {
+      if (!text) {
+        setDisplayedText("");
         return;
       }
 
-      const line = lines[currentLine];
+      let lineIdx = 0;
+      let charIdx = 0;
+      const lines = text.split("\n");
+      let timeoutId: ReturnType<typeof setTimeout> | null = null;
+      let aborted = false;
 
-      const lineTyping = () => {
-        setDisplayedText((prev) => {
-          const newText = prev + (line[index] || '');
-          index += 1;
-          if (index >= line.length) {
-            index = 0;
-            currentLine += 1;
-            setDisplayedText((prev) => prev + '\n'); // Add a newline character after the line is done
-            clearInterval(typingTimer);
-            typeLine(); // Move to the next line
+      const tick = () => {
+        if (aborted) return;
+        if (lineIdx >= lines.length) return;
+
+        const line = lines[lineIdx];
+
+        // Fetch the next character to output (or move to the newline case)
+        if (charIdx < line.length) {
+          const nextChar = line.charAt(charIdx);
+          charIdx += 1;
+
+          setDisplayedText((prev) => prev + nextChar);
+
+          // Schedule the next character
+          timeoutId = setTimeout(tick, speed);
+        } else {
+          // End of line: append a newline unless this is the final line
+          const shouldAppendNewline = lineIdx < lines.length - 1;
+          if (shouldAppendNewline) {
+            setDisplayedText((prev) => prev + "\n");
           }
 
-          const diary = $('.diary');
-          const scrollHeight = diary[0].scrollHeight;
-          const clientHeight = diary[0].clientHeight;
+          // Move to the next line, reset the character index, and queue another tick
+          lineIdx += 1;
+          charIdx = 0;
+          timeoutId = setTimeout(tick, speed);
+        }
 
-          if (scrollHeight > clientHeight) {
-            diary.css('pointer-events', 'auto');
-          } else {
-            diary.css('pointer-events', 'none');
+        // Optional: safely update the pointer-events state for .diary
+        if ($) {
+          const diary = $(".diary");
+          if (diary && diary.length > 0 && diary[0]) {
+            const el = diary[0];
+            const scrollable = el.scrollHeight > el.clientHeight;
+            diary.css("pointer-events", scrollable ? "auto" : "none");
           }
-
-          return newText;
-        });
+        }
       };
 
-      typingTimer = setInterval(lineTyping, speed);
-    };
+      // Start the typing loop
+      setDisplayedText(""); // Reset output whenever text or speed changes
+      timeoutId = setTimeout(tick, speed);
 
-    typeLine();
+      return () => {
+        aborted = true;
+        if (timeoutId) clearTimeout(timeoutId);
+      };
+    }, [text, speed]);
 
-    return () => clearInterval(typingTimer);
-  }, [text, speed]);
-
-  return <pre>{displayedText}</pre>; // Use <pre> to preserve whitespace and line breaks
-});
+    return <pre>{displayedText}</pre>;
+  }
+);
 
 export default Typewriter;
-
-
