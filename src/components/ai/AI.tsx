@@ -3,10 +3,13 @@ import Typewriter from "../ui/Typewriter";
 import TypewriterNew from "../ui/TypewriterNew";
 import GlobalState from "../GlobalState";
 
+// ============================
+// Type definitions
+// ============================
 interface TranscriptionSegment {
   id: number;
-  start: number;
-  end: number;
+  start: number; // seconds
+  end: number;   // seconds
   text: string;
 }
 
@@ -18,144 +21,256 @@ interface TypewriterRef {
   reset: () => void;
 }
 
+// ============================
+// Helpers
+// ============================
+
+/**
+ * Convert a base64 (no data: prefix) into a Blob URL (ObjectURL).
+ * This avoids CSP blocking (media-src 'self' https:) because we use blob: instead of data:.
+ * NOTE: ObjectURLs are memory-backed and become invalid after reload; do not store them in localStorage.
+ */
+function base64ToObjectUrl(b64: string, mime = "audio/mpeg") {
+  const byteStr = atob(b64);
+  const buf = new Uint8Array(byteStr.length);
+  for (let i = 0; i < byteStr.length; i++) buf[i] = byteStr.charCodeAt(i);
+  const blob = new Blob([buf], { type: mime });
+  return URL.createObjectURL(blob);
+}
+
+/**
+ * Pick API base depending on environment.
+ * - Dev: localhost:3000
+ * - Prod: (replace with your Render URL if different)
+ */
+function getServerBase() {
+  if (typeof window !== "undefined") {
+    const origin = window.location.origin;
+    // Add your production hostnames here if you want auto-switch
+    if (origin.includes("mingjyunhung.com")) {
+      // Example: your Render backend host
+      return "https://openai-api-backend.onrender.com";
+    }
+  }
+  return "https://openai-api-backend.onrender.com";
+  // return "http://localhost:3000";
+}
+
+const server = getServerBase();
+
+// ============================
+// LocalStorage Keys
+// ============================
+const LS_DATE = "diaryDate";
+const LS_ENTRY = "diaryEntry";
+const LS_AUDIO_B64 = "diaryAudioBase64";  // store pure base64 only
+const LS_AUDIO_MIME = "diaryAudioMime";   // e.g., "audio/mpeg"
+const LS_TRANS = "diaryTranscription";    // JSON string
+
+// ============================
+// Component
+// ============================
 export default function AI() {
   const [diaryEntry, setDiaryEntry] = useState<string>("");
   const [transcription, setTranscription] = useState<Transcription | undefined>();
-  const [audioUrl, setAudioUrl] = useState<string | undefined>();
+  const [audioUrl, setAudioUrl] = useState<string | undefined>(); // ObjectURL for <audio>
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<boolean>(false);
   const [firstWords, setFirstWords] = useState<string[]>([]);
   const { noted } = GlobalState();
   const writerRef = useRef<TypewriterRef | null>(null);
-  const server = 'https://openai-api-backend.onrender.com';
 
+  // Keep the latest ObjectURL to revoke and avoid memory leaks
+  const objectUrlRef = useRef<string | null>(null);
+
+  // Compute a human-readable date used as the "per-day" cache key.
+  function getTodayHumanDate() {
+    return new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+  }
+
+  // Derive a "first word per line" array for your UI
+  function parseFirstWords(text: string): string[] {
+    return text
+      .split("\n")
+      .filter(line => line.trim() !== "")
+      .map(line => line.trim().split(" ")[0]);
+  }
+
+  // Load diary (and audio/transcription) on mount
   useEffect(() => {
-    async function fetchDiaryEntry() {
-      const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-      const storedDate = localStorage.getItem('diaryDate');
-      const storedEntry = localStorage.getItem('diaryEntry');
-      const storedAudio = localStorage.getItem('diaryAudio');
-      const storedTranscription = localStorage.getItem('diaryTranscription');
-
-      if (storedDate === currentDate && storedEntry) {
-        handleStoredDiary(storedEntry, storedAudio, storedTranscription);
-      } else {
-        fetchNewDiary(currentDate);
-      }
-    }
-
-    async function fetchNewDiary(currentDate: string) {
+    async function boot() {
       try {
-        const response = await fetch(`${server}/api/diary/`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ date: currentDate })
-        });
+        const today = getTodayHumanDate();
+        const storedDate = localStorage.getItem(LS_DATE);
+        const storedEntry = localStorage.getItem(LS_ENTRY);
+        const storedB64 = localStorage.getItem(LS_AUDIO_B64);
+        const storedMime = localStorage.getItem(LS_AUDIO_MIME) || "audio/mpeg";
+        const storedTrans = localStorage.getItem(LS_TRANS);
 
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (storedDate === today && storedEntry) {
+          // Use cached text immediately
+          setDiaryEntry(storedEntry);
+          setFirstWords(parseFirstWords(storedEntry));
 
-        const data = await response.json();
-        const lastCompleteSentence = data.diaryEntry;
+          // Use cached audio (pure base64) if available -> convert to ObjectURL
+          if (storedB64) {
+            const url = base64ToObjectUrl(storedB64, storedMime);
+            // Revoke previous url if any
+            if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+            objectUrlRef.current = url;
+            setAudioUrl(url);
+          } else {
+            // No cached audio for today -> generate once (costs money only first time of the day)
+            await fetchAudioAndTranscription(storedEntry);
+          }
 
-        // Reset typewriter and update state
-        saveDiaryToLocalStorage(currentDate, lastCompleteSentence);
-        setDiaryEntry(lastCompleteSentence);
-        setLoading(false);
-
-        // Fetch audio and transcription
-        fetchAudioAndTranscription(lastCompleteSentence);
-      } catch (error) {
-        handleError(error);
-      }
-    }
-
-    async function fetchAudioAndTranscription(text: string) {
-      try {
-        const response = await fetch(`${server}/api/speech-and-transcribe`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text })
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Server responded with status ${response.status}: ${errorText}`);
+          // Use cached transcription if available
+          if (storedTrans) {
+            try {
+              setTranscription(JSON.parse(storedTrans));
+            } catch {
+              // Bad JSON; ignore
+            }
+          }
+          setLoading(false);
+        } else {
+          // No cache or old day -> generate new diary entry (cheap) and later TTS (costly)
+          await fetchNewDiary(today);
         }
-
-        const data = await response.json();
-        const { audioBase64, transcription } = data;
-
-        // Save audio and transcription to local storage
-        localStorage.setItem('diaryAudio', audioBase64);
-        localStorage.setItem('diaryTranscription', JSON.stringify(transcription));
-
-        // Set audio and transcription in the global state
-        setAudioUrl(audioBase64);
-        setTranscription(transcription);
-
-        writerRef.current?.reset();
-      } catch (error) {
-        console.error("Failed to fetch audio and transcription:", error);
+      } catch (e) {
+        console.error(e);
+        setError(true);
+        setLoading(false);
       }
     }
 
-    function handleStoredDiary(storedEntry: string, storedAudio: string | null, storedTranscription: string | null) {
-      setDiaryEntry(storedEntry);
+    boot();
+
+    // Cleanup any previously created ObjectURL when component unmounts
+    return () => {
+      if (objectUrlRef.current) {
+        URL.revokeObjectURL(objectUrlRef.current);
+        objectUrlRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ============================
+  // Network calls
+  // ============================
+
+  /**
+   * Fetch a new diary entry (text only). This is cheaper than TTS.
+   * After text is ready, we also trigger the audio+transcription fetch.
+   */
+  async function fetchNewDiary(currentDate: string) {
+    setLoading(true);
+    setError(false);
+
+    try {
+      const resp = await fetch(`${server}/api/diary`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: currentDate }),
+      });
+
+      if (!resp.ok) {
+        const t = await resp.text();
+        throw new Error(`generate diary failed: ${resp.status} ${t}`);
+      }
+
+      const data = await resp.json();
+      const entry: string = data.diaryEntry;
+
+      // Persist basic text cache for the day
+      localStorage.setItem(LS_DATE, currentDate);
+      localStorage.setItem(LS_ENTRY, entry);
+
+      setDiaryEntry(entry);
+      setFirstWords(parseFirstWords(entry));
       setLoading(false);
 
-      if (storedAudio && storedTranscription) {
-        setAudioUrl(storedAudio);
-        setTranscription(JSON.parse(storedTranscription));
-      } else {
-        fetchAudioAndTranscription(storedEntry);
-      }
-    }
-
-    function saveDiaryToLocalStorage(currentDate: string, diaryEntry: string) {
-      localStorage.setItem('diaryDate', currentDate);
-      localStorage.setItem('diaryEntry', diaryEntry);
-    }
-
-    function handleError(error: unknown) {
-      console.error(error);
+      // Fetch audio and transcription once per day, then cache base64 (to avoid repeated cost)
+      await fetchAudioAndTranscription(entry);
+    } catch (e) {
+      console.error(e);
       setError(true);
       setLoading(false);
     }
+  }
 
-    fetchDiaryEntry();
-  }, []);
+  /**
+   * Fetch audio (base64 only, no data: prefix) + transcription.
+   * We then convert base64 -> Blob -> ObjectURL for playback.
+   * We persist only base64 + mime + transcription to localStorage to avoid repeated TTS cost.
+   */
+  async function fetchAudioAndTranscription(text: string) {
+    try {
+      const resp = await fetch(`${server}/api/speech-and-transcribe`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
 
-  const typewriterText = (loading || !audioUrl) ? 'Waiting for cosmic signals... The universe is vast, but we\'ll connect soon.' :
-    'Strange... Some signals are hard to catch in the void. I\'ll keep trying until I get through.';
+      if (!resp.ok) {
+        const t = await resp.text();
+        throw new Error(`speech+transcribe failed: ${resp.status} ${t}`);
+      }
 
-  useEffect(() => {
-    function parseFirstWords(text: string): string[] {
-      const lines = text.split('\n');
+      const data = await resp.json();
+      let { audioBase64, mime = "audio/mpeg", transcription } = data;
 
-      // Filter out any empty lines, and map each line to its first word
-      const firstWords = lines
-        .filter(line => line.trim() !== '')  // Ignore empty lines
-        .map(line => line.trim().split(' ')[0]); // Split each line into words and take the first one
+      // Safety: if backend accidentally returns a 'data:audio/...;base64,...', strip the prefix
+      const comma = audioBase64.indexOf(",");
+      if (comma !== -1) audioBase64 = audioBase64.slice(comma + 1);
 
-      return firstWords;
+      // Convert to ObjectURL for <audio> src (CSP-safe)
+      const url = base64ToObjectUrl(audioBase64, mime);
+
+      // Revoke previous ObjectURL, then use new one
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = url;
+
+      setAudioUrl(url);
+      setTranscription(transcription);
+
+      // Persist minimal cache to avoid repeated TTS cost on reloads
+      localStorage.setItem(LS_AUDIO_B64, audioBase64);
+      localStorage.setItem(LS_AUDIO_MIME, mime);
+      localStorage.setItem(LS_TRANS, JSON.stringify(transcription));
+
+      // Optional: reset typewriter if your component exposes it
+      writerRef.current?.reset?.();
+    } catch (e) {
+      console.error("Failed to fetch audio and transcription:", e);
+      // We keep the text visible; user can retry or trigger via a button if desired
     }
-    setFirstWords(parseFirstWords(diaryEntry));
-  }, [diaryEntry]);
+  }
+
+  // ============================
+  // Render
+  // ============================
+
+  const typewriterText =
+    loading || !audioUrl
+      ? "Waiting for cosmic signals... The universe is vast, but we'll connect soon."
+      : "Strange... Some signals are hard to catch in the void. I'll keep trying until I get through.";
 
   return (
     <>
-      {noted &&
-        (
-          <div className="diary">
-            {loading || error || !audioUrl ?
-              <Typewriter ref={writerRef} text={typewriterText} /> :
-              <TypewriterNew transcription={transcription} audioUrl={audioUrl} firstWords={firstWords} />
-            }
-          </div>
-        )
-      }
+      <div className="diary" style={{ display: noted ? 'block' : 'none' }}>
+        {loading || error || !audioUrl ? (
+          <Typewriter ref={writerRef} text={typewriterText} />
+        ) : (
+          <TypewriterNew
+            ref={writerRef}
+            transcription={transcription}
+            audioUrl={audioUrl}
+            firstWords={firstWords}
+          />
+        )}
+      </div>
     </>
   );
 }
-
-
