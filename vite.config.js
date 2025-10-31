@@ -5,8 +5,9 @@ import basicSsl from '@vitejs/plugin-basic-ssl';
 import { resolve } from 'path';
 
 export default {
-    root: 'src/',
-    publicDir: '../public/',
+    // Standard Vite setup: index.html at project root, source files in src/
+    root: process.cwd(),
+    publicDir: 'public',
     base: './',
     resolve: {
         alias: {
@@ -36,7 +37,8 @@ export default {
         
         glsl(),
 
-        basicSsl()
+        // Only enable SSL plugin in dev mode, not during build
+        ...(process.env.NODE_ENV !== 'production' ? [basicSsl()] : [])
     ],
     server:
     {
@@ -46,7 +48,7 @@ export default {
     },
     build:
     {
-        outDir: '../dist', // Output in the dist/ folder
+        outDir: 'dist', // Output in the dist/ folder
         emptyOutDir: true, // Empty the folder first
         sourcemap: true // Add sourcemap
     },
