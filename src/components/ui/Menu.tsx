@@ -186,7 +186,7 @@ export default function Menu() {
             }
           </div>
 
-          <div>
+          {/* <div>
             {started && isMobile &&
               <IconButton
                 onClick={() => Share()}
@@ -195,7 +195,7 @@ export default function Menu() {
                 <ShareIcon sx={style} />
               </IconButton>
             }
-          </div>
+          </div> */}
         </div>
 
         {!started &&
