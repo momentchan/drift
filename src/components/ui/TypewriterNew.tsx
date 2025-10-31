@@ -124,9 +124,15 @@ const TypewriterNew = forwardRef<TypewriterNewRef, TypewriterNewProps>(
         audio.current.loop = false;
         audio.current.volume = 0.5;
       }
-      audio.current.src = audioUrl;
+      console.log('[Typewriter] audioUrl', audioUrl);
 
-      // do not auto play here; the main effect below handles it
+      if (!audioUrl.startsWith("blob:")) {
+        console.error("[Typewriter] audioUrl must be a blob: URL. Got:", audioUrl);
+        return;
+      }
+
+      audio.current.src = audioUrl;
+      audio.current.load();
     }, [audioUrl]);
 
     // 3) Main loop: start once when we have everything and user enabled (noted)
