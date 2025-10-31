@@ -3,11 +3,16 @@ import { transformWithEsbuild } from 'vite'
 import glsl from 'vite-plugin-glsl'
 import basicSsl from '@vitejs/plugin-basic-ssl';
 import { resolve } from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export default {
-    // Standard Vite setup: index.html at project root, source files in src/
-    root: process.cwd(),
-    publicDir: 'public',
+    // Explicitly set root to the directory containing vite.config.js
+    root: __dirname,
+    publicDir: resolve(__dirname, 'public'),
     base: './',
     resolve: {
         alias: {
@@ -50,6 +55,10 @@ export default {
     {
         outDir: 'dist', // Output in the dist/ folder
         emptyOutDir: true, // Empty the folder first
-        sourcemap: true // Add sourcemap
+        sourcemap: true, // Add sourcemap
+        rollupOptions: {
+            // Explicitly set the HTML entry point
+            input: resolve(__dirname, 'index.html')
+        }
     },
 }
