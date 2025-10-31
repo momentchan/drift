@@ -1,32 +1,35 @@
-import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 
 interface TypewriterProps {
   text: string;
-  speed?: number; // ms per char
+  /** milliseconds per character (default: 60ms) */
+  speed?: number;
 }
 
-interface TypewriterRef {
+export interface TypewriterRef {
+  /** Clear the rendered text immediately */
   reset: () => void;
 }
-
-// Simple declaration: keep if you actually use jQuery; otherwise remove it
-declare const $: undefined | ((selector: string) => {
-  length: number;
-  [index: number]: HTMLElement;
-  css: (prop: string, value: string | number) => void;
-});
 
 const Typewriter = forwardRef<TypewriterRef, TypewriterProps>(
   ({ text, speed = 60 }, ref) => {
     const [displayedText, setDisplayedText] = useState("");
+    const timeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+    // Expose reset() to parent
     useImperativeHandle(ref, () => ({
       reset() {
+        // Clear any pending timers and reset content
+        if (timeoutIdRef.current) {
+          clearTimeout(timeoutIdRef.current);
+          timeoutIdRef.current = null;
+        }
         setDisplayedText("");
       },
     }));
 
     useEffect(() => {
+      // Guard: empty text -> clear and exit
       if (!text) {
         setDisplayedText("");
         return;
@@ -35,55 +38,57 @@ const Typewriter = forwardRef<TypewriterRef, TypewriterProps>(
       let lineIdx = 0;
       let charIdx = 0;
       const lines = text.split("\n");
-      let timeoutId: ReturnType<typeof setTimeout> | null = null;
       let aborted = false;
 
+      // Utility: update pointer-events for .diary without jQuery
+      const updateDiaryPointerEvents = () => {
+        // Skip on server
+        if (typeof document === "undefined") return;
+        const diary = document.querySelector<HTMLElement>(".diary");
+        if (!diary) return;
+        const scrollable = diary.scrollHeight > diary.clientHeight;
+        diary.style.pointerEvents = scrollable ? "auto" : "none";
+      };
+
+      // Typing loop
       const tick = () => {
         if (aborted) return;
         if (lineIdx >= lines.length) return;
 
         const line = lines[lineIdx];
 
-        // Fetch the next character to output (or move to the newline case)
         if (charIdx < line.length) {
+          // Append next char
           const nextChar = line.charAt(charIdx);
           charIdx += 1;
-
           setDisplayedText((prev) => prev + nextChar);
-
-          // Schedule the next character
-          timeoutId = setTimeout(tick, speed);
+          timeoutIdRef.current = setTimeout(tick, speed);
         } else {
-          // End of line: append a newline unless this is the final line
+          // End of line: add newline unless it's the last line
           const shouldAppendNewline = lineIdx < lines.length - 1;
           if (shouldAppendNewline) {
             setDisplayedText((prev) => prev + "\n");
           }
-
-          // Move to the next line, reset the character index, and queue another tick
           lineIdx += 1;
           charIdx = 0;
-          timeoutId = setTimeout(tick, speed);
+          timeoutIdRef.current = setTimeout(tick, speed);
         }
 
-        // Optional: safely update the pointer-events state for .diary
-        if ($) {
-          const diary = $(".diary");
-          if (diary && diary.length > 0 && diary[0]) {
-            const el = diary[0];
-            const scrollable = el.scrollHeight > el.clientHeight;
-            diary.css("pointer-events", scrollable ? "auto" : "none");
-          }
-        }
+        // Keep pointer-events in sync
+        updateDiaryPointerEvents();
       };
 
-      // Start the typing loop
-      setDisplayedText(""); // Reset output whenever text or speed changes
-      timeoutId = setTimeout(tick, speed);
+      // Reset displayed text whenever text/speed changes, then start
+      setDisplayedText("");
+      timeoutIdRef.current = setTimeout(tick, speed);
 
       return () => {
+        // Cleanup on unmount or when deps change
         aborted = true;
-        if (timeoutId) clearTimeout(timeoutId);
+        if (timeoutIdRef.current) {
+          clearTimeout(timeoutIdRef.current);
+          timeoutIdRef.current = null;
+        }
       };
     }, [text, speed]);
 
