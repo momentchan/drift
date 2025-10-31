@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import Typewriter from "../ui/Typewriter";
-import TypewriterNew from "../ui/TypewriterNew";
+import Typewriter from "./Typewriter";
+import TypewriterNew from "./TypewriterNew";
 import GlobalState from "../GlobalState";
 
 // ============================
@@ -261,7 +261,7 @@ export default function AI() {
     <>
       <div className="diary" style={{ display: noted ? 'block' : 'none' }}>
         {loading || error || !audioUrl ? (
-          <Typewriter ref={writerRef} text={typewriterText} />
+          <Typewriter ref={writerRef} text={typewriterText} active={noted} />
         ) : (
           <TypewriterNew
             ref={writerRef}

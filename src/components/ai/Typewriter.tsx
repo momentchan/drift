@@ -4,6 +4,8 @@ interface TypewriterProps {
   text: string;
   /** milliseconds per character (default: 60ms) */
   speed?: number;
+  /** start typing only when this flag is true */
+  active?: boolean;
 }
 
 export interface TypewriterRef {
@@ -12,10 +14,14 @@ export interface TypewriterRef {
 }
 
 const Typewriter = forwardRef<TypewriterRef, TypewriterProps>(
-  ({ text, speed = 60 }, ref) => {
+  ({ text, speed = 60, active = true }, ref) => {
     const [displayedText, setDisplayedText] = useState("");
     const timeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+    useEffect(() => {
+      setDisplayedText("");
+    }, []);
+    
     // Expose reset() to parent
     useImperativeHandle(ref, () => ({
       reset() {
@@ -29,8 +35,13 @@ const Typewriter = forwardRef<TypewriterRef, TypewriterProps>(
     }));
 
     useEffect(() => {
-      // Guard: empty text -> clear and exit
-      if (!text) {
+      if (timeoutIdRef.current) {
+        clearTimeout(timeoutIdRef.current);
+        timeoutIdRef.current = null;
+      }
+
+      // Guard: inactive or empty text -> clear and exit
+      if (!active || !text) {
         setDisplayedText("");
         return;
       }
@@ -78,7 +89,7 @@ const Typewriter = forwardRef<TypewriterRef, TypewriterProps>(
         updateDiaryPointerEvents();
       };
 
-      // Reset displayed text whenever text/speed changes, then start
+      // Reset displayed text whenever inputs change, then start
       setDisplayedText("");
       timeoutIdRef.current = setTimeout(tick, speed);
 
@@ -90,7 +101,7 @@ const Typewriter = forwardRef<TypewriterRef, TypewriterProps>(
           timeoutIdRef.current = null;
         }
       };
-    }, [text, speed]);
+    }, [text, speed, active]);
 
     return <pre>{displayedText}</pre>;
   }
