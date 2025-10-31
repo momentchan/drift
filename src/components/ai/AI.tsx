@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import Typewriter from "./Typewriter";
-import TypewriterNew from "./TypewriterNew";
+import FallbackTypewriter from "./FallbackTypewriter";
+import SyncedTranscriptTypewriter from "./SyncedTranscriptTypewriter";
 import GlobalState from "../GlobalState";
 
 // ============================
@@ -17,7 +17,7 @@ interface Transcription {
   segments: TranscriptionSegment[];
 }
 
-interface TypewriterRef {
+interface TypingDisplayHandle {
   reset: () => void;
 }
 
@@ -78,7 +78,7 @@ export default function AI() {
   const [error, setError] = useState<boolean>(false);
   const [firstWords, setFirstWords] = useState<string[]>([]);
   const { noted } = GlobalState();
-  const writerRef = useRef<TypewriterRef | null>(null);
+  const writerRef = useRef<TypingDisplayHandle | null>(null);
 
   // Keep the latest ObjectURL to revoke and avoid memory leaks
   const objectUrlRef = useRef<string | null>(null);
@@ -261,9 +261,9 @@ export default function AI() {
     <>
       <div className="diary" style={{ display: noted ? 'block' : 'none' }}>
         {loading || error || !audioUrl ? (
-          <Typewriter ref={writerRef} text={typewriterText} active={noted} />
+          <FallbackTypewriter ref={writerRef} text={typewriterText} active={noted} />
         ) : (
-          <TypewriterNew
+          <SyncedTranscriptTypewriter
             ref={writerRef}
             transcription={transcription}
             audioUrl={audioUrl}

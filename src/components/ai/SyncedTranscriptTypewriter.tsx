@@ -7,15 +7,18 @@ interface TranscriptionSegment {
   end: number;   // seconds
   text: string;
 }
+
 interface Transcription {
   segments: TranscriptionSegment[];
 }
-interface TypewriterNewProps {
+
+interface SyncedTranscriptTypewriterProps {
   transcription?: Transcription;
   audioUrl?: string;        // blob: ObjectURL (NOT data:)
   firstWords: string[];     // line leaders to insert line breaks
 }
-export interface TypewriterNewRef {
+
+export interface SyncedTranscriptTypewriterRef {
   reset: () => void;
 }
 
@@ -32,25 +35,20 @@ function waitCanPlay(el: HTMLAudioElement) {
   });
 }
 
-const TypewriterNew = forwardRef<TypewriterNewRef, TypewriterNewProps>(
+const SyncedTranscriptTypewriter = forwardRef<SyncedTranscriptTypewriterRef, SyncedTranscriptTypewriterProps>(
   ({ transcription, audioUrl, firstWords }, ref) => {
-
     const { noted } = GlobalState();
 
-    // --- Audio element/loop bookkeeping ---
     const audio = useRef<HTMLAudioElement | null>(null);
     const rafId = useRef<number | null>(null);
 
-    // --- Timed characters & pointers (use refs to avoid render churn) ---
     const timedCharsRef = useRef<CharData[]>([]);
     const idxRef = useRef<number>(0);
     const textRef = useRef<string>("");
 
-    // --- UI state (rendered string + UX) ---
     const [displayedText, setDisplayedText] = useState("");
     const [needUserGesture, setNeedUserGesture] = useState(false);
 
-    // Expose manual reset to parent
     useImperativeHandle(ref, () => ({
       reset() {
         stopLoopAndAudio();
@@ -61,7 +59,6 @@ const TypewriterNew = forwardRef<TypewriterNewRef, TypewriterNewProps>(
       }
     }));
 
-    // 1) Build timed char list whenever transcription/firstWords changes
     useEffect(() => {
       timedCharsRef.current = [];
       idxRef.current = 0;
@@ -70,7 +67,6 @@ const TypewriterNew = forwardRef<TypewriterNewRef, TypewriterNewProps>(
 
       if (!transcription || !transcription.segments?.length) return;
 
-      // Make a safe copy of firstWords and normalize them
       const leaders = firstWords
         .map(w => (w ?? "").trim())
         .filter(w => w.length > 0);
@@ -84,7 +80,6 @@ const TypewriterNew = forwardRef<TypewriterNewRef, TypewriterNewProps>(
 
         if (!text) return;
 
-        // Insert paragraph break when the segment begins with the next leader word
         const firstWord = text.split(" ")[0] ?? "";
         if (leaders.length > 0 && firstWord === leaders[0]) {
           if (segIdx !== 0) {
@@ -102,18 +97,16 @@ const TypewriterNew = forwardRef<TypewriterNewRef, TypewriterNewProps>(
         if (len > 1) {
           for (let i = 0; i < len; i++) {
             const r = i / (len - 1);
-            const t = start + duration * r; // uniform distribution in segment
+            const t = start + duration * r;
             chars.push({ char: arr[i], t });
           }
         }
       });
 
-      // Sort by time to be safe
       chars.sort((a, b) => a.t - b.t);
       timedCharsRef.current = chars;
     }, [transcription, firstWords]);
 
-    // 2) Prepare / update audio element when audioUrl changes
     useEffect(() => {
       if (!audioUrl) return;
 
@@ -124,10 +117,10 @@ const TypewriterNew = forwardRef<TypewriterNewRef, TypewriterNewProps>(
         audio.current.loop = false;
         audio.current.volume = 0.5;
       }
-      console.log('[Typewriter] audioUrl', audioUrl);
+      console.log('[SyncedTranscriptTypewriter] audioUrl', audioUrl);
 
       if (!audioUrl.startsWith("blob:")) {
-        console.error("[Typewriter] audioUrl must be a blob: URL. Got:", audioUrl);
+        console.error("[SyncedTranscriptTypewriter] audioUrl must be a blob: URL. Got:", audioUrl);
         return;
       }
 
@@ -135,9 +128,7 @@ const TypewriterNew = forwardRef<TypewriterNewRef, TypewriterNewProps>(
       audio.current.load();
     }, [audioUrl]);
 
-    // 3) Main loop: start once when we have everything and user enabled (noted)
     useEffect(() => {
-      // Guard conditions
       const el = audio.current;
       const haveChars = timedCharsRef.current.length > 0;
       if (!noted || !el || !audioUrl || !haveChars) {
@@ -146,14 +137,13 @@ const TypewriterNew = forwardRef<TypewriterNewRef, TypewriterNewProps>(
       }
 
       let canceled = false;
-      const OFFSET = 0.20; // seconds: reveal a bit earlier than exact timestamps
-      let lastCommit = 0;  // reduce setState frequency
+      const OFFSET = 0.20;
+      let lastCommit = 0;
 
       const loop = (ts: number) => {
         if (canceled) return;
 
         const t = el.currentTime;
-        // Advance index while the target time is reached (or audio ended)
         const arr = timedCharsRef.current;
         let advanced = false;
         while (idxRef.current < arr.length) {
@@ -167,7 +157,6 @@ const TypewriterNew = forwardRef<TypewriterNewRef, TypewriterNewProps>(
           }
         }
 
-        // Commit to React state at most ~60fps; throttle to ~15ms
         if (advanced && ts - lastCommit > 15) {
           setDisplayedText(textRef.current);
           lastCommit = ts;
@@ -180,12 +169,10 @@ const TypewriterNew = forwardRef<TypewriterNewRef, TypewriterNewProps>(
         try {
           await waitCanPlay(el);
           await el.play().catch(() => {
-            // Autoplay blocked by browser policy -> show a manual start button
             setNeedUserGesture(true);
           });
           if (!canceled) rafId.current = requestAnimationFrame(loop);
         } catch {
-          // Ignore; user gesture might be needed
           setNeedUserGesture(true);
         }
       })();
@@ -197,14 +184,11 @@ const TypewriterNew = forwardRef<TypewriterNewRef, TypewriterNewProps>(
           rafId.current = null;
         }
       };
-    }, [noted, audioUrl, transcription]); // <- do NOT include displayedText/current index here
+    }, [noted, audioUrl, transcription]);
 
     useEffect(() => {
       if (!noted) {
-        // Stop audio & animation loop
         stopLoopAndAudio();
-    
-        // Reset all state for a clean restart next time
         setDisplayedText("");
         textRef.current = "";
         idxRef.current = 0;
@@ -231,7 +215,6 @@ const TypewriterNew = forwardRef<TypewriterNewRef, TypewriterNewProps>(
         await waitCanPlay(audio.current);
         await audio.current.play();
       } catch {
-        // If still blocked, keep button visible
         setNeedUserGesture(true);
       }
     }
@@ -259,4 +242,7 @@ const TypewriterNew = forwardRef<TypewriterNewRef, TypewriterNewProps>(
   }
 );
 
-export default TypewriterNew;
+SyncedTranscriptTypewriter.displayName = "SyncedTranscriptTypewriter";
+
+export default SyncedTranscriptTypewriter;
+
