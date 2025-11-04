@@ -90,7 +90,6 @@ export default function Effect({ light }: EffectProps) {
       >
         <GodraysEffect light={light} config={config} composer={composer} />
         <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-        <HueSaturation saturation={0.4} />
         <Bloom
           luminanceThreshold={props.bloomThreshold}
           luminanceSmoothing={props.bloomSmoothing}

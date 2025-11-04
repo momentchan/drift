@@ -84,6 +84,7 @@ function Model({ path, pos }: ModelProps) {
     aoMap: 'textures/Body/Astronaut_Suit_Body_Ao.png',
     normalMap: 'textures/Body/Astronaut_Suit_Body_Normals.png'
   });
+  bodyTex.map.colorSpace = THREE.SRGBColorSpace;
 
   const detailTex = useTexture({
     map: 'textures/Details/Astronaut_Suit_Details_Albedo.png',
@@ -91,7 +92,8 @@ function Model({ path, pos }: ModelProps) {
     aoMap: 'textures/Details/Astronaut_Suit_Details_Ao.png',
     normalMap: 'textures/Details/Astronaut_Suit_Details_Normals.png'
   });
-
+  detailTex.map.colorSpace = THREE.SRGBColorSpace;
+  
   useEffect(() => {
     const bodyMat = new THREE.MeshStandardMaterial({ map: bodyTex.map, aoMap: bodyTex.aoMap, normalMap: bodyTex.normalMap, metalnessMap: bodyTex.metalnessMap });
     const detailMat = new THREE.MeshStandardMaterial({ map: detailTex.map, aoMap: detailTex.aoMap, normalMap: detailTex.normalMap, metalnessMap: detailTex.metalnessMap });
