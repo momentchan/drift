@@ -27,7 +27,7 @@ export default class BoidsMeshRenderCustomShader extends THREE.ShaderMaterial {
                 n += 1.0;
                 n *= 0.5;
 
-                debug = texture2D(velocityTex, uvs.xy).w;
+                debug = texture2D(velocityTex, uvs.xy).w * 0.8;
                 vec3 scale = vec3(1.0, 1.0, mix(1.0, 0.5, n)) * mix(1.0, 10.0, n) * 0.2 * mix(1.0, 3.0, debug);
                 vec3 lpos = position * vec3(mix(1.0, 10.0, n), 0.5, mix(10.0, 1.0, n)) * 0.05 * mix(1.0, 3.0, debug);
                 lpos = position * scale;

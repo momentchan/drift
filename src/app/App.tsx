@@ -80,6 +80,8 @@ export default function App() {
         gl={{
           preserveDrawingBuffer: true,
           shadowMapType: THREE.PCFSoftShadowMap,
+          toneMapping: THREE.NoToneMapping,
+          outputColorSpace: THREE.SRGBColorSpace,
         }}
 
         dpr={[1, 2]}

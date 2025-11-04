@@ -43,7 +43,7 @@ function Wave({ rate, radius }: WaveProps) {
       <ringGeometry args={[rate * radius * 0.99, rate * radius, 128]} />
       <meshStandardMaterial
         emissive='white'
-        emissiveIntensity={1000}
+        emissiveIntensity={10}
         transparent
         opacity={THREE.MathUtils.smoothstep(1 - rate, 0, 1)}
       />

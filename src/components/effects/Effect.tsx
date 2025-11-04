@@ -89,12 +89,12 @@ export default function Effect({ light }: EffectProps) {
         enableNormalPass={false}
       >
         <GodraysEffect light={light} config={config} composer={composer} />
-        <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
         <Bloom
           luminanceThreshold={props.bloomThreshold}
           luminanceSmoothing={props.bloomSmoothing}
           mipmapBlur
           intensity={props.bloomIntensity} />
+        <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
         <SMAA />
       </EffectComposer>
     </>

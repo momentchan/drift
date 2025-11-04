@@ -117,7 +117,6 @@ const SyncedTranscriptTypewriter = forwardRef<SyncedTranscriptTypewriterRef, Syn
         audio.current.loop = false;
         audio.current.volume = 0.5;
       }
-      console.log('[SyncedTranscriptTypewriter] audioUrl', audioUrl);
 
       if (!audioUrl.startsWith("blob:")) {
         console.error("[SyncedTranscriptTypewriter] audioUrl must be a blob: URL. Got:", audioUrl);
