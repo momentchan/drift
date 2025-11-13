@@ -14,7 +14,7 @@
     "@vitejs/plugin-basic-ssl": "^2.1.0",
     "@vitejs/plugin-react": "^5.0.4",
     "sass": "^1.93.2",
-    "vite": "^7.1.7",
+    "vite": "7.1.12",
     "vite-plugin-glsl": "^1.5.4"
   },
   "dependencies": {
