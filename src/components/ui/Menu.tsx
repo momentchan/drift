@@ -10,8 +10,7 @@ import MyLocationIcon from '@mui/icons-material/MyLocation';
 import ShareIcon from '@mui/icons-material/Share';
 import html2canvas from 'html2canvas';
 import { useProgress } from '@react-three/drei';
-import { useLoadedFileCount } from '@packages/r3f-gist/hooks/useLoadedFileCount';
-import FullscreenLoadingOverlay from '@packages/r3f-gist/components/ui/FullscreenLoadingOverlay';
+import { useLoadedFileCount } from '../../hooks/useLoadedFileCount';
 
 interface TriangleOutlinedIconProps {
   sx?: Record<string, string | number>;
@@ -27,7 +26,7 @@ function TriangleOutlinedIcon(props: TriangleOutlinedIconProps) {
 
 export default function Menu() {
   const { progress } = useProgress();
-  const { loaded } = useLoadedFileCount(12);
+  const { count, loaded } = useLoadedFileCount(12);
 
   const loadedRef = useRef(false);
   useEffect(() => {
@@ -114,7 +113,21 @@ export default function Menu() {
 
   return (
     <>
-      <FullscreenLoadingOverlay isLoaded={loaded} progress={progress} />
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          display: 'grid',
+          placeItems: 'center',
+          background: '#171717',
+          fontSize: 20,
+          opacity: loadedRef.current ? 0 : 1,
+          transition: 'opacity 0.8s ease',
+          pointerEvents: loadedRef.current ? 'none' : 'auto'
+        }}
+      >
+        Loading… {Math.round(progress)}%
+      </div>
 
 
       <div className='container'>
