@@ -113,7 +113,7 @@ export default function Menu() {
 
   return (
     <>
-      <div
+      {/* <div
         style={{
           position: 'fixed',
           inset: 0,
@@ -127,7 +127,7 @@ export default function Menu() {
         }}
       >
         Loading… {Math.round(progress)}%
-      </div>
+      </div> */}
 
 
       <div className='container'>
