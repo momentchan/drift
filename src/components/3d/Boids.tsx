@@ -76,7 +76,6 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }: B
     baseMaterial: THREE.MeshDepthMaterial,
     vertexShader: patchShaders(renderMat.vertexShader) as string,
     uniforms: renderMat.uniforms,
-    silent: true,
     depthPacking: THREE.RGBADepthPacking
   });
 
@@ -187,7 +186,6 @@ export default function Boids({ radius, length, lightPos, texture, rayCount }: B
           <ThreeCustomShaderMaterial
             ref={mat}
             baseMaterial={THREE.MeshStandardMaterial}
-            silent
             fragmentShader={patchShaders(renderMat.fragmentShader) as string}
             vertexShader={patchShaders(renderMat.vertexShader) as string}
             uniforms={renderMat.uniforms}

@@ -40,7 +40,7 @@
     "react-dom": "18.2",
     "realism-effects": "^1.1.2",
     "three": "^0.160.0",
-    "three-custom-shader-material": "^5.4.0",
+    "three-custom-shader-material": "^6.4.0",
     "three-good-godrays": "^0.6.1",
     "three-stdlib": "^2.36.0",
     "valtio": "^1.13.2",
