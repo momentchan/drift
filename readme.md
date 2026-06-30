@@ -12,3 +12,7 @@ If you use this project in your own work, please provide credit to the author.
 
 **Author:** Ming-Jyun Hung  
 **Source:** [https://mingjyunhung.com/](https://mingjyunhung.com/)
+
+The Astronaut model was purchased from [CGTrader](https://www.cgtrader.com/3d-models/character/sci-fi-character/astronaut-pilot).
+
+Please do not use this asset unless you have purchased an appropriate license.
